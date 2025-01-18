@@ -1,145 +1,252 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>AskFM Clone</title>
+  <title>AskFM | Задавайте вопросы</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
     :root {
-      --primary-dark: #1a1a2e;
-      --secondary-dark: #16213e;
-      --accent-color: #3282b8;
-      --text-primary: #e9ecef;
-      --text-secondary: #b8b8b8;
-      --hover-color: #4a90e2;
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #e2e6ea;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --card-bg: rgba(239, 243, 244, 0.1);
     }
 
     body {
-      background-color: var(--primary-dark);
-      color: var(--text-primary);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     .navbar {
-      background-color: var(--secondary-dark);
-      padding: 1rem 2rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-
-    .navbar-brand {
-      color: var(--text-primary) !important;
-      font-size: 1.5rem;
-      font-weight: bold;
+      background-color: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .nav-link {
-      color: var(--text-primary) !important;
-      margin: 0 1rem;
-      transition: color 0.3s ease;
+      color: var(--text-white) !important;
+      position: relative;
+      font-weight: 500;
     }
 
-    .nav-link:hover {
-      color: var(--hover-color) !important;
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--blue-accent);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
     }
 
     .hero-section {
-      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
-      url('/api/placeholder/1920/1080') center/cover;
-      height: 80vh;
+      min-height: 100vh;
       display: flex;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+      url('/api/placeholder/1920/1080') center/cover;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(29, 155, 240, 0.1), transparent 70%);
     }
 
     .feature-card {
-      background-color: var(--secondary-dark);
-      border-radius: 10px;
+      background-color: var(--card-bg);
+      border-radius: 16px;
       padding: 2rem;
-      margin: 1rem 0;
-      transition: transform 0.3s ease;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(29, 155, 240, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
     }
 
     .feature-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-10px);
+      border-color: var(--blue-accent);
+    }
+
+    .feature-card:hover::before {
+      transform: translateX(100%);
     }
 
     .feature-icon {
       font-size: 2.5rem;
-      color: var(--accent-color);
-      margin-bottom: 1rem;
+      color: var(--blue-accent);
+      margin-bottom: 1.5rem;
     }
 
     .btn-custom {
-      background-color: var(--accent-color);
+      background-color: var(--blue-accent);
       color: white;
+      border-radius: 9999px;
       padding: 0.8rem 2rem;
+      font-weight: bold;
       border: none;
-      border-radius: 25px;
       transition: all 0.3s ease;
     }
 
     .btn-custom:hover {
-      background-color: var(--hover-color);
+      background-color: var(--blue-hover);
       transform: scale(1.05);
     }
 
     .stats-section {
-      background-color: var(--secondary-dark);
-      padding: 4rem 0;
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .stat-item {
-      text-align: center;
+      position: relative;
       padding: 2rem;
     }
 
-    .stat-number {
-      font-size: 2.5rem;
-      color: var(--accent-color);
-      font-weight: bold;
+    .stat-item::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 20%;
+      height: 60%;
+      width: 1px;
+      background-color: var(--border-color);
     }
 
-    .footer {
-      background-color: var(--secondary-dark);
-      padding: 3rem 0;
-      margin-top: 4rem;
+    .stat-item:last-child::after {
+      display: none;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, var(--blue-accent), #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .testimonial-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .testimonial-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 3rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background-color: var(--blue-accent);
+      border-radius: 2px;
+    }
+
+    .step-number {
+      font-size: 4rem;
+      font-weight: bold;
+      color: var(--blue-accent);
+      opacity: 0.2;
+      position: absolute;
+      top: -20px;
+      left: 20px;
     }
 
     .social-icon {
       font-size: 1.5rem;
+      color: var(--text-gray);
       margin: 0 1rem;
-      color: var(--text-primary);
-      transition: color 0.3s ease;
+      transition: all 0.3s ease;
     }
 
     .social-icon:hover {
-      color: var(--hover-color);
+      color: var(--blue-accent);
+      transform: translateY(-3px);
+    }
+
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
     }
   </style>
 </head>
 <body>
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg fixed-top">
   <div class="container">
-    <a class="navbar-brand" href="#">AskFM </a>
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-comment-dots me-2"></i>
+      AskFM
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-home"></i> Home</a>
+          <a class="nav-link" href="#features">Особенности</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-search"></i> Explore</a>
+          <a class="nav-link" href="#how-it-works">Как это работает</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> Login</a>
+          <a class="nav-link" th:href="@{/login}">Войти</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/register}"><i class="fas fa-user-plus"></i> Register</a>
+          <a class="nav-link" th:href="@{/register}">Регистрация</a>
         </li>
       </ul>
     </div>
@@ -148,61 +255,66 @@
 
 <!-- Hero Section -->
 <section class="hero-section">
-  <div class="container">
-    <h1 class="display-3 mb-4">Ask Questions, Share Knowledge</h1>
-    <p class="lead mb-4">Connect with people around the world through questions and answers</p>
-    <a href="#" class="btn btn-custom btn-lg">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
+  <div class="container text-center" data-aos="fade-up">
+    <h1 class="display-3 mb-4">Задавайте вопросы.<br>Делитесь знаниями.</h1>
+    <p class="lead mb-4">Создайте пространство для открытого диалога и обмена знаниями</p>
+    <a href="#" class="btn btn-custom btn-lg floating">
+      Начать сейчас <i class="fas fa-arrow-right ms-2"></i>
+    </a>
   </div>
 </section>
 
 <!-- Features Section -->
-<section class="container my-5">
-  <h2 class="text-center mb-5">Why Choose Us?</h2>
+<section id="features" class="container my-5 py-5">
+  <h2 class="section-title" data-aos="fade-up">Почему выбирают нас</h2>
   <div class="row">
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="feature-card">
+        <span class="step-number">01</span>
         <i class="fas fa-user-shield feature-icon"></i>
-        <h3>Anonymous Questions</h3>
-        <p class="text-secondary">Ask questions anonymously and express yourself freely</p>
+        <h3>Анонимные вопросы</h3>
+        <p>Задавайте вопросы анонимно, выражайте свои мысли свободно и безопасно</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+      <div class="feature-card">
+        <span class="step-number">02</span>
         <i class="fas fa-users feature-icon"></i>
-        <h3>Growing Community</h3>
-        <p class="text-secondary">Join millions of users sharing knowledge daily</p>
+        <h3>Растущее сообщество</h3>
+        <p>Присоединяйтесь к миллионам пользователей, которые ежедневно делятся знаниями</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+      <div class="feature-card">
+        <span class="step-number">03</span>
         <i class="fas fa-shield-alt feature-icon"></i>
-        <h3>Safe Environment</h3>
-        <p class="text-secondary">Advanced moderation system to keep the platform clean</p>
+        <h3>Безопасная среда</h3>
+        <p>Современная система модерации для поддержания здоровой атмосферы общения</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Stats Section -->
-<section class="stats-section">
+<section class="stats-section py-5 my-5">
   <div class="container">
     <div class="row">
-      <div class="col-md-4">
-        <div class="stat-item">
+      <div class="col-md-4" data-aos="fade-up">
+        <div class="stat-item text-center">
           <div class="stat-number">1M+</div>
-          <div>Active Users</div>
+          <div>Активных пользователей</div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-item">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-item text-center">
           <div class="stat-number">5M+</div>
-          <div>Questions Asked</div>
+          <div>Заданных вопросов</div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-item">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat-item text-center">
           <div class="stat-number">10M+</div>
-          <div>Answers Shared</div>
+          <div>Полученных ответов</div>
         </div>
       </div>
     </div>
@@ -210,46 +322,182 @@
 </section>
 
 <!-- How It Works Section -->
-<section class="container my-5">
-  <h2 class="text-center mb-5">How It Works</h2>
+<section id="how-it-works" class="container my-5 py-5">
+  <h2 class="section-title" data-aos="fade-up">Как это работает</h2>
   <div class="row">
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-right">
+      <div class="feature-card">
         <i class="fas fa-user-plus feature-icon"></i>
-        <h3>1. Create Account</h3>
-        <p class="text-secondary">Sign up in seconds and customize your profile</p>
+        <h3>Создайте аккаунт</h3>
+        <p>Быстрая регистрация и настройка профиля. Начните использовать платформу за считанные секунды.</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-up">
+      <div class="feature-card">
         <i class="fas fa-question-circle feature-icon"></i>
-        <h3>2. Ask Questions</h3>
-        <p class="text-secondary">Ask anything to anyone, anonymously or with your identity</p>
+        <h3>Задавайте вопросы</h3>
+        <p>Спрашивайте о чем угодно. Анонимно или от своего имени - выбор за вами.</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="feature-card text-center">
+    <div class="col-md-4" data-aos="fade-left">
+      <div class="feature-card">
         <i class="fas fa-comments feature-icon"></i>
-        <h3>3. Get Answers</h3>
-        <p class="text-secondary">Receive insights and share your knowledge with others</p>
+        <h3>Получайте ответы</h3>
+        <p>Делитесь своими знаниями с другими и получайте ценные ответы от сообщества.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Testimonials Section -->
+<section class="container my-5 py-5">
+  <h2 class="section-title" data-aos="fade-up">Отзывы пользователей</h2>
+  <div class="row">
+    <div class="col-md-6" data-aos="fade-right">
+      <div class="testimonial-card">
+        <div class="d-flex align-items-center mb-3">
+          <img src="/api/placeholder/60/60" class="testimonial-avatar" alt="User">
+          <div>
+            <h5 class="mb-0">Анна Петрова</h5>
+            <small class="text-gray">@anna_p</small>
+          </div>
+        </div>
+        <p class="mb-2">"AskFM помог мне найти единомышленников и получить ответы на вопросы, которые я стеснялась задать лично. Отличная платформа для общения и обмена знаниями!"</p>
+        <div class="text-gray">
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6" data-aos="fade-left">
+      <div class="testimonial-card">
+        <div class="d-flex align-items-center mb-3">
+          <img src="/api/placeholder/60/60" class="testimonial-avatar" alt="User">
+          <div>
+            <h5 class="mb-0">Михаил Иванов</h5>
+            <small class="text-gray">@misha_dev</small>
+          </div>
+        </div>
+        <p class="mb-2">"Как разработчик, я нашел здесь отличное сообщество профессионалов. Анонимные вопросы позволяют не бояться спрашивать о сложных темах."</p>
+        <div class="text-gray">
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star text-warning"></i>
+          <i class="fas fa-star-half-alt text-warning"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Additional Features Section -->
+<section class="container my-5 py-5">
+  <h2 class="section-title" data-aos="fade-up">Дополнительные возможности</h2>
+  <div class="row">
+    <div class="col-md-4" data-aos="fade-up">
+      <div class="feature-card">
+        <i class="fas fa-mobile-alt feature-icon"></i>
+        <h3>Мобильное приложение</h3>
+        <p>Оставайтесь на связи с помощью нашего удобного мобильного приложения. Задавайте вопросы и получайте ответы где угодно.</p>
+      </div>
+    </div>
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="feature-card">
+        <i class="fas fa-bell feature-icon"></i>
+        <h3>Уведомления</h3>
+        <p>Мгновенные уведомления о новых вопросах и ответах. Не пропустите важные обновления.</p>
+      </div>
+    </div>
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+      <div class="feature-card">
+        <i class="fas fa-palette feature-icon"></i>
+        <h3>Персонализация</h3>
+        <p>Настройте свой профиль, выберите темы интересов и создайте уникальное пространство для общения.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="container-fluid stats-section my-5">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-md-8" data-aos="fade-right">
+        <h2 class="mb-4">Готовы начать задавать вопросы?</h2>
+        <p class="lead mb-4">Присоединяйтесь к нашему сообществу сегодня и откройте для себя новые возможности!</p>
+      </div>
+      <div class="col-md-4 text-center" data-aos="fade-left">
+        <a href="#" class="btn btn-custom btn-lg">Создать аккаунт</a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Footer -->
-<footer class="footer">
-  <div class="container text-center">
-    <div class="mb-4">
-      <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
-      <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-      <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-      <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+<footer class="footer py-5">
+  <div class="container">
+    <div class="row" data-aos="fade-up">
+      <div class="col-md-4 mb-4">
+        <h5 class="mb-3">О нас</h5>
+        <p class="text-gray">AskFM - это платформа для обмена знаниями, где каждый может задать вопрос и получить ответ от сообщества.</p>
+      </div>
+      <div class="col-md-2 mb-4">
+        <h5 class="mb-3">Навигация</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-gray text-decoration-none">Главная</a></li>
+          <li><a href="#features" class="text-gray text-decoration-none">Особенности</a></li>
+          <li><a href="#how-it-works" class="text-gray text-decoration-none">Как это работает</a></li>
+          <li><a href="#" class="text-gray text-decoration-none">Блог</a></li>
+        </ul>
+      </div>
+      <div class="col-md-2 mb-4">
+        <h5 class="mb-3">Поддержка</h5>
+        <ul class="list-unstyled">
+          <li><a href="#" class="text-gray text-decoration-none">FAQ</a></li>
+          <li><a href="#" class="text-gray text-decoration-none">Помощь</a></li>
+          <li><a href="#" class="text-gray text-decoration-none">Контакты</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h5 class="mb-3">Подпишитесь на новости</h5>
+        <form class="mb-3">
+          <div class="input-group">
+            <input type="email" class="form-control" placeholder="Ваш email" style="background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-white);">
+            <button class="btn btn-custom" type="submit">Подписаться</button>
+          </div>
+        </form>
+        <div class="social-links">
+          <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
     </div>
-    <p class="text-secondary">&copy; 2024 AskFM Clone. All rights reserved.</p>
+    <hr class="border-secondary my-4">
+    <div class="row">
+      <div class="col-md-6 text-center text-md-start">
+        <p class="text-gray mb-md-0">&copy; 2024 AskFM. Все права защищены.</p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <a href="#" class="text-gray text-decoration-none me-3">Условия использования</a>
+        <a href="#" class="text-gray text-decoration-none">Конфиденциальность</a>
+      </div>
+    </div>
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 1000,
+    once: true
+  });
+</script>
 </body>
 </html>
+

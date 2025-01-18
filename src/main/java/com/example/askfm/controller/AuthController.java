@@ -42,4 +42,9 @@ public class AuthController {
     public String showLoginForm() {
         return "aut/login";
     }
+
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        return "aut/logout";
+    }
 }
