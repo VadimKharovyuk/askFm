@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRegistrationDTO {
     @NotBlank
-    @Size(min = 3, max = 20)
+    @Size(min = 1, max = 20)
     private String username;
 
     @NotBlank
@@ -20,6 +20,6 @@ public class UserRegistrationDTO {
     private String email;
 
     @NotBlank
-    @Size(min = 6, max = 40)
+    @Size(min = 1, max = 40)
     private String password;
 }

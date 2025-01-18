@@ -2,6 +2,7 @@ package com.example.askfm.service;
 
 import com.example.askfm.dto.UserProfileDTO;
 import com.example.askfm.dto.UserRegistrationDTO;
+import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,17 +13,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
-
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SubscriptionService subscriptionService ;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -53,13 +55,26 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public void updateProfile(User user, UserProfileDTO profileDTO) {
-        user.setBio(profileDTO.getBio());
-        if (profileDTO.getAvatar() != null && !profileDTO.getAvatar().isEmpty()) {
-            // Здесь должна быть логика обработки загрузки аватара
-            user.setAvatar(profileDTO.getAvatar());
-        }
-        userRepository.save(user);
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
+
+    public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return userRepository.searchByUsername(query.trim())
+                .stream()
+                .map(user -> UserSearchDTO.builder()
+                        .username(user.getUsername())
+                        .avatar(user.getAvatar())
+                        .bio(user.getBio())
+                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+                        .isFollowing(currentUsername != null &&
+                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

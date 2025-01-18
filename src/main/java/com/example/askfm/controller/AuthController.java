@@ -19,14 +19,14 @@ public class AuthController {
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new UserRegistrationDTO());
-        return "register";
+        return "aut/register";
     }
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDTO registrationDTO,
                                BindingResult result) {
         if (result.hasErrors()) {
-            return "register";
+            return "aut/register";
         }
 
         try {
@@ -34,12 +34,12 @@ public class AuthController {
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
             result.rejectValue("username", "error.user", e.getMessage());
-            return "register";
+            return "aut/register";
         }
     }
 
     @GetMapping("/login")
     public String showLoginForm() {
-        return "login";
+        return "aut/login";
     }
 }

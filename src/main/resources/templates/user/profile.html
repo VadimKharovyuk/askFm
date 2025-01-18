@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Профиль пользователя</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #71767b;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-input {
+      background-color: #202327;
+      border: none;
+      color: var(--text-white);
+      border-radius: 9999px;
+    }
+
+    .search-input:focus {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      box-shadow: none;
+      border: 1px solid var(--blue-accent);
+    }
+
+    .main-container {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .profile-header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 1rem;
+    }
+
+    .cover-photo {
+      height: 200px;
+      background-color: #333639;
+      position: relative;
+    }
+
+    .profile-avatar {
+      width: 134px;
+      height: 134px;
+      border-radius: 50%;
+      border: 4px solid var(--background-dark);
+      position: absolute;
+      bottom: -67px;
+      left: 15px;
+      background-color: var(--background-dark);
+    }
+
+    .profile-info {
+      margin-top: 70px;
+      padding: 1rem;
+    }
+
+    .edit-profile-btn {
+      background-color: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--border-color);
+      border-radius: 9999px;
+      padding: 8px 16px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .edit-profile-btn:hover {
+      background-color: rgba(239, 243, 244, 0.1);
+    }
+
+    .stats-link {
+      color: var(--text-white);
+      text-decoration: none;
+      margin-right: 20px;
+    }
+
+    .stats-link:hover {
+      text-decoration: underline;
+      color: var(--text-white);
+    }
+
+    .nav-tabs {
+      border-bottom: none;
+    }
+
+    .nav-tabs .nav-link {
+      color: var(--text-gray);
+      background: transparent;
+      border: none;
+      padding: 1rem;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: var(--text-white);
+      background-color: rgba(239, 243, 244, 0.1);
+      border: none;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: var(--text-white);
+      background: transparent;
+      border: none;
+      position: relative;
+    }
+
+    .nav-tabs .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--blue-accent);
+      border-radius: 9999px;
+    }
+
+    .content-item {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
+    }
+
+    .content-item:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .question-card {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .question-card:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-ask {
+      background-color: var(--blue-accent);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 8px 20px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .btn-ask:hover {
+      background-color: var(--blue-hover);
+      color: white;
+    }
+
+    .text-muted {
+      color: var(--text-gray) !important;
+    }
+  </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg position-sticky top-0">
+  <div class="container">
+    <a class="navbar-brand text-light" href="#">AskFM</a>
+    <div class="d-flex align-items-center">
+      <form class="d-flex me-3" action="/users/search" method="get">
+        <input class="form-control search-input me-2"
+               type="search"
+               name="query"
+               placeholder="Поиск пользователей..."
+               required>
+      </form>
+      <div class="dropdown">
+        <button class="btn btn-link text-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-user"></i> <span th:text="${username}">Username</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end bg-dark">
+          <li><a class="dropdown-item text-light" href="#"><i class="fas fa-cog"></i> Настройки</a></li>
+          <li><a class="dropdown-item text-light" th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-container">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="cover-photo">
+      <img src="/api/placeholder/600/200" alt="Cover" class="w-100 h-100" style="object-fit: cover;">
+      <img src="/api/placeholder/134/134" alt="Profile" class="profile-avatar">
+    </div>
+
+    <div class="profile-info">
+      <div class="d-flex justify-content-end mb-3">
+        <button class="edit-profile-btn">Редактировать профиль</button>
+      </div>
+
+      <h4 class="mb-1" th:text="${username}">Username</h4>
+      <div class="text-muted mb-3" th:text="'@' + ${username}">@username</div>
+
+      <p class="mb-3">Ваше био здесь...</p>
+
+      <div class="d-flex mb-3">
+        <a th:href="@{'/users/' + ${username} + '/following'}" class="stats-link">
+          <span class="fw-bold">250</span> <span class="text-muted">подписок</span>
+        </a>
+        <a th:href="@{'/users/' + ${username} + '/followers'}" class="stats-link">
+          <span class="fw-bold">1.2K</span> <span class="text-muted">подписчиков</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Profile Navigation -->
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Вопросы</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Ответы</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Понравилось</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Questions Feed -->
+  <div class="questions-feed">
+    <div class="question-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <span class="fw-bold">Аноним</span>
+          <span class="text-muted ms-2">· 2 часа назад</span>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end bg-dark">
+            <li><a class="dropdown-item text-light" href="#">Удалить</a></li>
+            <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>
+          </ul>
+        </div>
+      </div>
+      <p>Какой ваш любимый язык программирования и почему?</p>
+      <button class="btn btn-ask btn-sm">Ответить</button>
+    </div>
+
+    <div class="question-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <span class="fw-bold">@johndoe</span>
+          <span class="text-muted ms-2">· 5 часов назад</span>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end bg-dark">
+            <li><a class="dropdown-item text-light" href="#">Удалить</a></li>
+            <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>
+          </ul>
+        </div>
+      </div>
+      <p>Как вы начали свой путь в разработке?</p>
+      <div class="bg-black bg-opacity-25 rounded p-3 mt-2">
+        <p class="mb-0">Начал с изучения Python как первого языка программирования...</p>
+      </div>
+      <div class="d-flex gap-3 mt-3">
+        <button class="btn btn-link text-muted p-0"><i class="far fa-heart"></i> 24</button>
+        <button class="btn btn-link text-muted p-0"><i class="far fa-comment"></i> Комментировать</button>
+        <button class="btn btn-link text-muted p-0"><i class="fas fa-retweet"></i> Поделиться</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

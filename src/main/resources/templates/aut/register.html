@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Регистрация | AskFM</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #71767b;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --error-red: #f4212e;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 380px;
+      padding: 20px;
+    }
+
+    .register-logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      font-size: 2.5rem;
+      color: var(--text-white);
+    }
+
+    .form-title {
+      font-size: 31px;
+      font-weight: bold;
+      margin-bottom: 24px;
+      color: var(--text-white);
+    }
+
+    .form-text {
+      color: var(--text-gray);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .form-floating {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .form-control {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-white);
+      padding: 12px;
+      font-size: 16px;
+      height: auto;
+    }
+
+    .form-control:focus {
+      background-color: transparent;
+      border-color: var(--blue-accent);
+      color: var(--text-white);
+      box-shadow: none;
+    }
+
+    .form-control.is-invalid {
+      border-color: var(--error-red);
+    }
+
+    .form-label {
+      color: var(--text-gray);
+      font-size: 14px;
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      background-color: var(--background-dark);
+      padding: 0 5px;
+      transition: all 0.2s;
+    }
+
+    .error-message {
+      color: var(--error-red);
+      font-size: 13px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .btn-register {
+      background-color: var(--text-white);
+      color: var(--background-dark);
+      border: none;
+      border-radius: 9999px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      width: 100%;
+      margin: 12px 0;
+      transition: background-color 0.2s;
+    }
+
+    .btn-register:hover {
+      background-color: #e6e6e6;
+    }
+
+    .oauth-button {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      border-radius: 9999px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      width: 100%;
+      margin-bottom: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .oauth-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .oauth-icon {
+      margin-right: 8px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--text-gray);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .divider span {
+      padding: 0 10px;
+    }
+
+    .login-link {
+      color: var(--blue-accent);
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .login-link:hover {
+      text-decoration: underline;
+    }
+
+    .terms-text {
+      color: var(--text-gray);
+      font-size: 13px;
+      margin-top: 20px;
+    }
+
+    .terms-text a {
+      color: var(--blue-accent);
+      text-decoration: none;
+    }
+
+    .terms-text a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="register-container">
+  <!-- Logo -->
+  <div class="register-logo">
+    <i class="fas fa-comment-dots logo-icon"></i>
+  </div>
+
+  <!-- Title -->
+  <h1 class="form-title">Создать аккаунт</h1>
+  <p class="form-text">Присоединяйтесь к нашему сообществу сегодня</p>
+
+  <!-- OAuth Buttons -->
+  <button class="oauth-button">
+    <i class="fab fa-google oauth-icon"></i>
+    Регистрация через Google
+  </button>
+  <button class="oauth-button">
+    <i class="fab fa-github oauth-icon"></i>
+    Регистрация через GitHub
+  </button>
+
+  <!-- Divider -->
+  <div class="divider">
+    <span>или</span>
+  </div>
+
+  <!-- Registration Form -->
+  <form th:action="@{/register}" th:object="${user}" method="post">
+    <div class="form-floating">
+      <input type="text"
+             class="form-control"
+             id="username"
+             th:field="*{username}"
+             th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+             placeholder="Имя пользователя">
+      <label for="username" class="form-label">Имя пользователя</label>
+      <div class="error-message" th:if="${#fields.hasErrors('username')}"
+           th:errors="*{username}">Ошибка имени пользователя</div>
+    </div>
+
+    <div class="form-floating">
+      <input type="email"
+             class="form-control"
+             id="email"
+             th:field="*{email}"
+             th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+             placeholder="Email">
+      <label for="email" class="form-label">Email</label>
+      <div class="error-message" th:if="${#fields.hasErrors('email')}"
+           th:errors="*{email}">Ошибка email</div>
+    </div>
+
+    <div class="form-floating">
+      <input type="password"
+             class="form-control"
+             id="password"
+             th:field="*{password}"
+             th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+             placeholder="Пароль">
+      <label for="password" class="form-label">Пароль</label>
+      <div class="error-message" th:if="${#fields.hasErrors('password')}"
+           th:errors="*{password}">Ошибка пароля</div>
+    </div>
+
+    <button type="submit" class="btn-register">Зарегистрироваться</button>
+
+    <p class="terms-text">
+      Регистрируясь, вы соглашаетесь с нашими
+      <a href="#">Условиями использования</a> и
+      <a href="#">Политикой конфиденциальности</a>
+    </p>
+  </form>
+
+  <!-- Login Link -->
+  <p class="text-center text-gray">
+    Уже есть аккаунт?
+    <a th:href="@{/login}" class="login-link">Войти</a>
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
