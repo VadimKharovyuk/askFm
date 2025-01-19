@@ -29,18 +29,4 @@ public class ProfileController {
         return "user/profile";
     }
 
-
-//    @GetMapping("/profile/edit")
-//    public String showEditProfileForm(Model model, @AuthenticationPrincipal UserDetails currentUser) {
-//        UserProfileDTO profileDTO = userService.getUserProfile(currentUser.getUsername());
-//        model.addAttribute("profileDTO", profileDTO);
-//        return "user/edit-profile";
-//    }
-
-//    @PostMapping("/profile/edit")
-//    public String updateProfile(@Valid @ModelAttribute UserProfileDTO profileDTO,
-//                                @AuthenticationPrincipal UserDetails currentUser) {
-//        userService.updateProfile(currentUser.getUsername(), profileDTO);
-//        return "redirect:/home";
-//    }
 }

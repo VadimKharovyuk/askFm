@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -56,5 +57,17 @@ public class QuestionService {
         questionRepository.save(question);
 
         return answer;
+    }
+
+    public List<Question> getAnsweredQuestions(User user) {
+        return questionRepository.findByRecipientAndAnsweredOrderByCreatedAtDesc(user, true);
+    }
+
+    public List<Question> getUnansweredQuestions(User user) {
+        return questionRepository.findByRecipientAndAnsweredOrderByCreatedAtDesc(user, false);
+    }
+
+    public List<Question> getAllQuestions(User user) {
+        return questionRepository.findByRecipientOrderByCreatedAtDesc(user);
     }
 }

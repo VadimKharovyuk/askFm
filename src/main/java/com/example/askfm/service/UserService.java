@@ -77,4 +77,9 @@ public class UserService implements UserDetailsService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public User findByUsername(String username) {
+      return userRepository.findByUsername(username)
+               .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
 }

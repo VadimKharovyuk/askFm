@@ -1,0 +1,963 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title th:text="${profileUser.username + ' | AskFM'}">User Profile</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    :root {-->
+<!--      &#45;&#45;background-dark: #000000;-->
+<!--      &#45;&#45;secondary-bg: #16181c;-->
+<!--      &#45;&#45;text-white: #e7e9ea;-->
+<!--      &#45;&#45;text-gray: #71767b;-->
+<!--      &#45;&#45;border-color: #2f3336;-->
+<!--      &#45;&#45;blue-accent: #1d9bf0;-->
+<!--      &#45;&#45;blue-hover: #1a8cd8;-->
+<!--    }-->
+
+<!--    body {-->
+<!--      background-color: var(&#45;&#45;background-dark);-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;-->
+<!--    }-->
+
+<!--    .top-nav {-->
+<!--      position: sticky;-->
+<!--      top: 0;-->
+<!--      background-color: rgba(0, 0, 0, 0.65);-->
+<!--      backdrop-filter: blur(12px);-->
+<!--      z-index: 1000;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .profile-header {-->
+<!--      position: relative;-->
+<!--    }-->
+
+<!--    .cover-photo {-->
+<!--      height: 200px;-->
+<!--      background-color: var(&#45;&#45;secondary-bg);-->
+<!--      position: relative;-->
+<!--    }-->
+
+<!--    .profile-avatar {-->
+<!--      width: 134px;-->
+<!--      height: 134px;-->
+<!--      border-radius: 50%;-->
+<!--      border: 4px solid var(&#45;&#45;background-dark);-->
+<!--      position: absolute;-->
+<!--      bottom: -67px;-->
+<!--      left: 15px;-->
+<!--      background-color: var(&#45;&#45;background-dark);-->
+<!--    }-->
+
+<!--    .profile-actions {-->
+<!--      margin-top: 10px;-->
+<!--      padding: 10px 15px;-->
+<!--      display: flex;-->
+<!--      justify-content: flex-end;-->
+<!--    }-->
+
+<!--    .btn-follow, .btn-unfollow {-->
+<!--      padding: 8px 20px;-->
+<!--      border-radius: 9999px;-->
+<!--      font-weight: bold;-->
+<!--      transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .btn-follow {-->
+<!--      background-color: var(&#45;&#45;text-white);-->
+<!--      color: var(&#45;&#45;background-dark);-->
+<!--      border: none;-->
+<!--    }-->
+
+<!--    .btn-unfollow {-->
+<!--      background-color: transparent;-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      border: 1px solid var(&#45;&#45;text-white);-->
+<!--    }-->
+
+<!--    .btn-unfollow:hover {-->
+<!--      background-color: rgba(244, 33, 46, 0.1);-->
+<!--      color: #f4212e;-->
+<!--      border-color: #f4212e;-->
+<!--    }-->
+
+<!--    .profile-info {-->
+<!--      padding: 70px 15px 15px;-->
+<!--    }-->
+
+<!--    .profile-stats {-->
+<!--      display: flex;-->
+<!--      gap: 20px;-->
+<!--      margin: 15px 0;-->
+<!--    }-->
+
+<!--    .stat-link {-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .stat-link:hover {-->
+<!--      text-decoration: underline;-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--    }-->
+
+<!--    .ask-question-form {-->
+<!--      padding: 15px;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .question-textarea {-->
+<!--      background-color: transparent;-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      width: 100%;-->
+<!--      padding: 12px;-->
+<!--      resize: vertical;-->
+<!--      min-height: 100px;-->
+<!--      border-radius: 16px;-->
+<!--    }-->
+
+<!--    .question-textarea:focus {-->
+<!--      border-color: var(&#45;&#45;blue-accent);-->
+<!--      outline: none;-->
+<!--    }-->
+
+<!--    .ask-options {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      margin-top: 10px;-->
+<!--    }-->
+
+<!--    .btn-ask {-->
+<!--      background-color: var(&#45;&#45;blue-accent);-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      border-radius: 9999px;-->
+<!--      padding: 8px 20px;-->
+<!--      font-weight: bold;-->
+<!--    }-->
+
+<!--    .btn-ask:hover {-->
+<!--      background-color: var(&#45;&#45;blue-hover);-->
+<!--    }-->
+
+<!--    .question-card {-->
+<!--      padding: 15px;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--      transition: background-color 0.2s;-->
+<!--    }-->
+
+<!--    .question-card:hover {-->
+<!--      background-color: rgba(255, 255, 255, 0.03);-->
+<!--    }-->
+
+<!--    .nav-tabs {-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .nav-tabs .nav-link {-->
+<!--      color: var(&#45;&#45;text-gray);-->
+<!--      border: none;-->
+<!--      padding: 15px;-->
+<!--      margin: 0;-->
+<!--      font-weight: 500;-->
+<!--    }-->
+
+<!--    .nav-tabs .nav-link:hover {-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      background-color: rgba(239, 243, 244, 0.1);-->
+<!--      border: none;-->
+<!--    }-->
+
+<!--    .nav-tabs .nav-link.active {-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      background-color: transparent;-->
+<!--      border: none;-->
+<!--      border-bottom: 4px solid var(&#45;&#45;blue-accent);-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Top Navigation &ndash;&gt;-->
+<!--<div class="top-nav p-3">-->
+<!--  <div class="container">-->
+<!--    <div class="d-flex align-items-center">-->
+<!--      <a href="javascript:history.back()" class="text-white me-3">-->
+<!--        <i class="fas fa-arrow-left"></i>-->
+<!--      </a>-->
+<!--      <div>-->
+<!--        <h5 class="mb-0" th:text="${profileUser.username}">Username</h5>-->
+<!--        <small class="text-gray"-->
+<!--               th:text="${questions != null ? questions.size() + ' вопросов' : '0 вопросов'}">-->
+<!--          0 вопросов-->
+<!--        </small>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Profile Header &ndash;&gt;-->
+<!--<div class="profile-header">-->
+<!--  <div class="cover-photo">-->
+<!--    <img src="/api/placeholder/800/200" alt="Cover" style="width: 100%; height: 100%; object-fit: cover;">-->
+<!--  </div>-->
+<!--  <img th:if="${profileUser.avatar}" th:src="${profileUser.avatar}"-->
+<!--       class="profile-avatar" th:alt="${profileUser.username + ' avatar'}">-->
+<!--  <img th:unless="${profileUser.avatar}" src="/api/placeholder/134/134"-->
+<!--       class="profile-avatar" alt="Default avatar">-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Profile Actions &ndash;&gt;-->
+<!--<div class="profile-actions">-->
+<!--  <th:block th:if="${currentUser != null && currentUser != profileUser.username}">-->
+<!--    <form th:if="${!isFollowing}" th:action="@{'/users/' + ${profileUser.username} + '/follow'}"-->
+<!--          method="post" style="display: inline;">-->
+<!--      <button type="submit" class="btn btn-follow">Подписаться</button>-->
+<!--    </form>-->
+<!--    <form th:if="${isFollowing}" th:action="@{'/users/' + ${profileUser.username} + '/unfollow'}"-->
+<!--          method="post" style="display: inline;">-->
+<!--      <button type="submit" class="btn btn-unfollow">-->
+<!--        <span class="following-text">Подписан</span>-->
+<!--        <span class="unfollow-text" style="display: none;">Отписаться</span>-->
+<!--      </button>-->
+<!--    </form>-->
+<!--  </th:block>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Profile Info &ndash;&gt;-->
+<!--<div class="profile-info">-->
+<!--  <h4 th:text="${profileUser.username}">Username</h4>-->
+<!--  <p class="text-gray" th:text="'@' + ${profileUser.username}">@username</p>-->
+
+<!--  <p th:if="${profileUser.bio}" th:text="${profileUser.bio}" class="mb-3">Bio</p>-->
+
+<!--  <div class="profile-stats">-->
+<!--    <a th:href="@{'/users/' + ${profileUser.username} + '/following'}" class="stat-link">-->
+<!--      <span class="fw-bold" th:text="${followingCount}">0</span>-->
+<!--      <span class="text-gray">подписок</span>-->
+<!--    </a>-->
+<!--    <a th:href="@{'/users/' + ${profileUser.username} + '/followers'}" class="stat-link">-->
+<!--      <span class="fw-bold" th:text="${followersCount}">0</span>-->
+<!--      <span class="text-gray">подписчиков</span>-->
+<!--    </a>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Navigation Tabs &ndash;&gt;-->
+<!--<ul class="nav nav-tabs">-->
+<!--  <li class="nav-item">-->
+<!--    <a class="nav-link active" href="#">Вопросы</a>-->
+<!--  </li>-->
+<!--  <li class="nav-item">-->
+<!--    <a class="nav-link" href="#">Ответы</a>-->
+<!--  </li>-->
+<!--  <li class="nav-item">-->
+<!--    <a class="nav-link" href="#">Медиа</a>-->
+<!--  </li>-->
+<!--  <li class="nav-item">-->
+<!--    <a class="nav-link" href="#">Лайки</a>-->
+<!--  </li>-->
+<!--</ul>-->
+
+<!--&lt;!&ndash; Ask Question Form &ndash;&gt;-->
+<!--<div class="ask-question-form" th:if="${currentUser != null && currentUser != profileUser.username}">-->
+<!--  <form th:action="@{'/questions/ask/' + ${profileUser.username}}" method="post">-->
+<!--            <textarea name="content" class="question-textarea"-->
+<!--                      placeholder="Задайте вопрос..." required></textarea>-->
+<!--    <div class="ask-options">-->
+<!--      <div class="form-check">-->
+<!--        <input class="form-check-input" type="checkbox" id="anonymous" name="anonymous">-->
+<!--        <label class="form-check-label text-gray" for="anonymous">-->
+<!--          Спросить анонимно-->
+<!--        </label>-->
+<!--      </div>-->
+<!--      <button type="submit" class="btn btn-ask">Задать вопрос</button>-->
+<!--    </div>-->
+<!--  </form>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Questions Feed &ndash;&gt;-->
+<!--<div class="questions-feed">-->
+<!--  <div th:each="question : ${questions}" class="question-card">-->
+<!--    <div class="d-flex justify-content-between mb-2">-->
+<!--      <div>-->
+<!--                    <span class="fw-bold" th:text="${question.anonymous ? 'Аноним' : question.author.username}">-->
+<!--                        Username-->
+<!--                    </span>-->
+<!--        <span class="text-gray ms-2"-->
+<!--              th:text="${#temporals.format(question.createdAt, 'dd MMM yyyy')}">-->
+<!--                        Date-->
+<!--                    </span>-->
+<!--      </div>-->
+<!--      <div class="dropdown" th:if="${currentUser == profileUser.username}">-->
+<!--        <button class="btn btn-link text-gray" type="button" data-bs-toggle="dropdown">-->
+<!--          <i class="fas fa-ellipsis"></i>-->
+<!--        </button>-->
+<!--        <ul class="dropdown-menu dropdown-menu-end">-->
+<!--          <li><a class="dropdown-item" href="#">Удалить</a></li>-->
+<!--          <li><a class="dropdown-item" href="#">Пожаловаться</a></li>-->
+<!--        </ul>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <p th:text="${question.content}">Question content</p>-->
+
+<!--    <div th:if="${question.answer != null}" class="mt-3 p-3"-->
+<!--         style="background-color: rgba(255, 255, 255, 0.05); border-radius: 16px;">-->
+<!--      <p class="mb-0" th:text="${question.answer.content}">Answer content</p>-->
+<!--    </div>-->
+
+<!--    <div class="d-flex gap-3 mt-3">-->
+<!--      <button class="btn btn-link text-gray p-0">-->
+<!--        <i class="far fa-heart"></i>-->
+<!--        <span th:text="${question.likes != null ? question.likes : '0'}">0</span>-->
+<!--      </button>-->
+<!--      <button class="btn btn-link text-gray p-0">-->
+<!--        <i class="far fa-comment"></i>-->
+<!--      </button>-->
+<!--      <button class="btn btn-link text-gray p-0">-->
+<!--        <i class="fas fa-retweet"></i>-->
+<!--      </button>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--<script>-->
+<!--  // Изменение текста кнопки отписки при наведении-->
+<!--  document.querySelectorAll('.btn-unfollow').forEach(button => {-->
+<!--    button.addEventListener('mouseenter', () => {-->
+<!--      button.querySelector('.following-text').style.display = 'none';-->
+<!--      button.querySelector('.unfollow-text').style.display = 'inline';-->
+<!--    });-->
+
+<!--    button.addEventListener('mouseleave', () => {-->
+<!--      button.querySelector('.following-text').style.display = 'inline';-->
+<!--      button.querySelector('.unfollow-text').style.display = 'none';-->
+<!--    });-->
+<!--  });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${profileUser.username + ' | AskFM'}">User Profile</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #71767b;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+    }
+
+    /* Grid Layout */
+    .page-wrapper {
+      display: grid;
+      grid-template-columns: 280px minmax(600px, 800px) 350px;
+      gap: 0;
+      max-width: 1430px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    /* Left Sidebar */
+    .left-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px;
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 24px;
+      text-decoration: none;
+      color: var(--text-white);
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      text-decoration: none;
+      color: var(--text-white);
+      border-radius: 9999px;
+      transition: background-color 0.2s;
+      font-size: 1.2rem;
+    }
+
+    .side-link:hover {
+      background-color: rgba(239, 243, 244, 0.1);
+      color: var(--text-white);
+    }
+
+    .side-link i {
+      width: 24px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      border-right: 1px solid var(--border-color);
+      border-left: 1px solid var(--border-color);
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Search Box */
+    .search-box {
+      background-color: var(--secondary-bg);
+      border-radius: 9999px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      width: 100%;
+    }
+
+    .search-input:focus {
+      outline: none;
+    }
+
+    /* Trending Section */
+    .trending-section, .who-to-follow {
+      background-color: var(--secondary-bg);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .trending-item, .suggestion-item {
+      padding: 12px;
+      border-radius: 12px;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .trending-item:hover, .suggestion-item:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Добавьте эти стили вместо строки [Существующие стили профиля остаются без изменений...] */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .profile-header {
+      position: relative;
+    }
+
+    .cover-photo {
+      height: 200px;
+      background-color: var(--secondary-bg);
+      position: relative;
+    }
+
+    .profile-avatar {
+      width: 134px;
+      height: 134px;
+      border-radius: 50%;
+      border: 4px solid var(--background-dark);
+      position: absolute;
+      bottom: -67px;
+      left: 15px;
+      background-color: var(--background-dark);
+    }
+
+    .profile-actions {
+      margin-top: 10px;
+      padding: 10px 15px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-follow, .btn-unfollow {
+      padding: 8px 20px;
+      border-radius: 9999px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-follow {
+      background-color: var(--text-white);
+      color: var(--background-dark);
+      border: none;
+    }
+
+    .btn-unfollow {
+      background-color: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-unfollow:hover {
+      background-color: rgba(244, 33, 46, 0.1);
+      color: #f4212e;
+      border-color: #f4212e;
+    }
+
+    .profile-info {
+      padding: 70px 15px 15px;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 20px;
+      margin: 15px 0;
+    }
+
+    .stat-link {
+      color: var(--text-white);
+      text-decoration: none;
+    }
+
+    .stat-link:hover {
+      text-decoration: underline;
+      color: var(--text-white);
+    }
+
+    .nav-tabs {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-tabs .nav-link {
+      color: var(--text-gray);
+      border: none;
+      padding: 15px;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: var(--text-white);
+      background-color: rgba(239, 243, 244, 0.1);
+      border: none;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: var(--text-white);
+      background-color: transparent;
+      border: none;
+      border-bottom: 4px solid var(--blue-accent);
+    }
+
+    .ask-question-form {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .question-textarea {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      width: 100%;
+      padding: 12px;
+      resize: vertical;
+      min-height: 100px;
+      border-radius: 16px;
+    }
+
+    .question-textarea:focus {
+      border-color: var(--blue-accent);
+      outline: none;
+    }
+
+    .question-card {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
+    }
+
+    .question-card:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .ask-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .btn-ask {
+      background-color: var(--blue-accent);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 8px 20px;
+      font-weight: bold;
+    }
+
+    .btn-ask:hover {
+      background-color: var(--blue-hover);
+    }
+
+    .dropdown-menu {
+      background-color: var(--secondary-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    .dropdown-item {
+      color: var(--text-white);
+    }
+
+    .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-white);
+    }
+
+    /* Fix for buttons */
+    .btn-link {
+      text-decoration: none;
+    }
+
+    .btn-link:hover {
+      text-decoration: none;
+      color: var(--blue-accent);
+    }
+
+    /* Fix for form controls */
+    .form-check-input {
+      background-color: transparent;
+      border-color: var(--border-color);
+    }
+
+    .form-check-input:checked {
+      background-color: var(--blue-accent);
+      border-color: var(--blue-accent);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1280px) {
+      .page-wrapper {
+        grid-template-columns: 88px minmax(600px, 800px) 350px;
+      }
+
+      .side-link span {
+        display: none;
+      }
+
+      .logo-link span {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .page-wrapper {
+        grid-template-columns: 88px minmax(600px, 1fr);
+      }
+
+      .right-sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .left-sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <!-- Left Sidebar -->
+  <aside class="left-sidebar">
+    <a href="/" class="logo-link">
+      <i class="fas fa-comment-dots"></i>
+      <span>AskFM</span>
+    </a>
+
+    <nav class="side-nav">
+      <a href="/home" class="side-link">
+        <i class="fas fa-home"></i>
+        <span>Главная</span>
+      </a>
+      <a href="/explore" class="side-link">
+        <i class="fas fa-hashtag"></i>
+        <span>Поиск</span>
+      </a>
+      <a href="/notifications" class="side-link">
+        <i class="fas fa-bell"></i>
+        <span>Уведомления</span>
+      </a>
+      <a href="/messages" class="side-link">
+        <i class="fas fa-envelope"></i>
+        <span>Сообщения</span>
+      </a>
+      <a href="/bookmarks" class="side-link">
+        <i class="fas fa-bookmark"></i>
+        <span>Закладки</span>
+      </a>
+      <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+        <i class="fas fa-user"></i>
+        <span>Профиль</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Navigation -->
+    <div class="top-nav p-3">
+      <div class="d-flex align-items-center">
+        <a href="javascript:history.back()" class="text-white me-3">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h5 class="mb-0" th:text="${profileUser.username}">Username</h5>
+          <small class="text-gray"
+                 th:text="${questions != null ? questions.size() + ' вопросов' : '0 вопросов'}">
+            0 вопросов
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="cover-photo">
+        <img src="/api/placeholder/800/200" alt="Cover" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <img th:if="${profileUser.avatar}" th:src="${profileUser.avatar}"
+           class="profile-avatar" th:alt="${profileUser.username + ' avatar'}">
+      <img th:unless="${profileUser.avatar}" src="/api/placeholder/134/134"
+           class="profile-avatar" alt="Default avatar">
+    </div>
+
+    <!-- Profile Actions -->
+    <div class="profile-actions">
+      <th:block th:if="${currentUser != null && currentUser != profileUser.username}">
+        <form th:if="${!isFollowing}" th:action="@{'/users/' + ${profileUser.username} + '/follow'}"
+              method="post" style="display: inline;">
+          <button type="submit" class="btn btn-follow">Подписаться</button>
+        </form>
+        <form th:if="${isFollowing}" th:action="@{'/users/' + ${profileUser.username} + '/unfollow'}"
+              method="post" style="display: inline;">
+          <button type="submit" class="btn btn-unfollow">
+            <span class="following-text">Подписан</span>
+            <span class="unfollow-text" style="display: none;">Отписаться</span>
+          </button>
+        </form>
+      </th:block>
+    </div>
+
+    <!-- Profile Info -->
+    <div class="profile-info">
+      <h4 th:text="${profileUser.username}">Username</h4>
+      <p class="text-gray" th:text="'@' + ${profileUser.username}">@username</p>
+
+      <p th:if="${profileUser.bio}" th:text="${profileUser.bio}" class="mb-3">Bio</p>
+
+      <div class="profile-stats">
+        <a th:href="@{'/users/' + ${profileUser.username} + '/following'}" class="stat-link">
+          <span class="fw-bold" th:text="${followingCount}">0</span>
+          <span class="text-gray">подписок</span>
+        </a>
+        <a th:href="@{'/users/' + ${profileUser.username} + '/followers'}" class="stat-link">
+          <span class="fw-bold" th:text="${followersCount}">0</span>
+          <span class="text-gray">подписчиков</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Вопросы</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Ответы</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Медиа</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Лайки</a>
+      </li>
+    </ul>
+
+    <!-- Ask Question Form -->
+    <div class="ask-question-form" th:if="${currentUser != null && currentUser != profileUser.username}">
+      <form th:action="@{'/questions/ask/' + ${profileUser.username}}" method="post">
+            <textarea name="content" class="question-textarea"
+                      placeholder="Задайте вопрос..." required></textarea>
+        <div class="ask-options">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="anonymous" name="anonymous">
+            <label class="form-check-label text-gray" for="anonymous">
+              Спросить анонимно
+            </label>
+          </div>
+          <button type="submit" class="btn btn-ask">Задать вопрос</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Questions Feed -->
+    <div class="questions-feed">
+      <div th:each="question : ${questions}" class="question-card">
+        <div class="d-flex justify-content-between mb-2">
+          <div>
+                    <span class="fw-bold" th:text="${question.anonymous ? 'Аноним' : question.author.username}">
+                        Username
+                    </span>
+            <span class="text-gray ms-2"
+                  th:text="${#temporals.format(question.createdAt, 'dd MMM yyyy')}">
+                        Date
+                    </span>
+          </div>
+          <div class="dropdown" th:if="${currentUser == profileUser.username}">
+            <button class="btn btn-link text-gray" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end bg-dark">
+              <li><a class="dropdown-item text-light" href="#">Удалить</a></li>
+              <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <p th:text="${question.content}">Question content</p>
+
+        <div th:if="${question.answer != null}" class="mt-3 p-3"
+             style="background-color: rgba(255, 255, 255, 0.05); border-radius: 16px;">
+          <p class="mb-0" th:text="${question.answer.content}">Answer content</p>
+        </div>
+
+        <div class="d-flex gap-3 mt-3">
+          <button class="btn btn-link text-gray p-0">
+            <i class="far fa-heart"></i>
+            <span th:text="${question.likes != null ? question.likes : '0'}">0</span>
+          </button>
+          <button class="btn btn-link text-gray p-0">
+            <i class="far fa-comment"></i>
+          </button>
+          <button class="btn btn-link text-gray p-0">
+            <i class="fas fa-retweet"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <!-- Search Box -->
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="search" class="search-input" placeholder="Поиск в AskFM">
+    </div>
+
+    <!-- Trending Section -->
+    <div class="trending-section">
+      <h3 class="section-title">Актуальные темы</h3>
+      <div class="trending-item">
+        <div class="text-gray">Тренды в России</div>
+        <div class="fw-bold">#программирование</div>
+        <div class="text-gray">4,123 вопросов</div>
+      </div>
+      <div class="trending-item">
+        <div class="text-gray">Тренды в России</div>
+        <div class="fw-bold">#образование</div>
+        <div class="text-gray">2,891 вопросов</div>
+      </div>
+    </div>
+
+    <!-- Who to Follow -->
+    <div class="who-to-follow">
+      <h3 class="section-title">Кого читать</h3>
+      <div class="suggestion-item d-flex align-items-center gap-3">
+        <img src="/api/placeholder/48/48" class="rounded-circle" alt="User avatar">
+        <div class="flex-grow-1">
+          <div class="fw-bold">John Doe</div>
+          <div class="text-gray">@johndoe</div>
+        </div>
+        <button class="btn btn-follow">Читать</button>
+      </div>
+      <div class="suggestion-item d-flex align-items-center gap-3">
+        <img src="/api/placeholder/48/48" class="rounded-circle" alt="User avatar">
+        <div class="flex-grow-1">
+          <div class="fw-bold">Jane Smith</div>
+          <div class="text-gray">@janesmith</div>
+        </div>
+        <button class="btn btn-follow">Читать</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Изменение текста кнопки отписки при наведении
+  document.querySelectorAll('.btn-unfollow').forEach(button => {
+    button.addEventListener('mouseenter', () => {
+      button.querySelector('.following-text').style.display = 'none';
+      button.querySelector('.unfollow-text').style.display = 'inline';
+    });
+
+    button.addEventListener('mouseleave', () => {
+      button.querySelector('.following-text').style.display = 'inline';
+      button.querySelector('.unfollow-text').style.display = 'none';
+    });
+  });
+</script>
+</body>
+</html>
