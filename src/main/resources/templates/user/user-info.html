@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title th:text="${profileUser.username + ' | Информация'}">Информация о пользователе</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #71767b;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .main-container {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      background-color: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .info-section {
+      padding: 1rem;
+    }
+
+    .info-card {
+      background-color: var(--secondary-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-gray);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .info-label i {
+      margin-right: 0.5rem;
+      width: 20px;
+    }
+
+    .info-value {
+      color: var(--text-white);
+    }
+
+    .info-empty {
+      color: var(--text-gray);
+      font-style: italic;
+    }
+
+    .btn-edit {
+      background-color: var(--text-white);
+      color: var(--background-dark);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.8rem 1.5rem;
+      font-weight: bold;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-edit:hover {
+      background-color: #e6e6e6;
+      transform: translateY(-2px);
+    }
+
+    .website-link {
+      color: var(--blue-accent);
+      text-decoration: none;
+    }
+
+    .website-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="d-flex align-items-center">
+      <a href="javascript:history.back()" class="text-white me-3" style="text-decoration: none;">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h5 class="mb-0">Информация о пользователе</h5>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section">
+    <div class="info-card">
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-user"></i>Пользователь
+        </div>
+        <div class="info-value" th:text="${profileUser.username}">@username</div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-info-circle"></i>Био
+        </div>
+        <div class="info-value"
+             th:text="${userProfile != null && userProfile.bio != null ? userProfile.bio : 'Не указано'}"
+             th:classappend="${userProfile == null || userProfile.bio == null ? 'info-empty' : ''}">
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-birthday-cake"></i>Дата рождения
+        </div>
+        <div class="info-value"
+             th:text="${userProfile != null && userProfile.dateOfBirth != null ? #temporals.format(userProfile.dateOfBirth, 'dd MMMM yyyy') : 'Не указана'}"
+             th:classappend="${userProfile == null || userProfile.dateOfBirth == null ? 'info-empty' : ''}">
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-map-marker-alt"></i>Местоположение
+        </div>
+        <div class="info-value"
+             th:text="${userProfile != null && userProfile.location != null ? userProfile.location : 'Не указано'}"
+             th:classappend="${userProfile == null || userProfile.location == null ? 'info-empty' : ''}">
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-graduation-cap"></i>Образование
+        </div>
+        <div class="info-value"
+             th:text="${userProfile != null && userProfile.education != null ? userProfile.education : 'Не указано'}"
+             th:classappend="${userProfile == null || userProfile.education == null ? 'info-empty' : ''}">
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-briefcase"></i>Профессия
+        </div>
+        <div class="info-value"
+             th:text="${userProfile != null && userProfile.occupation != null ? userProfile.occupation : 'Не указана'}"
+             th:classappend="${userProfile == null || userProfile.occupation == null ? 'info-empty' : ''}">
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-globe"></i>Веб-сайт
+        </div>
+        <div class="info-value">
+          <a th:if="${userProfile != null && userProfile.website != null}"
+             th:href="${userProfile.website}"
+             target="_blank"
+             class="website-link">
+            <span th:text="${userProfile.website}"></span>
+            <i class="fas fa-external-link-alt ms-1"></i>
+          </a>
+          <span th:if="${userProfile == null || userProfile.website == null}"
+                class="info-empty">Не указан</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Edit Button for Profile Owner -->
+    <div class="text-center mt-4" th:if="${currentUser != null && currentUser == profileUser.username}">
+      <a th:href="@{/profile/edit}" class="btn-edit">
+        <i class="fas fa-edit me-2"></i>Редактировать информацию
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

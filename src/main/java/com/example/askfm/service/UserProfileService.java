@@ -17,6 +17,12 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
 
+
+    public UserProfile getUserProfile(User user) {
+        return userProfileRepository.findByUser(user)
+                .orElse(null);
+    }
+
     public void updateProfile(String username, ProfileEditDTO profileDTO) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -37,6 +43,7 @@ public class UserProfileService {
 
         userProfileRepository.save(profile);
     }
+
 
     public ProfileEditDTO getProfileDTO(User user) {
         UserProfile profile = user.getProfile();

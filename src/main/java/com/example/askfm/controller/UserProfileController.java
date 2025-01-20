@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.dto.ProfileEditDTO;
 import com.example.askfm.model.User;
+import com.example.askfm.model.UserProfile;
 import com.example.askfm.service.QuestionService;
 import com.example.askfm.service.SubscriptionService;
 import com.example.askfm.service.UserProfileService;
@@ -68,5 +69,17 @@ public class UserProfileController {
 
         userProfileService.updateProfile(currentUser.getUsername(), profileDTO);
         return "redirect:/users/" + currentUser.getUsername();
+    }
+    @GetMapping("/users/{username}/info")
+    public String showUserInfo(@PathVariable String username, Model model,
+                               @AuthenticationPrincipal UserDetails currentUser) {
+        User user = userService.findByUsername(username);
+        UserProfile userProfile = userProfileService.getUserProfile(user);
+
+        model.addAttribute("profileUser", user);
+        model.addAttribute("userProfile", userProfile);
+        model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
+
+        return "user/user-info";
     }
 }
