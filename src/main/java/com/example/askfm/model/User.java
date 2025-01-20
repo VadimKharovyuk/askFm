@@ -30,6 +30,10 @@ public class User {
     private String avatar;
     private String bio;
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserProfile profile;
+
     @OneToMany(mappedBy = "author")
     private List<Question> askedQuestions = new ArrayList<>();
 

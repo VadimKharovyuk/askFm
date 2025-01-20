@@ -47,17 +47,17 @@ public class SubscriptionController {
         return "user/subscription-list";
     }
 
-//    @GetMapping("/users/{username}/followers")
-//    public String showFollowers(@PathVariable String username,
-//                                Model model,
-//                                @AuthenticationPrincipal UserDetails currentUser) {
-//        List<UserSearchDTO> followers = subscriptionService.getFollowers(
-//                username,
-//                currentUser != null ? currentUser.getUsername() : null
-//        );
-//        model.addAttribute("users", followers);
-//        model.addAttribute("username", username);
-//        model.addAttribute("listType", "Followers");
-//        return "user/subscription-list";
-//    }
+    @GetMapping("/users/{username}/followers")
+    public String showFollowers(@PathVariable String username,
+                                Model model,
+                                @AuthenticationPrincipal UserDetails currentUser) {
+        List<UserSearchDTO> followers = subscriptionService.getFollowers(
+                username,
+                currentUser != null ? currentUser.getUsername() : null
+        );
+        model.addAttribute("users", followers);
+        model.addAttribute("username", username);
+        model.addAttribute("listType", "Followers");
+        return "user/subscription-list";
+    }
 }
