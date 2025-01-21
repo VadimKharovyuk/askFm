@@ -175,6 +175,21 @@
     .text-muted {
       color: var(--text-gray) !important;
     }
+
+    #save-avatar {
+      background-color: var(--blue-accent);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 4px 12px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    #save-avatar:hover {
+      background-color: var(--blue-hover);
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -209,7 +224,48 @@
   <div class="profile-header">
     <div class="cover-photo">
       <img src="/api/placeholder/600/200" alt="Cover" class="w-100 h-100" style="object-fit: cover;">
-      <img src="/api/placeholder/134/134" alt="Profile" class="profile-avatar">
+
+      <!-- Отображение аватара -->
+      <img th:if="${avatarBase64 != null}"
+           th:src="@{'data:image/jpeg;base64,' + ${avatarBase64}}"
+           class="profile-avatar"
+           th:alt="${profileUser.username + ' avatar'}"
+           id="preview-avatar">
+
+      <!-- Placeholder для новых пользователей -->
+      <img th:unless="${avatarBase64 != null}"
+           src="/api/placeholder/134/134"
+           class="profile-avatar"
+           th:alt="${profileUser.username + ' avatar'}"
+           id="preview-avatar">
+
+      <!-- Форма для загрузки аватара -->
+      <form th:if="${currentUser != null && currentUser == profileUser.username}"
+            th:action="@{/profile/avatar}"
+            method="post"
+            enctype="multipart/form-data"
+            id="avatar-form"
+            style="position: absolute; bottom: -30px; left: 120px;">
+        <div style="position: relative;">
+          <label for="avatar-upload" class="btn btn-dark btn-sm rounded-circle"
+                 style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-camera"></i>
+          </label>
+          <input id="avatar-upload"
+                 type="file"
+                 name="avatar"
+                 accept="image/*"
+                 style="display: none;"
+                 onchange="handleFileSelect(this)">
+
+          <button type="submit"
+                  class="btn btn-primary btn-sm"
+                  id="save-avatar"
+                  style="display: none; position: absolute; left: 40px; top: 0;">
+            Сохранить
+          </button>
+        </div>
+      </form>
     </div>
 
     <div class="profile-info">
@@ -301,6 +357,37 @@
     </div>
   </div>
 </div>
+<script>
+  function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        // Обновляем превью изображения
+        document.getElementById('preview-avatar').src = e.target.result;
+        // Показываем кнопку сохранения
+        document.getElementById('save-avatar').style.display = 'block';
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+<script>
+  document.getElementById('avatar-upload').onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('preview-avatar').src = e.target.result;
+        // Показываем кнопку сохранения
+        document.getElementById('save-avatar').style.display = 'block';
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

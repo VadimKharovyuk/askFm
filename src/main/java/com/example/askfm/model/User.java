@@ -8,8 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,7 +26,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String avatar;
+
+    @Column(name = "avatar", columnDefinition = "bytea")
+    private byte[] avatar;
+
+    //    private String avatar;
     private String bio;
 
 

@@ -1,6 +1,5 @@
 package com.example.askfm.service;
 
-import com.example.askfm.dto.UserProfileDTO;
 import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.model.User;
@@ -24,6 +23,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionService subscriptionService ;
+    private final ImageService imageService;
 
 
     @Override
@@ -49,16 +49,12 @@ public class UserService implements UserDetailsService {
         User user = User.builder()
                 .username(registrationDTO.getUsername())
                 .email(registrationDTO.getEmail())
+//                .avatar(null)
                 .password(passwordEncoder.encode(registrationDTO.getPassword()))
-                .build();
+                .build();;
 
         return userRepository.save(user);
     }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
 
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
         if (query == null || query.trim().isEmpty()) {
@@ -69,7 +65,9 @@ public class UserService implements UserDetailsService {
                 .stream()
                 .map(user -> UserSearchDTO.builder()
                         .username(user.getUsername())
-                        .avatar(user.getAvatar())
+                        .avatar(user.getAvatar() != null ?
+                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+                                null)
                         .bio(user.getBio())
                         .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
                         .isFollowing(currentUsername != null &&
@@ -79,7 +77,20 @@ public class UserService implements UserDetailsService {
     }
 
     public User findByUsername(String username) {
-      return userRepository.findByUsername(username)
-               .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+    public User updateUser(User user) {
+        User existingUser = findByUsername(user.getUsername());
+        existingUser.setAvatar(user.getAvatar());
+        existingUser.setBio(user.getBio());
+        return userRepository.save(existingUser);
+    }
+
+    // Специальный метод для обновления аватара
+    public User updateAvatar(String username, byte[] avatar) {
+        User user = findByUsername(username);
+        user.setAvatar(avatar);
+        return userRepository.save(user);
     }
 }

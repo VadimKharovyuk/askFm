@@ -112,7 +112,7 @@ public class SubscriptionService {
                 .stream()
                 .map(subscription -> UserSearchDTO.builder()
                         .username(subscription.getSubscribedTo().getUsername())
-                        .avatar(subscription.getSubscribedTo().getAvatar())
+//                        .avatar(subscription.getSubscribedTo().getAvatar())
                         .bio(subscription.getSubscribedTo().getBio())
                         .followersCount(getSubscribersCount(subscription.getSubscribedTo().getUsername()))
                         .isFollowing(currentUsername != null &&
@@ -129,7 +129,7 @@ public class SubscriptionService {
                 .stream()
                 .map(subscription -> UserSearchDTO.builder()
                         .username(subscription.getSubscriber().getUsername())
-                        .avatar(subscription.getSubscriber().getAvatar())
+//                        .avatar(subscription.getSubscriber().getAvatar())
                         .bio(subscription.getSubscriber().getBio())
                         .followersCount(getSubscribersCount(subscription.getSubscriber().getUsername()))
                         .isFollowing(currentUsername != null &&
