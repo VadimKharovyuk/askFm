@@ -3,10 +3,7 @@ package com.example.askfm.controller;
 import com.example.askfm.dto.ProfileEditDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.model.UserProfile;
-import com.example.askfm.service.QuestionService;
-import com.example.askfm.service.SubscriptionService;
-import com.example.askfm.service.UserProfileService;
-import com.example.askfm.service.UserService;
+import com.example.askfm.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+
 @Controller
 @RequiredArgsConstructor
 public class UserProfileController {
@@ -27,6 +25,7 @@ public class UserProfileController {
     private final QuestionService questionService;
     private final SubscriptionService subscriptionService;
     private final UserProfileService userProfileService ;
+    private final ImageService imageService;
 
     @GetMapping("/users/{username}")
     public String showUserProfile(@PathVariable String username,
@@ -45,6 +44,7 @@ public class UserProfileController {
         model.addAttribute("followingCount", subscriptionService.getSubscriptionsCount(username));
         model.addAttribute("questions", questionService.getAnsweredQuestions(user));
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
+        model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
 
         return "user/profile-view";
     }
