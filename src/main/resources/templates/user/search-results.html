@@ -102,16 +102,23 @@
     <p class="text-gray">Try searching for different keywords</p>
   </div>
 
+
   <!-- Users List -->
   <div class="users-list" th:if="${!#lists.isEmpty(users)}">
     <div class="user-card" th:each="user : ${users}">
       <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
           <!-- User Avatar -->
-          <img th:if="${user.avatar}" th:src="${user.avatar}" class="user-avatar me-3"
-               th:alt="${user.username + ' avatar'}">
-          <img th:unless="${user.avatar}" src="/api/placeholder/60/60" class="user-avatar me-3"
-               alt="Default avatar">
+          <a th:href="@{/users/{username}(username=${user.username})}" class="me-3">
+            <img th:if="${user.avatar}"
+                 th:src="${user.avatar}"
+                 class="user-avatar"
+                 th:alt="${user.username + ' avatar'}">
+            <img th:unless="${user.avatar}"
+                 src="/api/placeholder/60/60"
+                 class="user-avatar"
+                 alt="Default avatar">
+          </a>
 
           <!-- User Info -->
           <div>
