@@ -49,7 +49,6 @@ public class UserService implements UserDetailsService {
         User user = User.builder()
                 .username(registrationDTO.getUsername())
                 .email(registrationDTO.getEmail())
-//                .avatar(null)
                 .password(passwordEncoder.encode(registrationDTO.getPassword()))
                 .build();;
 

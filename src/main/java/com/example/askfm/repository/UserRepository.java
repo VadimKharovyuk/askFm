@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<User> searchByUsername(String query);
+
+    @Query("SELECT COUNT(u) FROM User u")
+    long countAllUsers();
 }

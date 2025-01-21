@@ -28,18 +28,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/register", "/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/",
+                                "/register", "/login",
+                                "/logout-page",  // добавьте доступ к странице
+                                "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout((logout) -> logout
-                        .permitAll()
-                );
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/logout-page")  // перенаправление на вашу страницу
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
 
         return http.build();
     }

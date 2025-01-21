@@ -43,8 +43,8 @@ public class AuthController {
         return "aut/login";
     }
 
-    @GetMapping("/logout")
-    public String logout(Model model) {
+    @GetMapping("/logout-page")
+    public String logoutPage(Model model) {
         return "aut/logout";
     }
 }
