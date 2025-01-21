@@ -27,6 +27,7 @@ public class UserProfileController {
     private final UserProfileService userProfileService ;
     private final ImageService imageService;
 
+
     @GetMapping("/users/{username}")
     public String showUserProfile(@PathVariable String username,
                                   @AuthenticationPrincipal UserDetails currentUser,
@@ -45,6 +46,7 @@ public class UserProfileController {
         model.addAttribute("questions", questionService.getAnsweredQuestions(user));
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
+        model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
 
         return "user/profile-view";
     }

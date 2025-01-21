@@ -30,7 +30,11 @@ public class User {
     @Column(name = "avatar", columnDefinition = "bytea")
     private byte[] avatar;
 
-    //    private String avatar;
+
+    @Column(name = "cover", columnDefinition = "bytea")
+    private byte[] cover;
+
+
     private String bio;
 
 

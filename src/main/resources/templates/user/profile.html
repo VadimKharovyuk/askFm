@@ -223,7 +223,41 @@
   <!-- Profile Header -->
   <div class="profile-header">
     <div class="cover-photo">
-      <img src="/api/placeholder/600/200" alt="Cover" class="w-100 h-100" style="object-fit: cover;">
+      <!-- Отображение обложки -->
+      <img th:if="${coverBase64 != null}"
+           th:src="@{'data:image/jpeg;base64,' + ${coverBase64}}"
+           class="w-100 h-100"
+           style="object-fit: cover;"
+           alt="Cover"
+           id="preview-cover">
+
+      <!-- Placeholder для обложки -->
+      <img th:unless="${coverBase64 != null}"
+           src="/api/placeholder/600/200"
+           class="w-100 h-100"
+           style="object-fit: cover;"
+           alt="Cover"
+           id="preview-cover">
+
+      <!-- Форма для загрузки обложки -->
+      <form th:if="${currentUser != null && currentUser == profileUser.username}"
+            th:action="@{/profile/cover}"
+            method="post"
+            enctype="multipart/form-data"
+            id="cover-form"
+            style="position: absolute; top: 10px; right: 10px;">
+        <div style="position: relative;">
+          <label for="cover-upload" class="btn btn-dark btn-sm">
+            <i class="fas fa-camera"></i> Изменить обложку
+          </label>
+          <input id="cover-upload"
+                 type="file"
+                 name="cover"
+                 accept="image/*"
+                 style="display: none;"
+                 onchange="handleCoverSelect(this)">
+        </div>
+      </form>
 
       <!-- Отображение аватара -->
       <img th:if="${avatarBase64 != null}"
@@ -386,7 +420,20 @@
       reader.readAsDataURL(file);
     }
   }
+  function handleCoverSelect(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        document.getElementById('preview-cover').src = e.target.result;
+        input.form.submit(); // Автоматически отправляем форму
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

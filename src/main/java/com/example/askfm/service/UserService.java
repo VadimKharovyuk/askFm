@@ -80,11 +80,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
-    public User updateUser(User user) {
-        User existingUser = findByUsername(user.getUsername());
-        existingUser.setAvatar(user.getAvatar());
-        existingUser.setBio(user.getBio());
-        return userRepository.save(existingUser);
+    public User updateCover(String username, byte[] cover) {
+        User user = findByUsername(username);
+        user.setCover(cover);
+        return userRepository.save(user);
     }
 
     // Специальный метод для обновления аватара

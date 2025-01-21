@@ -25,13 +25,13 @@ public class ProfileController {
     private final ImageService imageService;
 
 
-
     @GetMapping("/home")
     public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
         model.addAttribute("username", userDetails.getUsername());
         model.addAttribute("profileUser", user);
         model.addAttribute("currentUser", userDetails.getUsername());
+        model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
         return "user/profile";
     }
@@ -55,6 +55,29 @@ public class ProfileController {
         } catch (IOException e) {
             return "redirect:/home?error=true";
         }
+
+
     }
 
+    @PostMapping("/profile/cover")
+    public String updateCover(@RequestParam("cover") MultipartFile file,
+                              @AuthenticationPrincipal UserDetails currentUser) {
+        try {
+            if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+                throw new IllegalArgumentException("Разрешены только изображения");
+            }
+
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Размер файла должен быть меньше 5MB");
+            }
+
+            byte[] resizedImage = imageService.resizeImage(file.getBytes(), 600);
+            userService.updateCover(currentUser.getUsername(), resizedImage);
+
+            return "redirect:/home";
+        } catch (IOException e) {
+            return "redirect:/home?error=true";
+        }
+
+    }
 }

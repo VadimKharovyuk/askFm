@@ -166,23 +166,6 @@
   </div>
 
   <form id="profile-form" th:action="@{/profile/edit}" th:object="${profileDTO}" method="post">
-    <!-- Cover Photo -->
-    <div class="cover-section">
-      <img src="/api/placeholder/600/200" alt="Cover" class="cover-photo">
-      <label for="cover-upload" class="photo-upload-btn cover-upload-btn">
-        <i class="fas fa-camera"></i>
-      </label>
-      <input type="file" id="cover-upload" hidden accept="image/*">
-    </div>
-
-    <!-- Avatar -->
-    <div class="avatar-section">
-      <img src="/api/placeholder/134/134" alt="Avatar" class="avatar-photo">
-      <label for="avatar-upload" class="photo-upload-btn avatar-upload-btn">
-        <i class="fas fa-camera"></i>
-      </label>
-      <input type="file" id="avatar-upload" hidden accept="image/*">
-    </div>
 
     <!-- Form Fields -->
     <div class="form-section">
