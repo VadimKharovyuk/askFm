@@ -190,9 +190,56 @@
       background-color: var(--blue-hover);
       transform: scale(1.05);
     }
+    .page-container {
+      display: grid;
+      grid-template-columns: 275px 1fr;
+      min-height: 100vh;
+    }
+
+    .left-sidebar {
+      position: fixed;
+      width: 275px;
+      height: 100vh;
+      padding: 1rem;
+      border-right: 1px solid var(--border-color);
+      background-color: var(--background-dark);
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      color: var(--text-white);
+      text-decoration: none;
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 0.5rem;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-white);
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 9999px;
+      transition: background-color 0.2s;
+    }
+
+    .side-link:hover {
+      background-color: rgba(239, 243, 244, 0.1);
+      color: var(--text-white);
+    }
   </style>
 </head>
 <body>
+
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg position-sticky top-0">
   <div class="container">
@@ -217,9 +264,42 @@
     </div>
   </div>
 </nav>
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
 
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+    </a>
+    <a href="/bookmarks" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+  </nav>
+</aside>
 <!-- Main Content -->
 <div class="main-container">
+
   <!-- Profile Header -->
   <div class="profile-header">
     <div class="cover-photo">

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Чат</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-4 flex justify-between items-center">
+    <a href="/messages" class="text-blue-600 hover:underline">← Назад к чатам</a>
+    <h2 class="text-xl font-bold" th:text="'Чат с ' + ${recipientName}"></h2>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <div id="messageContainer" class="space-y-4 mb-6 max-h-[600px] overflow-y-auto">
+      <div th:each="message : ${messageHistory}"
+           th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">
+        <div th:class="${message.senderId == userId ?
+                       'bg-blue-500 text-white' : 'bg-gray-200'} +
+                       ' rounded-lg p-3 max-w-[70%] break-words'">
+          <p th:text="${message.content}"></p>
+          <time class="text-xs block mt-1"
+                th:text="${#temporals.format(message.timestamp, 'HH:mm')}">
+          </time>
+        </div>
+      </div>
+    </div>
+
+    <form id="messageForm" class="flex gap-3 mt-4">
+      <input type="hidden" id="recipientId" th:value="${recipientId}">
+      <input type="text" id="content"
+             class="flex-1 border rounded-lg px-4 py-2"
+             placeholder="Введите сообщение...">
+      <button type="submit"
+              class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+        Отправить
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script th:inline="javascript">
+  const userId = [[${userId}]];
+  const recipientId = [[${recipientId}]];
+  let stompClient = null;
+
+  function connect() {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, frame => {
+      console.log('Connected: ' + frame);
+      stompClient.subscribe('/user/' + userId + '/queue/messages', message => {
+        addMessage(JSON.parse(message.body));
+      });
+    });
+  }
+
+  function sendMessage(event) {
+    event.preventDefault();
+    const contentInput = document.getElementById('content');
+    const message = {
+      senderId: userId,
+      recipientId: recipientId,
+      content: contentInput.value,
+      timestamp: new Date()
+    };
+
+    stompClient.send("/app/send", {}, JSON.stringify(message));
+    addMessage(message);
+    contentInput.value = '';
+  }
+
+  function addMessage(message) {
+    const container = document.getElementById('messageContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = message.senderId === userId ?
+            'flex justify-end' : 'flex justify-start';
+
+    const innerDiv = document.createElement('div');
+    innerDiv.className = `${message.senderId === userId ?
+            'bg-blue-500 text-white' : 'bg-gray-200'} rounded-lg p-3 max-w-[70%] break-words`;
+
+    const content = document.createElement('p');
+    content.textContent = message.content;
+
+    const time = document.createElement('time');
+    time.className = 'text-xs block mt-1';
+    time.textContent = new Date(message.timestamp).toLocaleTimeString([],
+            {hour: '2-digit', minute:'2-digit'});
+
+    innerDiv.appendChild(content);
+    innerDiv.appendChild(time);
+    messageDiv.appendChild(innerDiv);
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  document.getElementById('messageForm').addEventListener('submit', sendMessage);
+  connect();
+</script>
+</body>
+</html>

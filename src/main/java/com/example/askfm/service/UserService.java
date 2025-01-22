@@ -3,6 +3,7 @@ package com.example.askfm.service;
 import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.enums.UserRole;
+import com.example.askfm.exception.UserNotFoundException;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -148,5 +149,10 @@ public class UserService implements UserDetailsService {
     public double getEngagementRate() {
         // Можно рассчитать на основе активности пользователей
         return 73.0; // Заглушка, реализуйте свою логику
+    }
+
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 }
