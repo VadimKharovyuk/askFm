@@ -2,6 +2,7 @@ package com.example.askfm.service;
 
 import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.dto.UserSearchDTO;
+import com.example.askfm.enums.UserRole;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +51,8 @@ public class UserService implements UserDetailsService {
         User user = User.builder()
                 .username(registrationDTO.getUsername())
                 .email(registrationDTO.getEmail())
+                .role(UserRole.USER)
+                .createdAt(LocalDateTime.now())
                 .password(passwordEncoder.encode(registrationDTO.getPassword()))
                 .build();;
 
@@ -90,5 +94,59 @@ public class UserService implements UserDetailsService {
         User user = findByUsername(username);
         user.setAvatar(avatar);
         return userRepository.save(user);
+    }
+
+    // Метод для повышения прав пользователя до админа
+    public User promoteToAdmin(String username) {
+        User user = findByUsername(username);
+        user.setRole(UserRole.ADMIN);
+        return userRepository.save(user);
+    }
+
+    // Метод для понижения прав
+    public User demoteToUser(String username) {
+        User user = findByUsername(username);
+        user.setRole(UserRole.USER);
+        return userRepository.save(user);
+    }
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User updateUserRole(String username, UserRole newRole) {
+        User user = findByUsername(username);
+
+        // Проверка, чтобы последний админ не мог снять с себя права админа
+        if (user.getRole() == UserRole.ADMIN && newRole != UserRole.ADMIN) {
+            long adminCount = userRepository.countByRole(UserRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new IllegalStateException("Cannot remove the last administrator");
+            }
+        }
+
+        user.setRole(newRole);
+        return userRepository.save(user);
+    }
+
+    public List<User> searchUsers(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query);
+    }
+    public long getTotalUsersCount() {
+        return userRepository.count();
+    }
+
+
+
+    public double getNewRegistrationsGrowth() {
+        // Процент роста новых регистраций за последний месяц
+        LocalDateTime monthAgo = LocalDateTime.now().minusMonths(1);
+        long previousCount = userRepository.countByCreatedAtBefore(monthAgo);
+        long currentCount = userRepository.count();
+        return previousCount > 0 ? ((currentCount - previousCount) * 100.0) / previousCount : 0;
+    }
+
+    public double getEngagementRate() {
+        // Можно рассчитать на основе активности пользователей
+        return 73.0; // Заглушка, реализуйте свою логику
     }
 }

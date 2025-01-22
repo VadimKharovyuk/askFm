@@ -1,8 +1,10 @@
 package com.example.askfm.model;
 
+import com.example.askfm.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,13 @@ public class User {
     @Column(name = "cover", columnDefinition = "bytea")
     private byte[] cover;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
 
     private String bio;
 
