@@ -30,10 +30,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/admin/**")
+                        .permitAll()
                         .requestMatchers("/",
                                 "/register", "/login",
-                                "/logout-page",  // добавьте доступ к странице
+                                "/logout-page",
+                                "/news/**",
                                 "/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -46,7 +48,7 @@ public class SecurityConfig {
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/logout-page")  // перенаправление на вашу страницу
+                        .logoutSuccessUrl("/logout-page")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll());

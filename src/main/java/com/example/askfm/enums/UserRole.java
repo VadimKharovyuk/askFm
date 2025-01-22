@@ -1,5 +1,8 @@
 package com.example.askfm.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum UserRole {
     USER("User"),
     MODERATOR("Moderator"),
@@ -11,7 +14,4 @@ public enum UserRole {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
 }
