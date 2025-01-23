@@ -388,6 +388,32 @@
     .profile-meta .d-flex {
       line-height: 1.4;
     }
+    .suggestion-item {
+      padding: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .suggestion-item:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-follow {
+      background-color: var(--text-white);
+      color: var(--background-dark);
+      border: none;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .btn-follow:hover {
+      background-color: rgb(76, 165, 203);
+    }
+
+    .suggestion-item a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -606,26 +632,37 @@
       </div>
     </div>
 
+
     <!-- Who to Follow -->
     <div class="who-to-follow">
       <h3 class="section-title">Кого читать</h3>
-      <div class="suggestion-item d-flex align-items-center gap-3">
-        <img src="/api/placeholder/48/48" class="rounded-circle" alt="User avatar">
-        <div class="flex-grow-1">
-          <div class="fw-bold">John Doe</div>
-          <div class="text-gray">@johndoe</div>
+      <div th:each="user : ${suggestedUsers}" class="suggestion-item d-flex align-items-center gap-3">
+        <!-- Ссылка на профиль через фото и имя -->
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+          <a th:href="@{'/users/' + ${user.username}}" class="text-decoration-none d-flex gap-3 align-items-center">
+            <img th:if="${user.avatarBase64 != null}"
+                 th:src="@{'data:image/jpeg;base64,' + ${user.avatarBase64}}"
+                 class="rounded-circle"
+                 style="width: 48px; height: 48px;"
+                 th:alt="${user.username + ' avatar'}">
+            <img th:unless="${user.avatarBase64 != null}"
+                 src="/api/placeholder/48/48"
+                 class="rounded-circle"
+                 alt="Default avatar">
+            <div>
+              <div class="fw-bold text-white" th:text="${user.username}">Username</div>
+              <div class="text-gray" th:text="'@' + ${user.username}">@username</div>
+            </div>
+          </a>
         </div>
-        <button class="btn btn-follow">Читать</button>
-      </div>
-      <div class="suggestion-item d-flex align-items-center gap-3">
-        <img src="/api/placeholder/48/48" class="rounded-circle" alt="User avatar">
-        <div class="flex-grow-1">
-          <div class="fw-bold">Jane Smith</div>
-          <div class="text-gray">@janesmith</div>
-        </div>
-        <button class="btn btn-follow">Читать</button>
+        <!-- Кнопка подписки -->
+        <form th:action="@{'/users/' + ${user.username} + '/follow'}" method="post">
+          <button type="submit" class="btn btn-follow">Читать</button>
+        </form>
       </div>
     </div>
+
+
   </aside>
 </div>
 

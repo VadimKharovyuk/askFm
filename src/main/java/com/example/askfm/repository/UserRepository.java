@@ -31,4 +31,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByCreatedAtBefore(LocalDateTime date);
 
+    @Query("""
+        SELECT u FROM User u 
+        WHERE u.username != :currentUsername 
+        AND u.id NOT IN (
+            SELECT s.subscribedTo.id 
+            FROM Subscription s 
+            WHERE s.subscriber.username = :currentUsername
+        )
+        ORDER BY 
+            SIZE(u.subscribers) * 0.4 + 
+            SIZE(u.askedQuestions) * 0.3 + 
+            SIZE(u.receivedQuestions) * 0.3 DESC,
+            u.createdAt DESC
+        LIMIT :limit
+        """)
+    List<User> findSuggestedUsers(String currentUsername, int limit);
 }

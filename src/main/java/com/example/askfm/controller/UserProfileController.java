@@ -3,6 +3,7 @@ package com.example.askfm.controller;
 import com.example.askfm.dto.ProfileEditDTO;
 import com.example.askfm.dto.QuestionRequestDto;
 import com.example.askfm.dto.QuestionResponseDto;
+import com.example.askfm.dto.UserSuggestionDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.model.UserProfile;
 import com.example.askfm.service.*;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,6 +34,7 @@ public class UserProfileController {
     private final SubscriptionService subscriptionService;
     private final UserProfileService userProfileService;
     private final ImageService imageService;
+    private final SuggestedUsersService suggestedUsersService;
 
 
     @GetMapping("/users/{username}")
@@ -44,14 +47,17 @@ public class UserProfileController {
         String joinDate = user.getCreatedAt()
                 .format(DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("ru")));
 
-
         // Безопасное получение местоположения
         String location = null;
         if (user.getProfile() != null) {
             location = user.getProfile().getLocation();
         }
-        model.addAttribute("getLocation", location);
 
+        // Получение рекомендуемых пользователей
+        List<UserSuggestionDTO> suggestedUsers = Collections.emptyList();
+        if (currentUser != null) {
+            suggestedUsers = suggestedUsersService.getSuggestedUsers(currentUser.getUsername());
+        }
 
         // Получаем список вопросов для пользователя
         List<QuestionResponseDto> questions = questionService.getQuestionsForUser(user.getId());
@@ -65,6 +71,7 @@ public class UserProfileController {
             isFollowing = subscriptionService.isFollowing(currentUser.getUsername(), username);
         }
 
+        // Существующие атрибуты
         model.addAttribute("profileUser", user);
         model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("followersCount", subscriptionService.getSubscribersCount(username));
@@ -73,9 +80,12 @@ public class UserProfileController {
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
         model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
-        // Добавляем вопросы в модель
         model.addAttribute("questions", questions);
         model.addAttribute("joinDate", joinDate);
+        model.addAttribute("getLocation", location);
+
+        // Добавляем рекомендуемых пользователей
+        model.addAttribute("suggestedUsers", suggestedUsers);
 
         return "user/profile-view";
     }
