@@ -395,8 +395,6 @@
       <h4 class="mb-1" th:text="${username}">Username</h4>
       <div class="text-muted mb-3" th:text="'@' + ${username}">@username</div>
 
-      <p class="mb-3">Ваше био здесь...</p>
-
       <div class="d-flex mb-3">
         <a th:href="@{'/users/' + ${username} + '/following'}" class="stats-link">
           <span class="fw-bold">250</span> <span class="text-muted">подписок</span>
@@ -406,70 +404,9 @@
         </a>
       </div>
     </div>
-
-    <!-- Profile Navigation -->
-<!--    <ul class="nav nav-tabs">-->
-<!--      <li class="nav-item">-->
-<!--        <a class="nav-link active" href="#">Вопросы</a>-->
-<!--      </li>-->
-<!--      <li class="nav-item">-->
-<!--        <a class="nav-link" href="#">Ответы</a>-->
-<!--      </li>-->
-<!--      <li class="nav-item">-->
-<!--        <a class="nav-link" href="#">Понравилось</a>-->
-<!--      </li>-->
-<!--    </ul>-->
   </div>
 
-<!--  &lt;!&ndash; Questions Feed &ndash;&gt;-->
-<!--  <div class="questions-feed">-->
-<!--    <div class="question-card">-->
-<!--      <div class="d-flex justify-content-between align-items-center mb-2">-->
-<!--        <div>-->
-<!--          <span class="fw-bold">Аноним</span>-->
-<!--          <span class="text-muted ms-2">· 2 часа назад</span>-->
-<!--        </div>-->
-<!--        <div class="dropdown">-->
-<!--          <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">-->
-<!--            <i class="fas fa-ellipsis"></i>-->
-<!--          </button>-->
-<!--          <ul class="dropdown-menu dropdown-menu-end bg-dark">-->
-<!--            <li><a class="dropdown-item text-light" href="#">Удалить</a></li>-->
-<!--            <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>-->
-<!--          </ul>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <p>Какой ваш любимый язык программирования и почему?</p>-->
-<!--      <button class="btn btn-ask btn-sm">Ответить</button>-->
-<!--    </div>-->
 
-<!--    <div class="question-card">-->
-<!--      <div class="d-flex justify-content-between align-items-center mb-2">-->
-<!--        <div>-->
-<!--          <span class="fw-bold">@johndoe</span>-->
-<!--          <span class="text-muted ms-2">· 5 часов назад</span>-->
-<!--        </div>-->
-<!--        <div class="dropdown">-->
-<!--          <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">-->
-<!--            <i class="fas fa-ellipsis"></i>-->
-<!--          </button>-->
-<!--          <ul class="dropdown-menu dropdown-menu-end bg-dark">-->
-<!--            <li><a class="dropdown-item text-light" href="#">Удалить</a></li>-->
-<!--            <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>-->
-<!--          </ul>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <p>Как вы начали свой путь в разработке?</p>-->
-<!--      <div class="bg-black bg-opacity-25 rounded p-3 mt-2">-->
-<!--        <p class="mb-0">Начал с изучения Python как первого языка программирования...</p>-->
-<!--      </div>-->
-<!--      <div class="d-flex gap-3 mt-3">-->
-<!--        <button class="btn btn-link text-muted p-0"><i class="far fa-heart"></i> 24</button>-->
-<!--        <button class="btn btn-link text-muted p-0"><i class="far fa-comment"></i> Комментировать</button>-->
-<!--        <button class="btn btn-link text-muted p-0"><i class="fas fa-retweet"></i> Поделиться</button>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
 </div>
 <script>
   function handleFileSelect(input) {

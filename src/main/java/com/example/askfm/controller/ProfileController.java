@@ -28,6 +28,7 @@ public class ProfileController {
     @GetMapping("/home")
     public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
+
         model.addAttribute("username", userDetails.getUsername());
         model.addAttribute("profileUser", user);
         model.addAttribute("currentUser", userDetails.getUsername());

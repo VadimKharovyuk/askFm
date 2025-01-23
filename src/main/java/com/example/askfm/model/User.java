@@ -44,7 +44,6 @@ public class User {
     @Column(name = "role")
     private UserRole role;
 
-    private String bio;
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

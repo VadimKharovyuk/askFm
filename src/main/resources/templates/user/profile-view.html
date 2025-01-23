@@ -96,25 +96,6 @@
       overflow-y: auto;
     }
 
-    /* Search Box */
-    .search-box {
-      background-color: var(--secondary-bg);
-      border-radius: 9999px;
-      padding: 12px 20px;
-      margin-bottom: 20px;
-    }
-
-    .search-input {
-      background: transparent;
-      border: none;
-      color: var(--text-white);
-      width: 100%;
-    }
-
-    .search-input:focus {
-      outline: none;
-    }
-
     /* Trending Section */
     .trending-section, .who-to-follow {
       background-color: var(--secondary-bg);
@@ -140,7 +121,7 @@
       background-color: rgba(255, 255, 255, 0.03);
     }
 
-    /* Добавьте эти стили вместо строки [Существующие стили профиля остаются без изменений...] */
+    /* Profile Styles */
     .top-nav {
       position: sticky;
       top: 0;
@@ -223,6 +204,7 @@
       color: var(--text-white);
     }
 
+    /* Navigation */
     .nav-tabs {
       border-bottom: 1px solid var(--border-color);
     }
@@ -248,6 +230,7 @@
       border-bottom: 4px solid var(--blue-accent);
     }
 
+    /* Question Form */
     .ask-question-form {
       padding: 15px;
       border-bottom: 1px solid var(--border-color);
@@ -267,16 +250,6 @@
     .question-textarea:focus {
       border-color: var(--blue-accent);
       outline: none;
-    }
-
-    .question-card {
-      padding: 15px;
-      border-bottom: 1px solid var(--border-color);
-      transition: background-color 0.2s;
-    }
-
-    .question-card:hover {
-      background-color: rgba(255, 255, 255, 0.03);
     }
 
     .ask-options {
@@ -299,31 +272,7 @@
       background-color: var(--blue-hover);
     }
 
-    .dropdown-menu {
-      background-color: var(--secondary-bg);
-      border: 1px solid var(--border-color);
-    }
-
-    .dropdown-item {
-      color: var(--text-white);
-    }
-
-    .dropdown-item:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--text-white);
-    }
-
-    /* Fix for buttons */
-    .btn-link {
-      text-decoration: none;
-    }
-
-    .btn-link:hover {
-      text-decoration: none;
-      color: var(--blue-accent);
-    }
-
-    /* Fix for form controls */
+    /* Form Controls */
     .form-check-input {
       background-color: transparent;
       border-color: var(--border-color);
@@ -367,6 +316,77 @@
       .left-sidebar {
         display: none;
       }
+    }
+    /* Search Box Styles */
+    .search-box {
+      position: relative;
+      background-color: var(--secondary-bg);
+      border-radius: 9999px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      background-color: var(--background-dark);
+      border: 1px solid var(--blue-accent);
+    }
+
+    .search-box i {
+      color: var(--text-gray);
+      font-size: 16px;
+    }
+
+    .search-input {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      width: 100%;
+      font-size: 15px;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-gray);
+    }
+
+    .search-input:focus {
+      outline: none;
+    }
+
+    .search-input::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    /* Hover Effects */
+    .search-box:hover {
+      background-color: var(--secondary-bg);
+      border: 1px solid var(--border-color);
+    }
+    .profile-meta {
+      font-size: 15px;
+    }
+
+    .profile-meta i {
+      font-size: 16px;
+      color: var(--text-gray);
+      width: 20px;
+      text-align: center;
+    }
+
+    .profile-meta .text-gray {
+      color: var(--text-gray);
+    }
+
+    .profile-meta .fa-location-dot {
+      color: var(--text-gray);
+    }
+
+    .profile-meta .d-flex {
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -480,8 +500,19 @@
       <p class="text-gray" th:text="'@' + ${profileUser.username}">@username</p>
 
 
-      <p th:if="${profileUser.bio}" th:text="${profileUser.bio}" class="mb-3">Bio</p>
-
+      <div class="profile-meta mb-3">
+        <div class="d-flex flex-column gap-2">
+        <span class="d-flex align-items-center text-gray"
+              th:if="${getLocation != null && !getLocation.isEmpty()}">
+            <i class="fas fa-location-dot me-2"></i>
+            <span th:text="${getLocation}">Местоположение</span>
+        </span>
+          <span class="d-flex align-items-center text-gray">
+            <i class="far fa-calendar me-2"></i>
+            <span th:text="'Регистрация: ' + ${joinDate}">Дата регистрации</span>
+        </span>
+        </div>
+      </div>
       <div class="profile-stats">
         <a th:href="@{'/users/' + ${profileUser.username} + '/following'}" class="stat-link">
           <span class="fw-bold" th:text="${followingCount}">0</span>
@@ -550,55 +581,6 @@
       </form>
     </div>
 
-<!--    &lt;!&ndash; Лента вопросов &ndash;&gt;-->
-<!--    <div class="questions-feed">-->
-<!--      <div th:each="question : ${questions}" class="question-card">-->
-<!--        <div class="d-flex justify-content-between mb-2">-->
-<!--          <div>-->
-<!--        <span class="fw-bold" th:text="${question.anonymous ? 'Аноним' : question.author.username}">-->
-<!--            Username-->
-<!--        </span>-->
-<!--            <span class="text-gray ms-2"-->
-<!--                  th:text="${#temporals.format(question.createdAt, 'dd MMM yyyy')}">-->
-<!--            Date-->
-<!--        </span>-->
-<!--          </div>-->
-<!--          <div class="dropdown" th:if="${currentUser == profileUser.username}">-->
-<!--            <button class="btn btn-link text-gray" type="button" data-bs-toggle="dropdown">-->
-<!--              <i class="fas fa-ellipsis"></i>-->
-<!--            </button>-->
-<!--            <ul class="dropdown-menu dropdown-menu-end bg-dark">-->
-<!--              <li>-->
-<!--                <form th:action="@{/questions/delete/{id}(id=${question.id})}" method="post">-->
-<!--                  <button type="submit" class="dropdown-item text-light">Удалить</button>-->
-<!--                </form>-->
-<!--              </li>-->
-<!--              <li><a class="dropdown-item text-light" href="#">Пожаловаться</a></li>-->
-<!--            </ul>-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        <p th:text="${question.content}">Question content</p>-->
-
-<!--        <div th:if="${question.answer != null}" class="mt-3 p-3"-->
-<!--             style="background-color: rgba(255, 255, 255, 0.05); border-radius: 16px;">-->
-<!--          <p class="mb-0" th:text="${question.answer.content}">Answer content</p>-->
-<!--        </div>-->
-
-<!--        <div class="d-flex gap-3 mt-3">-->
-<!--          <button class="btn btn-link text-gray p-0">-->
-<!--            <i class="far fa-heart"></i>-->
-<!--            <span th:text="${question.likes != null ? question.likes : '0'}">0</span>-->
-<!--          </button>-->
-<!--          <button class="btn btn-link text-gray p-0">-->
-<!--            <i class="far fa-comment"></i>-->
-<!--          </button>-->
-<!--          <button class="btn btn-link text-gray p-0">-->
-<!--            <i class="fas fa-retweet"></i>-->
-<!--          </button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
   </main>
 
   <!-- Right Sidebar -->

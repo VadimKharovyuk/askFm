@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 
 @Controller
@@ -38,6 +40,18 @@ public class UserProfileController {
                                   Model model) {
         User user = userService.findByUsername(username);
         User recipient = userService.findByUsername(username);
+
+        String joinDate = user.getCreatedAt()
+                .format(DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("ru")));
+
+
+        // Безопасное получение местоположения
+        String location = null;
+        if (user.getProfile() != null) {
+            location = user.getProfile().getLocation();
+        }
+        model.addAttribute("getLocation", location);
+
 
         // Получаем список вопросов для пользователя
         List<QuestionResponseDto> questions = questionService.getQuestionsForUser(user.getId());
@@ -61,6 +75,7 @@ public class UserProfileController {
         model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
         // Добавляем вопросы в модель
         model.addAttribute("questions", questions);
+        model.addAttribute("joinDate", joinDate);
 
         return "user/profile-view";
     }

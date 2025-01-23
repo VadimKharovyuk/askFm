@@ -25,7 +25,7 @@ public class AdminNewsController {
     @GetMapping
     public String showNews(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User currentUser = userService.findByUsername(userDetails.getUsername());
-        if (currentUser.getRole() == UserRole.ADMIN) {
+        if (currentUser.getRole() == UserRole.USER) {
             return "redirect:/login";
         }
 

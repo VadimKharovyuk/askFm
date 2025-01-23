@@ -72,7 +72,6 @@ public class UserService implements UserDetailsService {
                         .avatar(user.getAvatar() != null ?
                                 "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
                                 null)
-                        .bio(user.getBio())
                         .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
                         .isFollowing(currentUsername != null &&
                                 subscriptionService.isFollowing(currentUsername, user.getUsername()))
