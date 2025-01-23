@@ -1,5 +1,6 @@
 package com.example.askfm.service;
 
+import com.example.askfm.config.CacheMonitor;
 import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.enums.UserRole;
@@ -7,6 +8,9 @@ import com.example.askfm.exception.UserNotFoundException;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,12 +25,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionService subscriptionService ;
     private final ImageService imageService;
+    private final CacheMonitor cacheMonitor;
 
 
     @Override
@@ -60,29 +66,76 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+
+    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+        List<UserSearchDTO> results;
         if (query == null || query.trim().isEmpty()) {
-            return Collections.emptyList();
+            results = Collections.emptyList();
+        } else {
+            results = userRepository.searchByUsername(query.trim())
+                    .stream()
+                    .map(user -> UserSearchDTO.builder()
+                            .username(user.getUsername())
+                            .avatar(user.getAvatar() != null ?
+                                    "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+                                    null)
+                            .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+                            .isFollowing(currentUsername != null &&
+                                    subscriptionService.isFollowing(currentUsername, user.getUsername()))
+                            .build())
+                    .collect(Collectors.toList());
         }
 
-        return userRepository.searchByUsername(query.trim())
-                .stream()
-                .map(user -> UserSearchDTO.builder()
-                        .username(user.getUsername())
-                        .avatar(user.getAvatar() != null ?
-                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
-                                null)
-                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
-                        .isFollowing(currentUsername != null &&
-                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
-                        .build())
-                .collect(Collectors.toList());
+        cacheMonitor.showCacheStats("userSearch");
+        return results;
     }
 
+//    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
+//    public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+//        if (query == null || query.trim().isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return userRepository.searchByUsername(query.trim())
+//                .stream()
+//                .map(user -> UserSearchDTO.builder()
+//                        .username(user.getUsername())
+//                        .avatar(user.getAvatar() != null ?
+//                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+//                                null)
+//                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+//                        .isFollowing(currentUsername != null &&
+//                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
+
+
+@Cacheable(value = "users", key = "#username", unless = "#result == null")
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
+
+    @CacheEvict(value = "users", key = "#username")
+    public void evictUserCache(String username) {
+        log.info("Evicting cache for user: {}", username);
+    }
+
+    @CacheEvict(value = "users", allEntries = true)
+    public void updateUsername(String oldUsername, String newUsername) {
+        if (userRepository.existsByUsername(newUsername)) {
+            throw new IllegalArgumentException("Username already exists: " + newUsername);
+        }
+        User user = userRepository.findByUsername(oldUsername)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + oldUsername));
+        user.setUsername(newUsername);
+        userRepository.save(user);
+        log.info("Username updated and cache cleared: {} -> {}", oldUsername, newUsername);
+    }
+
+
     public User updateCover(String username, byte[] cover) {
         User user = findByUsername(username);
         user.setCover(cover);

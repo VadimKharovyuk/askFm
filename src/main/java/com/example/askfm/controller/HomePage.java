@@ -24,6 +24,8 @@ public class HomePage {
     }
 
 
+
+
     @GetMapping("/users/search")
     public String searchUsers(@RequestParam String query,
                               Model model,
