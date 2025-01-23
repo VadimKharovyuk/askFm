@@ -23,12 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.setUserDestinationPrefix("/user");
     }
 
-//    @Override
-//    public void registerStompEndpoints(StompEndpointRegistry registry) {
-//        registry.addEndpoint("/ws")
-//                .setAllowedOriginPatterns("http://localhost:*")
-//                .withSockJS();
-//    }
+
 @Override
 public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")

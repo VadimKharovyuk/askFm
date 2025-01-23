@@ -8,7 +8,10 @@ import java.util.List;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    List<Question> findByRecipientOrderByCreatedAtDesc(User recipient);
-    List<Question> findByRecipientAndAnsweredOrderByCreatedAtDesc(User recipient, boolean answered);
+
+    List<Question> findByRecipientIdAndAnsweredTrue(Long recipientId);
+    List<Question> findByRecipientIdAndAnsweredFalse(Long recipientId);
+    List<Question> findByRecipientIdOrderByCreatedAtDesc(Long recipientId);
+    List<Question> findByRecipientId(Long recipientId);
 
 }

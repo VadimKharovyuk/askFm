@@ -1,6 +1,8 @@
 package com.example.askfm.controller;
 
 import com.example.askfm.dto.ProfileEditDTO;
+import com.example.askfm.dto.QuestionRequestDto;
+import com.example.askfm.dto.QuestionResponseDto;
 import com.example.askfm.model.User;
 import com.example.askfm.model.UserProfile;
 import com.example.askfm.service.*;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.List;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -24,7 +28,7 @@ public class UserProfileController {
     private final UserService userService;
     private final QuestionService questionService;
     private final SubscriptionService subscriptionService;
-    private final UserProfileService userProfileService ;
+    private final UserProfileService userProfileService;
     private final ImageService imageService;
 
 
@@ -33,6 +37,14 @@ public class UserProfileController {
                                   @AuthenticationPrincipal UserDetails currentUser,
                                   Model model) {
         User user = userService.findByUsername(username);
+        User recipient = userService.findByUsername(username);
+
+        // Получаем список вопросов для пользователя
+        List<QuestionResponseDto> questions = questionService.getQuestionsForUser(user.getId());
+
+        // Создаем DTO с уже установленным recipientId
+        QuestionRequestDto questionRequest = new QuestionRequestDto();
+        questionRequest.setRecipientId(recipient.getId());
 
         boolean isFollowing = false;
         if (currentUser != null) {
@@ -43,15 +55,15 @@ public class UserProfileController {
         model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("followersCount", subscriptionService.getSubscribersCount(username));
         model.addAttribute("followingCount", subscriptionService.getSubscriptionsCount(username));
-        model.addAttribute("questions", questionService.getAnsweredQuestions(user));
+        model.addAttribute("questionRequest", questionRequest);
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
         model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
+        // Добавляем вопросы в модель
+        model.addAttribute("questions", questions);
 
         return "user/profile-view";
     }
-
-
 
 
     @GetMapping("/profile/edit")
@@ -72,6 +84,7 @@ public class UserProfileController {
         userProfileService.updateProfile(currentUser.getUsername(), profileDTO);
         return "redirect:/users/" + currentUser.getUsername();
     }
+
     @GetMapping("/users/{username}/info")
     public String showUserInfo(@PathVariable String username, Model model,
                                @AuthenticationPrincipal UserDetails currentUser) {

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Answer Question</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="answer-form">
+  <div class="question-content">
+    <p th:text="${question.content}"></p>
+    <small th:text="${question.anonymous} ? 'Anonymous' : ${question.authorUsername}"></small>
+    <small th:text="${#temporals.format(question.createdAt, 'dd-MM-yyyy HH:mm')}"></small>
+  </div>
+
+  <form th:action="@{/questions/answer}" method="post" th:object="${answerRequest}">
+    <input type="hidden" th:field="*{questionId}" th:value="${question.id}">
+
+    <div class="form-group">
+      <textarea th:field="*{content}" placeholder="Your answer..." required></textarea>
+    </div>
+
+    <button type="submit" class="btn">Submit Answer</button>
+  </form>
+</div>
+</body>
+</html>

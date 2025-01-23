@@ -1,0 +1,30 @@
+<!-- templates/received-questions.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Received Questions</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="questions-list">
+  <h2>Questions for you</h2>
+
+  <div th:each="question : ${questions}" class="question-card">
+    <div class="question-content">
+      <p th:text="${question.content}"></p>
+      <small th:text="${question.anonymous} ? 'Anonymous' : ${question.authorUsername}"></small>
+      <small th:text="${#temporals.format(question.createdAt, 'dd-MM-yyyy HH:mm')}"></small>
+    </div>
+
+    <div th:if="${!question.answered}">
+      <a th:href="@{'/questions/answer/' + ${question.id}}" class="btn">Answer</a>
+    </div>
+
+    <div th:if="${question.answered}" class="answer-content">
+      <p th:text="${question.answer.content}"></p>
+      <small th:text="${#temporals.format(question.answer.createdAt, 'dd-MM-yyyy HH:mm')}"></small>
+    </div>
+  </div>
+</div>
+</body>
+</html>
