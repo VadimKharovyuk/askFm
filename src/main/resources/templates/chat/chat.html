@@ -3,31 +3,81 @@
 <head>
   <title>Чат</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <style>
+    .chat-container {
+      max-width: 800px;
+      height: 80vh;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
+    .message-container {
+      height: calc(80vh - 160px); /* Высота контейнера минус header и форма */
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .chat-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      height: 60px;
+    }
+
+    .chat-form {
+      padding: 1rem;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+      height: 80px;
+    }
+
+    /* Стилизация скроллбара */
+    .message-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .message-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .message-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+
+    .message-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
-<div class="container mx-auto px-4 py-8">
-  <div class="mb-4 flex justify-between items-center">
+<div class="chat-container">
+  <!-- Шапка чата -->
+  <div class="chat-header flex justify-between items-center">
     <a href="/messages" class="text-blue-600 hover:underline">← Назад к чатам</a>
     <h2 class="text-xl font-bold" th:text="'Чат с ' + ${recipientName}"></h2>
+    <div class="w-20"></div> <!-- Для центрирования заголовка -->
   </div>
 
-  <div class="bg-white rounded-lg shadow-lg p-6">
-    <div id="messageContainer" class="space-y-4 mb-6 max-h-[600px] overflow-y-auto">
-      <div th:each="message : ${messageHistory}"
-           th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">
-        <div th:class="${message.senderId == userId ?
-                       'bg-blue-500 text-white' : 'bg-gray-200'} +
-                       ' rounded-lg p-3 max-w-[70%] break-words'">
-          <p th:text="${message.content}"></p>
-          <time class="text-xs block mt-1"
-                th:text="${#temporals.format(message.timestamp, 'HH:mm')}">
-          </time>
-        </div>
+  <!-- Контейнер сообщений -->
+  <div id="messageContainer" class="message-container space-y-4">
+    <div th:each="message : ${messageHistory}"
+         th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">
+      <div th:class="${message.senderId == userId ?
+                             'bg-blue-500 text-white' : 'bg-gray-200'} +
+                             ' rounded-lg p-3 max-w-[70%] break-words'">
+        <p th:text="${message.content}"></p>
+        <time class="text-xs block mt-1"
+              th:text="${#temporals.format(message.timestamp, 'HH:mm')}">
+        </time>
       </div>
     </div>
+  </div>
 
-    <form id="messageForm" class="flex gap-3 mt-4">
+  <!-- Форма отправки -->
+  <div class="chat-form">
+    <form id="messageForm" class="flex gap-3">
       <input type="hidden" id="recipientId" th:value="${recipientId}">
       <input type="text" id="content"
              class="flex-1 border rounded-lg px-4 py-2"
@@ -47,6 +97,27 @@
   const recipientId = [[${recipientId}]];
   let stompClient = null;
 
+  // Улучшенная функция прокрутки
+  function scrollToBottom(smooth = false) {
+    const container = document.getElementById('messageContainer');
+    const scrollOptions = smooth ? { behavior: 'smooth' } : { behavior: 'auto' };
+
+    // Принудительная прокрутка с таймаутом для гарантии
+    setTimeout(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        ...scrollOptions
+      });
+    }, 100);
+  }
+
+  // Прокрутка при загрузке страницы
+  document.addEventListener('DOMContentLoaded', () => {
+    scrollToBottom();
+    // Дополнительная прокрутка через секунду для надежности
+    setTimeout(scrollToBottom, 1000);
+  });
+
   function connect() {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
@@ -54,6 +125,7 @@
       console.log('Connected: ' + frame);
       stompClient.subscribe('/user/' + userId + '/queue/messages', message => {
         addMessage(JSON.parse(message.body));
+        scrollToBottom(true); // Плавная прокрутка для новых сообщений
       });
     });
   }
@@ -61,6 +133,8 @@
   function sendMessage(event) {
     event.preventDefault();
     const contentInput = document.getElementById('content');
+    if (!contentInput.value.trim()) return; // Не отправляем пустые сообщения
+
     const message = {
       senderId: userId,
       recipientId: recipientId,
@@ -71,6 +145,7 @@
     stompClient.send("/app/send", {}, JSON.stringify(message));
     addMessage(message);
     contentInput.value = '';
+    scrollToBottom(true); // Плавная прокрутка после отправки
   }
 
   function addMessage(message) {
@@ -95,8 +170,12 @@
     innerDiv.appendChild(time);
     messageDiv.appendChild(innerDiv);
     container.appendChild(messageDiv);
-    container.scrollTop = container.scrollHeight;
   }
+
+  // Фокус на поле ввода при загрузке
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('content').focus();
+  });
 
   document.getElementById('messageForm').addEventListener('submit', sendMessage);
   connect();
