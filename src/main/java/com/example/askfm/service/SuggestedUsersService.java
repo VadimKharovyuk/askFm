@@ -4,6 +4,8 @@ import com.example.askfm.dto.UserSuggestionDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,13 @@ public class SuggestedUsersService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    // Новый метод с пагинацией
+    public Page<UserSuggestionDTO> getPaginatedSuggestedUsers(String currentUsername, Pageable pageable) {
+        Page<User> users = userRepository.findPaginatedSuggestedUsers(currentUsername, pageable);
+        return users.map(this::convertToDTO);
+    }
+
+
 
     private UserSuggestionDTO convertToDTO(User user) {
         return UserSuggestionDTO.builder()

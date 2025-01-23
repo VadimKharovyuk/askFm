@@ -414,6 +414,20 @@
     .suggestion-item a:hover {
       text-decoration: underline;
     }
+
+
+    .show-more-btn {
+      padding: 16px;
+      color: var(--blue-accent);
+      transition: background-color 0.2s;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .show-more-btn:hover {
+      background-color: rgba(239, 243, 244, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -660,6 +674,11 @@
           <button type="submit" class="btn btn-follow">Читать</button>
         </form>
       </div>
+      <a href="/users/suggestions" class="show-more-link">
+        <div class="show-more-btn">
+          Показать больше
+        </div>
+      </a>
     </div>
 
 
