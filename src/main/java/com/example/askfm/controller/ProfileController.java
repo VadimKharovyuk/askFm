@@ -1,9 +1,8 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.model.User;
-import com.example.askfm.service.ImageService;
-import com.example.askfm.service.QuestionService;
-import com.example.askfm.service.UserService;
+import com.example.askfm.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,17 +22,25 @@ import java.util.Objects;
 public class ProfileController {
     private final UserService userService;
     private final ImageService imageService;
+    private final PostService postService;
+
+
 
 
     @GetMapping("/home")
     public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
+        String username = userDetails.getUsername();
 
-        model.addAttribute("username", userDetails.getUsername());
+        model.addAttribute("postForm", new PostCreateDTO());
+
+        model.addAttribute("posts", postService.getUserPosts(username, username));
+        model.addAttribute("username", username);
         model.addAttribute("profileUser", user);
-        model.addAttribute("currentUser", userDetails.getUsername());
+        model.addAttribute("currentUser", username);
         model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
+
         return "user/profile";
     }
 

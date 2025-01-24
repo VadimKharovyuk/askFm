@@ -1,9 +1,6 @@
 package com.example.askfm.controller;
 
-import com.example.askfm.dto.ProfileEditDTO;
-import com.example.askfm.dto.QuestionRequestDto;
-import com.example.askfm.dto.QuestionResponseDto;
-import com.example.askfm.dto.UserSuggestionDTO;
+import com.example.askfm.dto.*;
 import com.example.askfm.model.User;
 import com.example.askfm.model.UserProfile;
 import com.example.askfm.service.*;
@@ -35,6 +32,7 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     private final ImageService imageService;
     private final SuggestedUsersService suggestedUsersService;
+    private final PostService postService;
 
 
     @GetMapping("/users/{username}")
@@ -43,6 +41,11 @@ public class UserProfileController {
                                   Model model) {
         User user = userService.findByUsername(username);
         User recipient = userService.findByUsername(username);
+
+
+        String currentUsername = currentUser != null ? currentUser.getUsername() : null;
+        List<PostDTO> userPosts = postService.getUserPosts(username, currentUsername);
+        model.addAttribute("posts", userPosts);
 
         String joinDate = user.getCreatedAt()
                 .format(DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("ru")));
@@ -70,6 +73,7 @@ public class UserProfileController {
         if (currentUser != null) {
             isFollowing = subscriptionService.isFollowing(currentUser.getUsername(), username);
         }
+
 
         // Существующие атрибуты
         model.addAttribute("profileUser", user);
