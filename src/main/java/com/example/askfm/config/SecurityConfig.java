@@ -43,7 +43,9 @@ public class SecurityConfig {
                                 "/register", "/login",
                                 "/logout-page",
                                 "/news/**",
-                                "/css/**", "/js/**").permitAll()
+                                "/support/**",
+                                "/css/**", "/js/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

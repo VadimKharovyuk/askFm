@@ -114,6 +114,7 @@ public class UserService implements UserDetailsService {
 
 @Cacheable(value = "users", key = "#username", unless = "#result == null")
     public User findByUsername(String username) {
+    cacheMonitor.showCacheStats("users");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }

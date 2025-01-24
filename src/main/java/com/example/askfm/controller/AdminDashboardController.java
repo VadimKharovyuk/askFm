@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.enums.UserRole;
 import com.example.askfm.model.User;
+import com.example.askfm.service.NewsService;
 import com.example.askfm.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

@@ -20,7 +20,7 @@ public class CacheConfig {
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .initialCapacity(100)
                 .maximumSize(1000)
-                .recordStats(); // Для мониторинга
+                .recordStats();
     }
 
     @Bean
@@ -30,7 +30,7 @@ public class CacheConfig {
                 "suggestions",     // Кеш для рекомендаций
                 "followers",       // Кеш для подписчиков
                 "userProfiles",     // Кеш для профилей
-                "userSearch" // добавляем кеш для поиска
+                "userSearch" //  кеш для поиска
 
         );
         cacheManager.setCaffeine(caffeine);

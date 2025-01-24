@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ticket Details</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #050505;
+      --secondary-bg: #16181c;
+      --text-white: #dce3e7;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+    }
+
+    .ticket-details {
+      background-color: var(--secondary-bg);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px;
+    }
+
+    .detail-section {
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="ticket-details">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-ticket-alt me-2"></i>Ticket #<span th:text="${ticket.id}"></span></h2>
+      <a th:href="@{/admin/support}" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left me-2"></i>Back
+      </a>
+    </div>
+
+    <div class="detail-section">
+      <h5><i class="fas fa-user me-2"></i>Client Information</h5>
+      <p>Name: <span th:text="${ticket.clientName}"></span></p>
+      <p>Email: <span th:text="${ticket.email}"></span></p>
+    </div>
+
+    <div class="detail-section">
+      <h5><i class="fas fa-info-circle me-2"></i>Ticket Information</h5>
+      <p>Subject: <span th:text="${ticket.subject}"></span></p>
+      <p>Description: <span th:text="${ticket.description}"></span></p>
+    </div>
+
+    <div class="detail-section">
+      <h5><i class="fas fa-tasks me-2"></i>Status Management</h5>
+      <form th:action="@{/admin/support/{id}/status(id=${ticket.id})}" method="post" class="d-flex gap-3">
+        <select name="status" class="form-select bg-dark text-white">
+          <option th:each="status : ${statuses}"
+                  th:value="${status}"
+                  th:text="${status.displayName}"
+                  th:selected="${status == ticket.status}">
+          </option>
+        </select>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save me-2"></i>Update Status
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
