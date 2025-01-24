@@ -1,6 +1,7 @@
 package com.example.askfm.controller;
 
 import com.example.askfm.dto.PostCreateDTO;
+import com.example.askfm.dto.PostDTO;
 import com.example.askfm.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,15 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/{postId}")
+    public String getPostDetails(@PathVariable Long postId,
+                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 Model model) {
+        String currentUsername = userDetails != null ? userDetails.getUsername() : null;
+        PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
+        model.addAttribute("post", post);
+        return "posts/post-details";
+    }
 
     @PostMapping("/{postId}/like")
     public String likePost(@PathVariable Long postId,
@@ -25,6 +35,7 @@ public class PostController {
         postService.likePost(postId, userDetails.getUsername());
         return "redirect:/posts";
     }
+
 
 
     @GetMapping

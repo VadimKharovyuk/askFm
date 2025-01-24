@@ -35,6 +35,7 @@ public class UserProfileController {
     private final PostService postService;
 
 
+
     @GetMapping("/users/{username}")
     public String showUserProfile(@PathVariable String username,
                                   @AuthenticationPrincipal UserDetails currentUser,

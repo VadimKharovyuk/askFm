@@ -111,4 +111,8 @@ public class PostService {
                 .map(post -> getPostDTO(post, currentUsername))
                 .collect(Collectors.toList());
     }
+
+    public Post getPost(Long postId) {
+       return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+    }
 }

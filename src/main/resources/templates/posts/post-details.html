@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Post Details</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #050505;
+      --secondary-bg: #16181c;
+      --text-white: #dce3e7;
+      --text-gray: #e7eaee;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+    }
+
+    .post-detail-container {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .action-hover:hover {
+      color: var(--blue-accent) !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="post-detail-container">
+  <!-- Header -->
+  <div class="p-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <h5 class="mb-0">Пост</h5>
+  </div>
+
+  <!-- Post Content -->
+  <div class="p-3">
+    <div class="d-flex gap-3">
+      <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"
+           class="rounded-circle"
+           style="width: 48px; height: 48px;"
+           alt="User avatar">
+
+      <div class="flex-grow-1">
+      <span class="fw-bold">
+    <a th:href="@{/users/{username}(username=${post.authorUsername})}"
+       style="text-decoration: none; color: inherit;"
+       th:text="${post.authorUsername}"></a>
+</span>
+
+        <small class="text-muted mb-2 d-block"
+               th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"
+               style="color: #e2e2e2 !important;"></small>
+
+        <p class="mb-3" th:text="${post.content}"></p>
+
+        <img th:if="${post.base64Media != null}"
+             th:src="'data:image/jpeg;base64,' + ${post.base64Media}"
+             class="img-fluid rounded mb-3">
+
+        <div class="border-top border-bottom py-3 my-3"
+             style="border-color: var(--border-color) !important;">
+          <div class="d-flex justify-content-between" style="max-width: 425px;">
+            <span class="text-muted" th:text="${post.views} + ' просмотров'"></span>
+            <span class="text-muted" th:text="${post.likesCount} + ' лайков'"></span>
+          </div>
+        </div>
+
+        <div class="post-actions d-flex justify-content-between" style="max-width: 425px;">
+          <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                  style="color: var(--blue-accent);">
+            <i class="far fa-comment"></i>
+            <span th:text="${post.commentsCount ?: 0}"></span>
+          </button>
+
+          <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                  style="color: var(--blue-accent);">
+            <i class="fas fa-retweet"></i>
+            <span th:text="${post.repostsCount ?: 0}"></span>
+          </button>
+
+          <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                    th:style="${post.isLikedByCurrentUser ? 'color: #f91880;' : 'color: var(--blue-accent);'}">
+              <i class="fas" th:classappend="${post.isLikedByCurrentUser ? 'fa-heart' : 'fa-heart-o'}"></i>
+              <span th:text="${post.likesCount}"></span>
+            </button>
+          </form>
+
+          <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                  style="color: var(--blue-accent);">
+            <i class="far fa-chart-bar"></i>
+            <span th:text="${post.views}"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section p-3 border-top" style="border-color: var(--border-color) !important;">
+    <h6 class="mb-3">Комментарии</h6>
+    <!-- Add comment form and comments list here -->
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
