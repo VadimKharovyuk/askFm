@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Search Posts by Tags</title>
+  <style>
+    .post {
+      border: 1px solid #ddd;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .post-image {
+      max-width: 100%;
+      margin: 10px 0;
+    }
+
+    .tag {
+      background: #f0f0f0;
+      padding: 3px 8px;
+      border-radius: 3px;
+      margin-right: 5px;
+    }
+
+    .tag a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    .post-stats {
+      margin-top: 10px;
+      color: #666;
+    }
+
+    .pagination {
+      margin: 20px 0;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pagination a {
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      text-decoration: none;
+      border-radius: 3px;
+    }
+    .post-image-container {
+      margin: 15px 0;
+      max-width: 100%;
+    }
+
+    .post-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+<div class="search-form">
+  <form th:action="@{/posts/search}" method="get">
+    <input type="text" name="tags" th:value="${tags}" placeholder="Enter tag name">
+    <button type="submit">Search</button>
+  </form>
+</div>
+
+<div th:if="${message}" th:text="${message}" class="message"></div>
+
+<!-- Показываем информацию о теге -->
+<div th:if="${tags != null}" class="tag-info">
+  <h2>Posts with tag: <span th:text="${tags}"></span></h2>
+  <p>Found posts: <span th:text="${posts.totalElements}"></span></p>
+</div>
+
+<!-- Список постов -->
+<div th:if="${posts != null && !posts.empty}" class="posts-list">
+  <div th:each="post : ${posts}" class="post">
+    <div class="post-header">
+      <img th:if="${post.authorAvatar}" th:src="${'data:image/jpeg;base64,' + post.authorAvatar}" class="avatar">
+      <h3 th:text="${post.authorUsername}"></h3>
+      <span th:text="${#temporals.format(post.publishedAt, 'dd-MM-yyyy HH:mm')}"></span>
+    </div>
+
+    <div class="post-content">
+      <p th:text="${post.content}"></p>
+      <div th:if="${post.base64Media != null}" class="post-image-container">
+        <img th:src="@{'data:image/jpeg;base64,' + ${post.base64Media}}"
+             class="post-image"
+             alt="Post image">
+      </div>
+    </div>
+
+    <div class="post-tags">
+      <span>Tags:</span>
+      <span th:each="tag : ${post.tags}" class="tag">
+                    <a th:href="@{/posts/search(tags=${tag})}" th:text="${tag}"></a>
+                </span>
+    </div>
+
+    <div class="post-stats">
+      <span th:text="${post.likesCount + ' likes'}"></span>
+      <span th:text="${post.commentsCount + ' comments'}"></span>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div th:if="${posts.totalPages > 0}" class="pagination">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/posts/search(tags=${tags},page=${currentPage-1})}"
+       class="prev">Previous</a>
+
+    <span th:text="${'Page ' + (currentPage + 1) + ' of ' + posts.totalPages}"></span>
+
+    <a th:if="${currentPage < posts.totalPages - 1}"
+       th:href="@{/posts/search(tags=${tags},page=${currentPage+1})}"
+       class="next">Next</a>
+  </div>
+</div>
+</body>
+</html>

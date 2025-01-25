@@ -7,6 +7,10 @@ import com.example.askfm.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -17,8 +21,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Controller
 @RequestMapping("/posts")
@@ -26,6 +32,52 @@ import java.util.stream.Collectors;
 public class PostController {
 
     private final PostService postService;
+    @GetMapping("/search")
+    public String searchPosts(@RequestParam(required = false) String tags,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "10") int size,
+                              Model model,
+                              @AuthenticationPrincipal UserDetails userDetails) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
+        String username = userDetails != null ? userDetails.getUsername() : null;
+
+        // Если теги не указаны, можно показать все посты или пустую страницу
+        Page<PostDTO> posts;
+        if (tags == null || tags.trim().isEmpty()) {
+            model.addAttribute("message", "Please enter tags to search");
+            posts = Page.empty(pageable);
+        } else {
+            posts = postService.findPostsByTags(tags, username, pageable);
+        }
+
+        model.addAttribute("posts", posts);
+        model.addAttribute("tags", tags);
+        model.addAttribute("currentPage", page);
+
+        return "posts/by-tag";
+    }
+
+//    @GetMapping("/search")
+//    public String searchPosts(@RequestParam(required = false) String tags,
+//                              @RequestParam(defaultValue = "0") int page,
+//                              @RequestParam(defaultValue = "10") int size,
+//                              Model model,
+//                              @AuthenticationPrincipal UserDetails userDetails) {
+//
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
+//        String username = userDetails != null ? userDetails.getUsername() : null;
+//
+//        Page<PostDTO> posts = postService.findPostsByTags(tags, username, pageable);
+//
+//        model.addAttribute("posts", posts);
+//        model.addAttribute("tags", tags);
+//        model.addAttribute("currentPage", page);
+//
+//        return "posts/by-tag";
+//    }
+
+
 
     @PostMapping("/{id}/delete")
     public String deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {

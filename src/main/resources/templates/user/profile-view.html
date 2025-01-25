@@ -450,6 +450,9 @@
             background-color: rgba(255, 255, 255, 0.03);
         }
 
+
+
+
     </style>
 </head>
 <body>
@@ -740,11 +743,29 @@
 
     <!-- Right Sidebar -->
     <aside class="right-sidebar">
+        <form th:action="@{/posts/search}" method="get" class="search-box">
+            <div class="input-group">
+                <input type="text"
+                       name="tags"
+                       th:value="${tags}"
+                       class="form-control search-input"
+                       placeholder="Search by tag..."
+                       maxlength="100">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-link text-primary">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+
+
         <!-- Search Box -->
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="search" class="search-input" placeholder="Поиск в AskFM">
-        </div>
+<!--        <div class="search-box">-->
+<!--            <i class="fas fa-search"></i>-->
+<!--            <input type="search" class="search-input" placeholder="Поиск в AskFM">-->
+<!--        </div>-->
 
         <!-- Trending Section -->
         <div class="trending-section">

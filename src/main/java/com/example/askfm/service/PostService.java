@@ -16,6 +16,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final PostViewRepository postViewRepository ;
+    private final PostViewRepository postViewRepository;
     private final TagRepository tagRepository;
     private final EntityManager entityManager;
 
@@ -69,7 +71,6 @@ public class PostService {
     }
 
 
-
     public PostDTO getPostDTO(Post post, String currentUsername) {
         return PostDTO.builder()
                 .id(post.getId())
@@ -79,6 +80,9 @@ public class PostService {
                 .base64Media(post.getMedia() != null ?
                         imageService.getBase64Avatar(post.getMedia()) : null)
                 .publishedAt(post.getPublishedAt())
+                .tags(new HashSet<>(post.getTags().stream()
+                        .map(Tag::getName)
+                        .collect(Collectors.toSet())))
                 .likesCount(post.getLikedBy().size())
                 .isLikedByCurrentUser(currentUsername != null &&
                         post.getLikedBy().stream()
@@ -140,16 +144,17 @@ public class PostService {
     public long getPostViews(Long postId) {
         return postViewRepository.countByPostId(postId);
     }
-public List<PostDTO> getUserPostsWiews(String username, String currentUsername) {
-    return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
-            .stream()
-            .map(post -> {
-                PostDTO dto = getPostDTO(post, currentUsername);
-                dto.setViews(getPostViews(post.getId()));
-                return dto;
-            })
-            .collect(Collectors.toList());
-}
+
+    public List<PostDTO> getUserPostsWiews(String username, String currentUsername) {
+        return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
+                .stream()
+                .map(post -> {
+                    PostDTO dto = getPostDTO(post, currentUsername);
+                    dto.setViews(getPostViews(post.getId()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
         return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
@@ -159,6 +164,18 @@ public List<PostDTO> getUserPostsWiews(String username, String currentUsername) 
     }
 
     public Post getPost(Long postId) {
-       return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+    }
+
+
+    public Page<PostDTO> findPostsByTags(String tags, String currentUsername, Pageable pageable) {
+        if (tags == null || tags.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Убираем скобки и обрабатываем тег
+        String cleanTag = tags.replace("[", "").replace("]", "").trim();
+        Page<Post> posts = postRepository.findByTagNameContaining(cleanTag, pageable);
+        return posts.map(post -> getPostDTO(post, currentUsername));
     }
 }
