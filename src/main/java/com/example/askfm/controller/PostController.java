@@ -31,7 +31,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostController {
 
+
     private final PostService postService;
+
     @GetMapping("/search")
     public String searchPosts(@RequestParam(required = false) String tags,
                               @RequestParam(defaultValue = "0") int page,
@@ -51,32 +53,13 @@ public class PostController {
             posts = postService.findPostsByTags(tags, username, pageable);
         }
 
+
         model.addAttribute("posts", posts);
         model.addAttribute("tags", tags);
         model.addAttribute("currentPage", page);
 
         return "posts/by-tag";
     }
-
-//    @GetMapping("/search")
-//    public String searchPosts(@RequestParam(required = false) String tags,
-//                              @RequestParam(defaultValue = "0") int page,
-//                              @RequestParam(defaultValue = "10") int size,
-//                              Model model,
-//                              @AuthenticationPrincipal UserDetails userDetails) {
-//
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
-//        String username = userDetails != null ? userDetails.getUsername() : null;
-//
-//        Page<PostDTO> posts = postService.findPostsByTags(tags, username, pageable);
-//
-//        model.addAttribute("posts", posts);
-//        model.addAttribute("tags", tags);
-//        model.addAttribute("currentPage", page);
-//
-//        return "posts/by-tag";
-//    }
-
 
 
     @PostMapping("/{id}/delete")
@@ -90,19 +73,18 @@ public class PostController {
     }
 
 
+    @PostMapping("/{postId}/like")
+    public String likePost(@PathVariable Long postId,
+                           @AuthenticationPrincipal UserDetails userDetails,
+                           HttpServletRequest request) {
+        postService.likePost(postId, userDetails.getUsername());
 
-@PostMapping("/{postId}/like")
-public String likePost(@PathVariable Long postId,
-                       @AuthenticationPrincipal UserDetails userDetails,
-                       HttpServletRequest request) {
-    postService.likePost(postId, userDetails.getUsername());
+        // Получаем URL предыдущей страницы из заголовка Referer
+        String referer = request.getHeader("Referer");
 
-    // Получаем URL предыдущей страницы из заголовка Referer
-    String referer = request.getHeader("Referer");
-
-    // Перенаправляем обратно на предыдущую страницу
-    return "redirect:" + (referer != null ? referer : "/posts");
-}
+        // Перенаправляем обратно на предыдущую страницу
+        return "redirect:" + (referer != null ? referer : "/posts");
+    }
 
     @GetMapping("/{postId}")
     public String getPostDetails(@PathVariable Long postId,
@@ -119,9 +101,6 @@ public String likePost(@PathVariable Long postId,
         model.addAttribute("post", post);
         return "posts/post-details";
     }
-
-
-
 
 
     @GetMapping
@@ -149,7 +128,6 @@ public String likePost(@PathVariable Long postId,
         postService.createPost(userDetails.getUsername(), postForm);
         return "redirect:/home";
     }
-
 
 
     @GetMapping("/{username}/posts")

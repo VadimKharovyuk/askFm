@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Search Posts by Tags</title>
+  <title th:text="${title}">Search Results</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -18,7 +18,6 @@
     body {
       background-color: var(--background-dark);
       color: var(--text-white);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     .page-wrapper {
@@ -29,133 +28,6 @@
       max-width: 1800px;
       margin: 0 auto;
     }
-
-    /* Left Sidebar */
-    .left-sidebar {
-      padding: 20px;
-      border-right: 1px solid var(--border-color);
-      height: 100vh;
-      position: sticky;
-      top: 0;
-    }
-
-    /* Main Content */
-    .main-content {
-      border-right: 1px solid var(--border-color);
-      padding: 20px;
-    }
-
-    /* Search Results Section */
-    .search-results {
-      background-color: var(--secondary-bg);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .search-results h2 {
-      color: var(--text-white);
-      font-size: 20px;
-      margin-bottom: 15px;
-    }
-
-    .search-results .results-count {
-      color: var(--text-gray);
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    /* Post Card */
-    .post {
-      background-color: var(--secondary-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-      transition: background-color 0.2s;
-    }
-
-    .post:hover {
-      background-color: rgba(255, 255, 255, 0.03);
-      cursor: pointer;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .post-author {
-      font-weight: bold;
-      color: var(--text-white);
-    }
-
-    .post-time {
-      color: var(--text-gray);
-      font-size: 14px;
-    }
-
-    .post-content {
-      color: var(--text-white);
-      margin-bottom: 12px;
-    }
-
-    .post-image {
-      width: 500px;
-      border-radius: 16px;
-      margin: 12px 0;
-    }
-
-    /* Tags */
-    .tag {
-      background-color: var(--blue-accent);
-      color: var(--text-white);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      margin-right: 8px;
-      text-decoration: none;
-      display: inline-block;
-      margin-bottom: 8px;
-    }
-
-    .tag:hover {
-      background-color: var(--blue-hover);
-      color: var(--text-white);
-    }
-
-    /* Search Box */
-    .search-box {
-      background-color: var(--secondary-bg);
-      border-radius: 30px;
-      padding: 12px 20px;
-      margin-bottom: 24px;
-    }
-
-    .search-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text-white);
-      font-size: 16px;
-      outline: none;
-      padding: 8px;
-    }
-
-    .search-input::placeholder {
-      color: var(--text-gray);
-    }
-
-    /* Right Sidebar */
     .right-sidebar {
       padding: 20px;
       height: 100vh;
@@ -176,54 +48,10 @@
       color: var(--text-white);
     }
 
-    .trending-item {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-gray);
+    .trending-group {
+      margin-bottom: 24px;
     }
 
-    .trending-item:last-child {
-      border-bottom: none;
-    }
-
-    /* Post Actions */
-    .post-actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .action-btn {
-      color: var(--text-gray);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .action-btn:hover {
-      color: var(--blue-accent);
-    }
-
-    /* Navigation */
-    .side-link {
-      color: var(--text-white);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 30px;
-      margin-bottom: 8px;
-      font-size: 20px;
-    }
-
-    .side-link:hover {
-      background-color: var(--secondary-bg);
-      color: var(--text-white);
-    }
     .trending-title {
       color: var(--text-white);
       text-decoration: none;
@@ -236,22 +64,198 @@
       color: var(--blue-accent);
     }
 
-    .trending-title::after {
-      content: '→';
+    .trending-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .trending-item:last-child {
+      border-bottom: none;
+    }
+
+    .trending-link {
+      color: var(--text-gray);
+      text-decoration: none;
+      display: block;
+    }
+
+    .trending-link:hover {
+      color: var(--blue-accent);
+    }
+
+    .trending-link small {
+      display: block;
+      color: var(--text-gray);
+      margin-top: 4px;
+    }
+
+    .main-content {
+      padding: 20px;
+    }
+
+    .header {
+      background-color: var(--secondary-bg);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    .post-card {
+      background-color: var(--secondary-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .post-card:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .post-author {
+      font-weight: bold;
+      color: var(--text-white);
+    }
+
+    .post-time {
+      color: var(--text-gray);
+      font-size: 14px;
+    }
+
+    .post-content {
+      margin: 12px 0;
+    }
+
+    .post-image {
+      max-width: 100%;
+      border-radius: 16px;
+      margin: 12px 0;
+    }
+
+    .post-stats {
+      display: flex;
+      gap: 20px;
+      color: var(--text-gray);
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-item:hover {
+      color: var(--blue-accent);
+    }
+
+    .tags-container {
+      margin: 12px 0;
+    }
+
+    .tag {
+      background-color: var(--blue-accent);
+      color: var(--text-white);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      margin-right: 8px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .tag:hover {
+      background-color: var(--blue-hover);
+      color: var(--text-white);
+      text-decoration: none;
+    }
+    .left-sidebar {
+      padding: 20px;
+      border-right: 1px solid var(--border-color);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    /* Стили для левой боковой панели */
+    .left-sidebar {
+      padding: 20px;
+      border-right: 1px solid var(--border-color);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      color: var(--text-white);
+      text-decoration: none;
+      margin-bottom: 32px;
+      padding: 12px;
+    }
+
+    .logo-link:hover {
+      color: var(--blue-accent);
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-white);
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 30px;
       font-size: 18px;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
+      transition: all 0.2s;
     }
 
-    .trending-title:hover::after {
-      opacity: 1;
-      transform: translateX(5px);
+    .side-link:hover {
+      background-color: var(--secondary-bg);
+      color: var(--blue-accent);
+      text-decoration: none;
     }
 
+    .side-link i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .side-link.active {
+      font-weight: bold;
+      color: var(--blue-accent);
+    }
   </style>
 </head>
 <body>
 <div class="page-wrapper">
+  <!-- Left Sidebar -->
   <!-- Left Sidebar -->
   <aside class="left-sidebar">
     <a href="/" class="logo-link">
@@ -289,63 +293,57 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <div class="search-box">
-      <form th:action="@{/posts/search}" method="get">
-        <input type="text"
-               name="tags"
-               th:value="${tags}"
-               class="search-input"
-               placeholder="Search by tags...">
-      </form>
+    <!-- Header -->
+    <div class="header">
+      <h1 th:text="${title}">Results</h1>
     </div>
 
-    <div th:each="post : ${posts}" class="post" th:onclick="'window.location.href=\'/posts/' + ${post.id} + '\''">
-      <div class="post-header">
-        <img th:if="${post.authorAvatar}"
-             th:src="@{'data:image/jpeg;base64,' + ${post.authorAvatar}}"
-             class="avatar"
-             th:alt="${post.authorUsername}">
-        <div class="post-meta">
-          <span class="post-author" th:text="${post.authorUsername}"></span>
-          <span class="post-time"
-                th:text="${#temporals.format(post.publishedAt, 'dd MMM, yyyy')}"></span>
+    <!-- Posts List -->
+    <div class="posts-container">
+      <div th:each="post : ${posts}" class="post-card">
+        <div class="post-header">
+          <img th:if="${post.authorAvatar}"
+               th:src="@{'data:image/jpeg;base64,' + ${post.authorAvatar}}"
+               class="avatar"
+               th:alt="${post.authorUsername}">
+          <div>
+            <div class="post-author" th:text="${post.authorUsername}"></div>
+            <div class="post-time"
+                 th:text="${#temporals.format(post.publishedAt, 'dd MMM, yyyy HH:mm')}"></div>
+          </div>
         </div>
-      </div>
 
-      <div class="post-content">
-        <p th:text="${post.content}"></p>
+        <div class="post-content" th:text="${post.content}"></div>
+
         <img th:if="${post.base64Media}"
              th:src="@{'data:image/jpeg;base64,' + ${post.base64Media}}"
              class="post-image">
+
         <div class="tags-container">
           <a th:each="tag : ${post.tags}"
-             th:href="@{/posts/search(tags=${tag})}"
+             th:href="@{/search/search(tags=${tag})}"
              class="tag"
              th:text="${'#' + tag}"></a>
         </div>
-      </div>
 
-      <div class="post-actions">
-        <a href="#" class="action-btn">
-          <i class="far fa-comment"></i>
-          <span th:text="${post.commentsCount}"></span>
-        </a>
-        <a href="#" class="action-btn">
-          <i class="far fa-heart"></i>
-          <span th:text="${post.likesCount}"></span>
-        </a>
-        <a href="#" class="action-btn">
-          <i class="far fa-bookmark"></i>
-        </a>
-        <a href="#" class="action-btn">
-          <i class="fas fa-share"></i>
-        </a>
+        <div class="post-stats">
+          <div class="stat-item">
+            <i class="far fa-heart"></i>
+            <span th:text="${post.likesCount}">0</span>
+          </div>
+          <div class="stat-item">
+            <i class="far fa-comment"></i>
+            <span th:text="${post.commentsCount}">0</span>
+          </div>
+          <div th:if="${post.views != null}" class="stat-item">
+            <i class="far fa-eye"></i>
+            <span th:text="${post.views}">0</span>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
-
-  <!-- Right Sidebar -->
   <aside class="right-sidebar">
     <div class="trending-section">
       <div class="trending-header">Популярные посты</div>
@@ -390,7 +388,6 @@
       </div>
     </div>
   </aside>
-
 </div>
 </body>
 </html>
