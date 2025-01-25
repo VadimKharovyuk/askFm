@@ -3,9 +3,11 @@ package com.example.askfm.service;
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.model.Post;
+import com.example.askfm.model.PostView;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.PostRepository;
 
+import com.example.askfm.repository.PostViewRepository;
 import com.example.askfm.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final PostViewRepository postViewRepository ;
 
 
 
@@ -47,9 +50,8 @@ public class PostService {
                 .content(postDTO.getContent())
                 .media(mediaBytes)
                 .publishedAt(LocalDateTime.now())
-                .views(0L)
-
                 .build();
+
 
         return postRepository.save(post);
     }
@@ -65,7 +67,6 @@ public class PostService {
                 .base64Media(post.getMedia() != null ?
                         imageService.getBase64Avatar(post.getMedia()) : null)
                 .publishedAt(post.getPublishedAt())
-                .views(post.getViews())
                 .likesCount(post.getLikedBy().size())
                 .isLikedByCurrentUser(currentUsername != null &&
                         post.getLikedBy().stream()
@@ -98,12 +99,38 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-    public void incrementViews(Long postId) {
+
+
+    @Transactional
+    public void incrementViews(Long postId, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found"));
-        post.setViews(post.getViews() + 1);
-        postRepository.save(post);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (postViewRepository.findByPostAndUser(post, user).isEmpty()) {
+            PostView view = PostView.builder()
+                    .post(post)
+                    .user(user)
+                    .viewedAt(LocalDateTime.now())
+                    .build();
+            postViewRepository.save(view);
+        }
     }
+
+    public long getPostViews(Long postId) {
+        return postViewRepository.countByPostId(postId);
+    }
+public List<PostDTO> getUserPostsWiews(String username, String currentUsername) {
+    return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
+            .stream()
+            .map(post -> {
+                PostDTO dto = getPostDTO(post, currentUsername);
+                dto.setViews(getPostViews(post.getId()));
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
 
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
         return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)

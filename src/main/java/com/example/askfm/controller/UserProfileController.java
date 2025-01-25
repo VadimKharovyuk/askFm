@@ -57,6 +57,23 @@ public class UserProfileController {
             location = user.getProfile().getLocation();
         }
 
+        // Безопасное получение местоположения
+        String bio = null;
+        if (user.getProfile() != null) {
+            bio = user.getProfile().getBio();
+        }
+
+        // Безопасное получение местоположения
+        String website = null;
+        if (user.getProfile() != null) {
+            website = user.getProfile().getWebsite();
+        }
+
+// Получаем количество просмотров для каждого поста
+        List<PostDTO> userPostsViews = postService.getUserPostsWiews(username, currentUsername);
+        model.addAttribute("posts", userPostsViews);
+
+
         // Получение рекомендуемых пользователей
         List<UserSuggestionDTO> suggestedUsers = Collections.emptyList();
         if (currentUser != null) {
@@ -88,6 +105,8 @@ public class UserProfileController {
         model.addAttribute("questions", questions);
         model.addAttribute("joinDate", joinDate);
         model.addAttribute("getLocation", location);
+        model.addAttribute("bio", bio);
+        model.addAttribute("website", website);
 
         // Добавляем рекомендуемых пользователей
         model.addAttribute("suggestedUsers", suggestedUsers);

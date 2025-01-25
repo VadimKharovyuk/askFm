@@ -25,6 +25,9 @@ public class Post {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @OneToMany(mappedBy = "post")
+    private Set<PostView> views = new HashSet<>();
+
     @Column(nullable = false,length = 1000)
     private String content;
 
@@ -34,8 +37,7 @@ public class Post {
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
 
-    @Column(name = "views", nullable = false)
-    private Long views = 0L;
+
 
     @ManyToMany
     @JoinTable(
@@ -46,13 +48,4 @@ public class Post {
     private Set<User> likedBy = new HashSet<>();
 
 
-
-
-//    @ManyToMany
-//    @JoinTable(
-//            name = "post_tags",
-//            joinColumns = @JoinColumn(name = "post_id"),
-//            inverseJoinColumns = @JoinColumn(name = "tag_id")
-//    )
-//    private Set<Tag> tags = new HashSet<>();
 }

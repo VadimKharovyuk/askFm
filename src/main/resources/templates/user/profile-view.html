@@ -441,11 +441,11 @@
         }
 
 
-
         .post {
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         .post:hover {
             background-color: rgba(255, 255, 255, 0.03);
         }
@@ -556,33 +556,53 @@
             </th:block>
         </div>
 
-        <!-- Profile Info -->
+
+
+
+
         <div class="profile-info">
             <h4 th:text="${profileUser.username}">Username</h4>
             <p class="text-gray" th:text="'@' + ${profileUser.username}">@username</p>
 
-
             <div class="profile-meta mb-3">
                 <div class="d-flex flex-column gap-2">
-        <span class="d-flex align-items-center text-gray"
-              th:if="${getLocation != null && !getLocation.isEmpty()}">
-            <i class="fas fa-location-dot me-2"></i>
-            <span th:text="${getLocation}">Местоположение</span>
-        </span>
+           <span class="d-flex align-items-center text-gray"
+                 th:if="${bio != null && !bio.isEmpty()}">
+               <i class="fas fa-info me-2"></i>
+               <span th:text="${bio}">bio</span>
+           </span>
+
+                    <span class="d-flex align-items-center text-gray"
+                          th:if="${website != null && !website.isEmpty()}">
+               <i class="fas fa-link me-2"></i>
+               <a th:href="${website}" target="_blank"
+                  class="text-decoration-none text-primary"
+                  th:text="${website}">website</a>
+           </span>
+
+                    <span class="d-flex align-items-center text-gray"
+                          th:if="${getLocation != null && !getLocation.isEmpty()}">
+               <i class="fas fa-location-dot me-2"></i>
+               <span th:text="${getLocation}">Местоположение</span>
+           </span>
+
                     <span class="d-flex align-items-center text-gray">
-            <i class="far fa-calendar me-2"></i>
-            <span th:text="'Регистрация: ' + ${joinDate}">Дата регистрации</span>
-        </span>
+               <i class="far fa-calendar me-2"></i>
+               <span th:text="'Регистрация: ' + ${joinDate}">Дата регистрации</span>
+           </span>
                 </div>
             </div>
-            <div class="profile-stats">
-                <a th:href="@{'/users/' + ${profileUser.username} + '/following'}" class="stat-link">
+
+            <div class="profile-stats d-flex gap-4">
+                <a th:href="@{'/users/' + ${profileUser.username} + '/following'}"
+                   class="stat-link text-decoration-none">
                     <span class="fw-bold" th:text="${followingCount}">0</span>
-                    <span class="text-gray">подписок</span>
+                    <span class="text-gray ms-1">подписок</span>
                 </a>
-                <a th:href="@{'/users/' + ${profileUser.username} + '/followers'}" class="stat-link">
+                <a th:href="@{'/users/' + ${profileUser.username} + '/followers'}"
+                   class="stat-link text-decoration-none">
                     <span class="fw-bold" th:text="${followersCount}">0</span>
-                    <span class="text-gray">подписчиков</span>
+                    <span class="text-gray ms-1">подписчиков</span>
                 </a>
             </div>
         </div>
@@ -714,7 +734,6 @@
                 </div>
             </div>
         </div>
-
 
 
     </main>

@@ -67,7 +67,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
+//    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
         List<UserSearchDTO> results;
         if (query == null || query.trim().isEmpty()) {
@@ -91,40 +91,21 @@ public class UserService implements UserDetailsService {
         return results;
     }
 
-//    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
-//    public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
-//        if (query == null || query.trim().isEmpty()) {
-//            return Collections.emptyList();
-//        }
-//
-//        return userRepository.searchByUsername(query.trim())
-//                .stream()
-//                .map(user -> UserSearchDTO.builder()
-//                        .username(user.getUsername())
-//                        .avatar(user.getAvatar() != null ?
-//                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
-//                                null)
-//                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
-//                        .isFollowing(currentUsername != null &&
-//                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
 
 
-@Cacheable(value = "users", key = "#username", unless = "#result == null")
+//@Cacheable(value = "users", key = "#username", unless = "#result == null")
     public User findByUsername(String username) {
     cacheMonitor.showCacheStats("users");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    @CacheEvict(value = "users", key = "#username")
+//    @CacheEvict(value = "users", key = "#username")
     public void evictUserCache(String username) {
         log.info("Evicting cache for user: {}", username);
     }
 
-    @CacheEvict(value = "users", allEntries = true)
+//    @CacheEvict(value = "users", allEntries = true)
     public void updateUsername(String oldUsername, String newUsername) {
         if (userRepository.existsByUsername(newUsername)) {
             throw new IllegalArgumentException("Username already exists: " + newUsername);
