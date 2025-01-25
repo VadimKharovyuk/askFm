@@ -721,14 +721,14 @@
                                 <span th:text="${post.views}"></span>
                             </button>
 
-                            <form th:if="${currentUser == post.authorUsername}"
-                                  th:action="@{/posts/{id}/delete(id=${post.id})}"
-                                  method="post"
-                                  class="d-inline">
-                                <button type="submit" class="btn btn-link text-danger p-0">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+<!--                            <form th:if="${currentUser == post.authorUsername}"-->
+<!--                                  th:action="@{/posts/{id}/delete(id=${post.id})}"-->
+<!--                                  method="post"-->
+<!--                                  class="d-inline">-->
+<!--                                <button type="submit" class="btn btn-link text-danger p-0" title="Удалить пост">-->
+<!--                                    <i class="fas fa-trash"></i> Удалить-->
+<!--                                </button>-->
+<!--                            </form>-->
                         </div>
                     </div>
                 </div>

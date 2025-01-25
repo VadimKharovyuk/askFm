@@ -1,10 +1,7 @@
 package com.example.askfm.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -21,6 +18,7 @@ public class UserProfile {
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @Column(name = "date_of_birth")

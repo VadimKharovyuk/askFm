@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
+import com.example.askfm.model.Post;
 import com.example.askfm.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -14,12 +15,28 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
+
+    @PostMapping("/{id}/delete")
+    public String deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
+        Post post = postService.getPost(id);
+        if (!post.getAuthor().getUsername().equals(userDetails.getUsername())) {
+            throw new AccessDeniedException("Not authorized");
+        }
+        postService.deletePost(id);
+        return "redirect:/users/" + userDetails.getUsername();
+    }
+
 
 
 @PostMapping("/{postId}/like")
@@ -44,6 +61,7 @@ public String likePost(@PathVariable Long postId,
 
         long postViews = postService.getPostViews(postId);
         model.addAttribute("postViews", postViews);
+        model.addAttribute("currentUser", currentUsername);
 
         PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
         model.addAttribute("post", post);
@@ -68,16 +86,18 @@ public String likePost(@PathVariable Long postId,
         if (result.hasErrors()) {
             return "posts/create";
         }
+        // Преобразование строки тегов в Set
+        if (postForm.getTags() != null) {
+            Set<String> tagSet = Arrays.stream(postForm.getTags().split(","))
+                    .map(String::trim)
+                    .filter(tag -> !tag.isEmpty())
+                    .collect(Collectors.toSet());
+            postForm.setTags(tagSet.toString());
+        }
         postService.createPost(userDetails.getUsername(), postForm);
         return "redirect:/home";
     }
 
-
-    @PostMapping("/{id}/delete")
-    public String deletePost(@PathVariable Long id , @AuthenticationPrincipal UserDetails userDetails) {
-        postService.deletePostById(id);
-        return "redirect:/users/" + userDetails.getUsername();
-    }
 
 
     @GetMapping("/{username}/posts")

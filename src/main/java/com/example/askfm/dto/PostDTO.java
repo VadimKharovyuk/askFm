@@ -26,4 +26,6 @@ public class PostDTO {
 
     private int commentsCount;
     private int repostsCount;
+
+    private Set<String> tags;
 }

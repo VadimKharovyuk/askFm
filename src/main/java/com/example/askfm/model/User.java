@@ -47,6 +47,7 @@ public class User {
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
     private UserProfile profile;
 
     @OneToMany(mappedBy = "author")

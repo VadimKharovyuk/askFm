@@ -2,13 +2,17 @@ package com.example.askfm.service;
 
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
+import com.example.askfm.exception.PostNotFoundException;
 import com.example.askfm.model.Post;
 import com.example.askfm.model.PostView;
+import com.example.askfm.model.Tag;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.PostRepository;
 
 import com.example.askfm.repository.PostViewRepository;
+import com.example.askfm.repository.TagRepository;
 import com.example.askfm.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +34,8 @@ public class PostService {
     private final UserRepository userRepository;
     private final ImageService imageService;
     private final PostViewRepository postViewRepository ;
-
-
+    private final TagRepository tagRepository;
+    private final EntityManager entityManager;
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -45,13 +49,21 @@ public class PostService {
                 throw new RuntimeException("Failed to process image", e);
             }
         }
+
+        Set<Tag> tags = Arrays.stream(postDTO.getTags().split(","))
+                .map(String::trim)
+                .filter(tag -> !tag.isEmpty())
+                .map(tagName -> tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build())))
+                .collect(Collectors.toSet());
+
         Post post = Post.builder()
                 .author(author)
                 .content(postDTO.getContent())
                 .media(mediaBytes)
                 .publishedAt(LocalDateTime.now())
+                .tags(tags)
                 .build();
-
 
         return postRepository.save(post);
     }
@@ -95,10 +107,17 @@ public class PostService {
             postRepository.save(post);
         }
     }
-    public void deletePostById(Long postId) {
-        postRepository.deleteById(postId);
-    }
 
+
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found: " + postId));
+
+        postViewRepository.deleteByPostId(postId);
+        tagRepository.deleteByPostId(postId);
+        postRepository.delete(post);
+    }
 
 
     @Transactional

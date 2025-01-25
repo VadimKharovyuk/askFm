@@ -115,6 +115,7 @@ public class UserProfileController {
     }
 
 
+
     @GetMapping("/profile/edit")
     public String showEditProfileForm(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         User user = userService.findByUsername(currentUser.getUsername());

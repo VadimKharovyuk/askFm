@@ -13,4 +13,6 @@ public interface PostViewRepository extends JpaRepository<PostView, Long> {
 
     long countByPostId(Long postId);
 
+    void deleteByPostId(Long postId);
+
 }

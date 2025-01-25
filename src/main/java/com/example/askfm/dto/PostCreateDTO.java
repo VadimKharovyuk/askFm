@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 
+
 import java.util.Set;
 
 @Data
@@ -19,5 +20,6 @@ public class PostCreateDTO {
     private String content;
 
     private MultipartFile media;
+    private String tags;
 
 }
