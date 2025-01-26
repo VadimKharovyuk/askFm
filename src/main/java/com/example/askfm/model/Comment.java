@@ -29,7 +29,7 @@ public class Comment {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @Column(nullable = false)
+    @Column(nullable = false ,length = 1000)
     private String content;
 
     @Column(name = "created_at", nullable = false)
@@ -38,11 +38,5 @@ public class Comment {
     @Column(name = "edited_at")
     private LocalDateTime editedAt;
 
-    @ManyToMany
-    @JoinTable(
-            name = "comment_likes",
-            joinColumns = @JoinColumn(name = "comment_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> likedBy = new HashSet<>();
+
 }

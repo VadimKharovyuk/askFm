@@ -1,8 +1,11 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.CommentDTO;
+import com.example.askfm.dto.ListCommentDTO;
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.model.Post;
+import com.example.askfm.service.CommentService;
 import com.example.askfm.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -33,10 +37,11 @@ public class PostController {
 
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping("/{postId}")
     public String getPostDetails(@PathVariable Long postId,
-                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 @AuthenticationPrincipal UserDetails userDetails, @PageableDefault(size = 10) Pageable pageable,
                                  Model model) {
         String currentUsername = userDetails != null ? userDetails.getUsername() : null;
         postService.incrementViews(postId, currentUsername);
@@ -44,6 +49,13 @@ public class PostController {
         long postViews = postService.getPostViews(postId);
         model.addAttribute("postViews", postViews);
         model.addAttribute("currentUser", currentUsername);
+
+
+        Page<ListCommentDTO> comments = commentService.getPostCommentsList(postId, pageable);
+        model.addAttribute("comments", comments);
+
+        // Для отображения формы добавления комментария
+        model.addAttribute("newComment", new CommentDTO());
 
         PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
         model.addAttribute("post", post);

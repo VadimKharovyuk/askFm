@@ -144,6 +144,44 @@
             margin-top: 4px;
             display: block;
         }
+
+        .comment-form {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .comment-form textarea {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-white);
+            border-radius: 16px;
+            padding: 12px;
+            resize: none;
+        }
+
+        .comment-form textarea:focus {
+            background-color: var(--secondary-bg);
+            color: var(--text-white);
+            border-color: var(--blue-accent);
+            box-shadow: none;
+        }
+
+        .comment-form button {
+            background-color: var(--blue-accent);
+            border: none;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-weight: 600;
+        }
+
+        .comment-form button:hover {
+            background-color: #1a8cd8;
+        }
+
+        .author-link:hover {
+            color: var(--blue-accent) !important;
+            transition: color 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -238,7 +276,8 @@
                             </button>
 
                             <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                                <button type="submit"
+                                        class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
                                         th:style="${post.isLikedByCurrentUser ? 'color: #f91880;' : 'color: var(--blue-accent);'}">
                                     <i class="fas"
                                        th:classappend="${post.isLikedByCurrentUser ? 'fa-heart' : 'fa-heart-o'}"></i>
@@ -264,12 +303,60 @@
                     </div>
                 </div>
             </div>
+            <!-- Форма для создания комментария -->
+            <form th:action="@{/comments/add}" method="post" th:object="${newComment}" class="comment-form">
+                <input type="hidden" name="postId" th:value="${post.id}"/>
+                <textarea th:field="*{content}" class="form-control" rows="3" required></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+            </form>
 
-            <!-- Comments Section -->
-            <div class="comments-section p-3 border-top" style="border-color: var(--border-color) !important;">
-                <h6 class="mb-3">Комментарии</h6>
+            <br>
+            <div class="comments-section" style="border-top: 1px solid var(--border-color);">
+                <div class="comments-header p-3">
+                    <h6 class="mb-0">Комментарии</h6>
+                </div>
+
+                <div th:each="comment : ${comments}" class="comment p-3 border-top"
+                     style="border-color: var(--border-color) !important;">
+                    <div class="d-flex gap-3">
+                        <img th:src="${comment.authorAvatar != null ? 'data:image/jpeg;base64,' + comment.authorAvatar : '/api/placeholder/40/40'}"
+                             class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover;">
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                   <span class="fw-bold">
+                    <a th:href="@{/users/{username}(username=${comment.authorUsername})}"
+                       class="author-link"
+                       style="text-decoration: none; color: var(--text-white);"
+                       th:text="${comment.authorUsername}">
+
+                    </a>
+                   </span>
+                                <div class="d-flex align-items-center gap-3">
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(comment.createdAt, 'dd MMM, HH:mm')}"
+                                           style="color: #6c757d !important;">
+                                    </small>
+                                    <form th:if="${currentUser == comment.authorUsername}"
+                                          th:action="@{/comments/{id}/delete(id=${comment.id})}"
+                                          method="post"
+                                          class="d-inline">
+                                        <input type="hidden" name="postId" th:value="${post.id}"/>
+                                        <button type="submit" class="btn btn-link text-danger p-0"
+                                                style="font-size: 14px;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="mb-2 mt-1" th:text="${comment.content}"></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 
     <!-- Right Sidebar -->

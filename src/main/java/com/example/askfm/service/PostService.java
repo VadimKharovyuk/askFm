@@ -116,12 +116,13 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found: " + postId));
+                .orElseThrow(() -> new PostNotFoundException( postId));
 
         postViewRepository.deleteByPostId(postId);
         tagRepository.deleteByPostId(postId);
         postRepository.delete(post);
     }
+
 
 
     @Transactional

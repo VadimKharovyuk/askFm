@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     public void follow(String subscriberUsername, String subscribedToUsername) {
         // Проверяем, что пользователь не пытается подписаться на самого себя
