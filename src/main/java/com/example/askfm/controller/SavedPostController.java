@@ -45,6 +45,7 @@ public class SavedPostController {
                                 Model model) {
         List<SavedPostDTO> savedPosts = savedPostService.getUserSavedPosts(userDetails.getUsername());
         model.addAttribute("savedPosts", savedPosts);
+        model.addAttribute("currentUser", userDetails.getUsername());
         return "saved/saved-posts";
     }
 }
