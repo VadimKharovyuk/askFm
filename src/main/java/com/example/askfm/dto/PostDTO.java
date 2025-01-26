@@ -26,6 +26,7 @@ public class PostDTO {
 
     private Long commentsCount;
     private int repostsCount;
+    private boolean isSavedByCurrentUser;
 
     private Set<String> tags;
 }

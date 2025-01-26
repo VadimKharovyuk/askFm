@@ -9,5 +9,6 @@ public class AskFmApplication {
     public static void main(String[] args) {
         SpringApplication.run(AskFmApplication.class, args);
     }
-//посмотеть остальых пользователй сети в асиде секции
+//заблокировать юзера
+    //посты которые лайкнул юзер
 }

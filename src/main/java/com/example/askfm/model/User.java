@@ -6,11 +6,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -61,4 +64,7 @@ public class User {
 
     @OneToMany(mappedBy = "subscribedTo")
     private List<Subscription> subscribers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<SavedPost> savedPosts = new HashSet<>();
 }

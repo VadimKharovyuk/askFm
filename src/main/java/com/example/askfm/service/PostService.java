@@ -36,6 +36,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final EntityManager entityManager;
     private final CommentRepository commentRepository;
+    private final SavedPostRepository savedPostRepository;
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -86,6 +87,7 @@ public class PostService {
                         post.getLikedBy().stream()
                                 .anyMatch(user -> user.getUsername().equals(currentUsername)))
                 .commentsCount(commentRepository.countByPostId(post.getId()))
+                .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(post.getId(), currentUsername))
                 .build();
     }
 

@@ -210,7 +210,7 @@
                 <i class="fas fa-envelope"></i>
                 <span>Сообщения</span>
             </a>
-            <a href="/bookmarks" class="side-link">
+            <a href="/saved" class="side-link">
                 <i class="fas fa-bookmark"></i>
                 <span>Закладки</span>
             </a>
@@ -243,6 +243,18 @@
                                   style="text-decoration: none; color: inherit;"
                                   th:text="${post.authorUsername}"></a>
                            </span>
+
+
+                        <form th:action="@{/saved/save/{id}(id=${post.id})}" method="post" class="d-inline">
+                            <button type="submit"
+                                    class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                                    th:style="${post.isSavedByCurrentUser ? 'color: #f91880;' : 'color: var(--blue-accent);'}">
+                                <i class="fas" th:classappend="${post.isSavedByCurrentUser ? 'fa-bookmark' : 'fa-bookmark-o'}"></i>
+                                <span th:text="${post.isSavedByCurrentUser ? 'Сохранено' : 'Сохранить'}"></span>
+                            </button>
+                        </form>
+
+
 
                         <small class="text-muted mb-2 d-block"
                                th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"
