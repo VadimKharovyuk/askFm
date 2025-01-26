@@ -65,9 +65,6 @@ public Page<ListCommentDTO> getPostCommentsList(Long postId, Pageable pageable) 
         commentRepository.delete(comment);
     }
 
-    public long getCommentsCount(Long postId) {
-        return commentRepository.countByPostId(postId);
-    }
 
 
     private CommentDTO convertToDTO(Comment comment) {

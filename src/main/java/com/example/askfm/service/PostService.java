@@ -7,11 +7,8 @@ import com.example.askfm.model.Post;
 import com.example.askfm.model.PostView;
 import com.example.askfm.model.Tag;
 import com.example.askfm.model.User;
-import com.example.askfm.repository.PostRepository;
+import com.example.askfm.repository.*;
 
-import com.example.askfm.repository.PostViewRepository;
-import com.example.askfm.repository.TagRepository;
-import com.example.askfm.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +35,7 @@ public class PostService {
     private final PostViewRepository postViewRepository;
     private final TagRepository tagRepository;
     private final EntityManager entityManager;
+    private final CommentRepository commentRepository;
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -87,6 +85,7 @@ public class PostService {
                 .isLikedByCurrentUser(currentUsername != null &&
                         post.getLikedBy().stream()
                                 .anyMatch(user -> user.getUsername().equals(currentUsername)))
+                .commentsCount(commentRepository.countByPostId(post.getId()))
                 .build();
     }
 
@@ -173,7 +172,6 @@ public class PostService {
         if (tags == null || tags.trim().isEmpty()) {
             return Page.empty(pageable);
         }
-
         // Убираем скобки и обрабатываем тег
         String cleanTag = tags.replace("[", "").replace("]", "").trim();
         Page<Post> posts = postRepository.findByTagNameContaining(cleanTag, pageable);

@@ -702,6 +702,7 @@
                                 <span th:text="${post.commentsCount ?: 0}"></span>
                             </button>
 
+
                             <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
                                     style="color: var(--blue-accent);">
                                 <i class="fas fa-retweet"></i>
@@ -724,14 +725,6 @@
                                 <span th:text="${post.views}"></span>
                             </button>
 
-<!--                            <form th:if="${currentUser == post.authorUsername}"-->
-<!--                                  th:action="@{/posts/{id}/delete(id=${post.id})}"-->
-<!--                                  method="post"-->
-<!--                                  class="d-inline">-->
-<!--                                <button type="submit" class="btn btn-link text-danger p-0" title="Удалить пост">-->
-<!--                                    <i class="fas fa-trash"></i> Удалить-->
-<!--                                </button>-->
-<!--                            </form>-->
                         </div>
                     </div>
                 </div>
@@ -759,13 +752,6 @@
             </div>
         </form>
 
-
-
-        <!-- Search Box -->
-<!--        <div class="search-box">-->
-<!--            <i class="fas fa-search"></i>-->
-<!--            <input type="search" class="search-input" placeholder="Поиск в AskFM">-->
-<!--        </div>-->
 
         <!-- Trending Section -->
         <div class="trending-section">

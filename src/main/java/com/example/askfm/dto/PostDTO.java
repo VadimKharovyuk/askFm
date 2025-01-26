@@ -24,7 +24,7 @@ public class PostDTO {
     private String authorAvatar;
     private boolean isLikedByCurrentUser;
 
-    private int commentsCount;
+    private Long commentsCount;
     private int repostsCount;
 
     private Set<String> tags;

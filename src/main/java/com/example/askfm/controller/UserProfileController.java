@@ -33,6 +33,7 @@ public class UserProfileController {
     private final ImageService imageService;
     private final SuggestedUsersService suggestedUsersService;
     private final PostService postService;
+    private final CommentService commentService;
 
 
 
