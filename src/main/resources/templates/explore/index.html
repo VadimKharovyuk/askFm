@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title th:text="${title}">Search Results</title>
+  <title>Explore</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+
     :root {
       --background-dark: #050505;
       --secondary-bg: #16181c;
@@ -186,14 +187,7 @@
       color: var(--text-white);
       text-decoration: none;
     }
-    .left-sidebar {
-      padding: 20px;
-      border-right: 1px solid var(--border-color);
-      height: 100vh;
-      position: sticky;
-      top: 0;
-    }
-    /* Стили для левой боковой панели */
+
     .left-sidebar {
       padding: 20px;
       border-right: 1px solid var(--border-color);
@@ -249,13 +243,145 @@
 
     .side-link.active {
       font-weight: bold;
-      color: var(--blue-accent);
+
+      /* Базовые стили остаются теми же */
+
+    .explore-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      background-color: var(--background-dark);
+      z-index: 100;
     }
+
+    .tab {
+      padding: 16px;
+      color: var(--text-gray);
+      text-decoration: none;
+      position: relative;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      color: var(--text-white);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: var(--blue-accent);
+      border-radius: 4px 4px 0 0;
+    }
+
+    .explore-search {
+      background-color: var(--secondary-bg);
+      border-radius: 30px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .trending-topic {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s;
+    }
+
+    .trending-topic:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+    }
+
+    .topic-category {
+      font-size: 13px;
+      color: var(--text-gray);
+    }
+
+    .topic-name {
+      font-weight: bold;
+      color: var(--text-white);
+      margin: 4px 0;
+    }
+
+    .topic-posts-count {
+      font-size: 13px;
+      color: var(--text-gray);
+    }
+      .filter-section {
+        background-color: var(--secondary-bg);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+
+      .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-label {
+        color: var(--text-gray);
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .filter-input,
+      .filter-select {
+        width: 100%;
+        padding: 8px 12px;
+        background-color: var(--background-dark);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-white);
+        font-size: 14px;
+      }
+
+      .filter-input:focus,
+      .filter-select:focus {
+        outline: none;
+        border-color: var(--blue-accent);
+      }
+
+      .filter-submit {
+        background-color: var(--blue-accent);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .filter-submit:hover {
+        background-color: var(--blue-hover);
+      }
+
   </style>
 </head>
 <body>
 <div class="page-wrapper">
-  <!-- Left Sidebar -->
   <!-- Left Sidebar -->
   <aside class="left-sidebar">
     <a href="/" class="logo-link">
@@ -293,25 +419,47 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <!-- Header -->
-    <div class="header">
-      <h1 th:text="${title}">Results</h1>
+    <!-- Search Bar -->
+    <div class="explore-search">
+      <form th:action="@{/search/search}" method="get">
+        <input type="text"
+               name="tags"
+               class="search-input"
+               placeholder="Поиск постов...">
+      </form>
     </div>
 
-    <!-- Posts List -->
-    <div class="posts-container">
+    <!-- Tabs -->
+    <div class="explore-tabs">
+      <a href="#" class="tab active">For you</a>
+      <a href="#" class="tab">Trending</a>
+      <a href="#" class="tab">News</a>
+      <a href="#" class="tab">Sports</a>
+      <a href="#" class="tab">Entertainment</a>
+    </div>
 
-      <div th:each="post : ${posts}" class="post-card">
-        <a th:href="@{'/posts/' + ${post.id}}" style="text-decoration: none; color: inherit;">
+    <!-- Trending Topics -->
+    <div class="trending-topics">
+      <div class="trending-topic">
+        <div class="topic-category">Trending in Technology</div>
+        <div class="topic-name">#Programming</div>
+        <div class="topic-posts-count">50.4K posts</div>
+      </div>
+      <!-- More trending topics -->
+    </div>
+
+    <!-- Trending Posts -->
+    <div class="posts-container">
+      <div th:each="post : ${trendingPosts}" class="post-card">
         <div class="post-header">
           <img th:if="${post.authorAvatar}"
                th:src="@{'data:image/jpeg;base64,' + ${post.authorAvatar}}"
                class="avatar"
                th:alt="${post.authorUsername}">
-          <div>
-            <div class="post-author" th:text="${post.authorUsername}"></div>
-            <div class="post-time"
-                 th:text="${#temporals.format(post.publishedAt, 'dd MMM, yyyy HH:mm')}"></div>
+          <div class="post-meta">
+            <span class="post-author" th:text="${post.authorUsername}"></span>
+            <span class="post-time"
+                  th:text="${#temporals.format(post.publishedAt, 'dd MMM, yyyy')}"></span>
           </div>
         </div>
 
@@ -320,13 +468,6 @@
         <img th:if="${post.base64Media}"
              th:src="@{'data:image/jpeg;base64,' + ${post.base64Media}}"
              class="post-image">
-
-        <div class="tags-container">
-          <a th:each="tag : ${post.tags}"
-             th:href="@{/search/search(tags=${tag})}"
-             class="tag"
-             th:text="${'#' + tag}"></a>
-        </div>
 
         <div class="post-stats">
           <div class="stat-item">
@@ -337,9 +478,11 @@
             <i class="far fa-comment"></i>
             <span th:text="${post.commentsCount}">0</span>
           </div>
-          <div th:if="${post.views != null}" class="stat-item">
-            <i class="far fa-eye"></i>
-            <span th:text="${post.views}">0</span>
+          <div class="stat-item">
+            <i class="far fa-bookmark"></i>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-share"></i>
           </div>
         </div>
       </div>
@@ -347,13 +490,71 @@
   </main>
 
   <aside class="right-sidebar">
+    <!-- Filters Section -->
+    <div class="filter-section">
+      <div class="trending-header">Фильтры поиска</div>
+      <form id="filtersForm" th:action="@{/search/filter}" method="get" class="filter-form">
+        <!-- Search by Tags -->
+        <div class="filter-group">
+          <label for="tags" class="filter-label">Поиск по тегам</label>
+          <input type="text"
+                 id="tags"
+                 name="tags"
+                 placeholder="Введите теги через запятую"
+                 class="filter-input"
+                 th:value="${tags}">
+        </div>
+
+        <!-- Sort by Likes -->
+        <div class="filter-group">
+          <label for="likes" class="filter-label">Сортировать по лайкам</label>
+          <select id="likes"
+                  name="likes"
+                  class="filter-select">
+            <option value="desc">По убыванию</option>
+            <option value="asc">По возрастанию</option>
+          </select>
+        </div>
+
+        <!-- Sort by Views -->
+        <div class="filter-group">
+          <label for="views" class="filter-label">Сортировать по просмотрам</label>
+          <select id="views"
+                  name="views"
+                  class="filter-select">
+            <option value="desc">По убыванию</option>
+            <option value="asc">По возрастанию</option>
+          </select>
+        </div>
+
+        <!-- Sort by Date -->
+        <div class="filter-group">
+          <label for="date" class="filter-label">Сортировать по дате</label>
+          <select id="date"
+                  name="date"
+                  class="filter-select">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="filter-submit">
+          Применить фильтры
+        </button>
+      </form>
+    </div>
+
+    <!-- Trending Section -->
     <div class="trending-section">
       <div class="trending-header">Популярные посты</div>
 
-      <!-- Самые понравившиеся посты -->
+      <!-- Most Liked Posts -->
       <div class="trending-group">
         <div class="trending-header">
-          <a th:href="@{/trending/most-liked}" class="trending-title">Самые понравившиеся</a>
+          <a th:href="@{/trending/most-liked}" class="trending-title">
+            Самые понравившиеся
+          </a>
         </div>
         <div th:each="post : ${mostLikedPosts}" class="trending-item">
           <a th:href="@{'/posts/' + ${post.id}}" class="trending-link">
@@ -363,10 +564,12 @@
         </div>
       </div>
 
-      <!-- Самые просматриваемые посты -->
+      <!-- Most Viewed Posts -->
       <div class="trending-group">
         <div class="trending-header">
-          <a th:href="@{/trending/most-viewed}" class="trending-title">Самые просматриваемые</a>
+          <a th:href="@{/trending/most-viewed}" class="trending-title">
+            Самые просматриваемые
+          </a>
         </div>
         <div th:each="post : ${mostViewedPosts}" class="trending-item">
           <a th:href="@{'/posts/' + ${post.id}}" class="trending-link">
@@ -376,10 +579,12 @@
         </div>
       </div>
 
-      <!-- Последние посты -->
+      <!-- Recent Posts -->
       <div class="trending-group">
         <div class="trending-header">
-          <a th:href="@{/trending/recent}" class="trending-title">Последние посты</a>
+          <a th:href="@{/trending/recent}" class="trending-title">
+            Последние посты
+          </a>
         </div>
         <div th:each="post : ${recentPosts}" class="trending-item">
           <a th:href="@{'/posts/' + ${post.id}}" class="trending-link">

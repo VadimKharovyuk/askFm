@@ -1,6 +1,8 @@
 package com.example.askfm.service;
 
 import com.example.askfm.dto.PostDTO;
+
+import com.example.askfm.model.Post;
 import com.example.askfm.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -18,9 +21,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
+
     private final PostRepository postRepository;
     private final PostService postService;
-
 
     // Популярные посты за последние 24 часа
     public List<PostDTO> getMostLikedPosts(String currentUsername) {
@@ -55,20 +58,20 @@ public class SearchService {
 
 
 
-//    // Поиск по тегам
-//    public Page<PostDTO> findPostsByTags(String tags, String currentUsername, Pageable pageable) {
-//        if (tags == null || tags.trim().isEmpty()) {
-//            return Page.empty(pageable);
-//        }
-//
-//        Set<String> tagNames = Arrays.stream(tags.split(","))
-//                .map(String::trim)
-//                .filter(tag -> !tag.isEmpty())
-//                .collect(Collectors.toSet());
-//
-//        return postRepository.findByTagNames(tagNames, pageable)
-//                .map(post -> postService.getPostDTO(post, currentUsername));
-//    }
+    // Поиск по тегам
+    public Page<PostDTO> findPostsByTags(String tags, String currentUsername, Pageable pageable) {
+        if (tags == null || tags.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Set<String> tagNames = Arrays.stream(tags.split(","))
+                .map(String::trim)
+                .filter(tag -> !tag.isEmpty())
+                .collect(Collectors.toSet());
+
+        return postRepository.findByTagNames(tagNames, pageable)
+                .map(post -> postService.getPostDTO(post, currentUsername));
+    }
 
 
 }

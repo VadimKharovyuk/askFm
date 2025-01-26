@@ -34,6 +34,22 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/{postId}")
+    public String getPostDetails(@PathVariable Long postId,
+                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 Model model) {
+        String currentUsername = userDetails != null ? userDetails.getUsername() : null;
+        postService.incrementViews(postId, currentUsername);
+
+        long postViews = postService.getPostViews(postId);
+        model.addAttribute("postViews", postViews);
+        model.addAttribute("currentUser", currentUsername);
+
+        PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
+        model.addAttribute("post", post);
+        return "posts/post-details";
+    }
+
     @GetMapping("/search")
     public String searchPosts(@RequestParam(required = false) String tags,
                               @RequestParam(defaultValue = "0") int page,
@@ -86,21 +102,7 @@ public class PostController {
         return "redirect:" + (referer != null ? referer : "/posts");
     }
 
-    @GetMapping("/{postId}")
-    public String getPostDetails(@PathVariable Long postId,
-                                 @AuthenticationPrincipal UserDetails userDetails,
-                                 Model model) {
-        String currentUsername = userDetails != null ? userDetails.getUsername() : null;
-        postService.incrementViews(postId, currentUsername);
 
-        long postViews = postService.getPostViews(postId);
-        model.addAttribute("postViews", postViews);
-        model.addAttribute("currentUser", currentUsername);
-
-        PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
-        model.addAttribute("post", post);
-        return "posts/post-details";
-    }
 
 
     @GetMapping
