@@ -37,6 +37,7 @@ public class PostService {
     private final EntityManager entityManager;
     private final CommentRepository commentRepository;
     private final SavedPostRepository savedPostRepository;
+    private final MentionService mentionService;
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -65,6 +66,8 @@ public class PostService {
                 .publishedAt(LocalDateTime.now())
                 .tags(tags)
                 .build();
+        post.setMentionedUsers(mentionService.extractMentions(postDTO.getContent()));
+
 
         return postRepository.save(post);
     }

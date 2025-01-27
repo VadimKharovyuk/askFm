@@ -37,7 +37,9 @@ public class Post {
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
 
-
+    @ManyToMany
+    @JoinTable(name = "post_mentions")
+    private Set<User> mentionedUsers = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(

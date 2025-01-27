@@ -202,6 +202,16 @@
       background-color: rgba(239, 243, 244, 0.1);
       color: var(--text-white);
     }
+
+
+    .mention-suggestions {
+      position: absolute;
+      background: var(--secondary-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -371,41 +381,73 @@
       </div>
     </div>
   </div>
+  <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}" autocomplete="off">
+    <div class="d-flex gap-3">
+      <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"
+           class="rounded-circle"
+           style="width: 48px; height: 48px;"
+           alt="User avatar">
+      <div class="flex-grow-1">
+     <textarea class="form-control bg-transparent text-white border-0"
+               style="resize: none; height: 100px;"
+               placeholder="Что нового?"
+               th:field="*{content}"
+               autocomplete="off"></textarea>
 
-  <!-- Form for creating posts -->
-  <div class="post-form-container p-3 border-bottom" style="border-color: var(--border-color) !important;">
-    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}">
-      <div class="d-flex gap-3">
-        <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"
-             class="rounded-circle"
-             style="width: 48px; height: 48px;"
-             alt="User avatar">
-        <div class="flex-grow-1">
-        <textarea class="form-control bg-transparent text-white border-0"
-                  style="resize: none; height: 100px;"
-                  placeholder="Что нового?"
-                  th:field="*{content}"></textarea>
+        <input type="text"
+               class="form-control bg-transparent text-white border-0 mt-2"
+               placeholder="Теги (через запятую)"
+               th:field="*{tags}"
+               autocomplete="off"/>
 
-          <input type="text"
-                 class="form-control bg-transparent text-white border-0 mt-2"
-                 placeholder="Теги (через запятую)"
-                 th:field="*{tags}"/>
-
-          <div class="d-flex justify-content-between align-items-center mt-3">
-            <div class="d-flex gap-2">
-              <label class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-image"></i>
-                <input type="file" name="media" style="display: none;" accept="image/*">
-              </label>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm px-4">
-              Опубликовать
-            </button>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="d-flex gap-2">
+            <label class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-image"></i>
+              <input type="file" name="media" style="display: none;" accept="image/*">
+            </label>
           </div>
+          <button type="submit" class="btn btn-primary btn-sm px-4">
+            Опубликовать
+          </button>
         </div>
       </div>
-    </form>
-  </div>
+    </div>
+  </form>
+<!--  &lt;!&ndash; Form for creating posts &ndash;&gt;-->
+<!--  <div class="post-form-container p-3 border-bottom" style="border-color: var(&#45;&#45;border-color) !important;">-->
+<!--    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}">-->
+<!--      <div class="d-flex gap-3">-->
+<!--        <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"-->
+<!--             class="rounded-circle"-->
+<!--             style="width: 48px; height: 48px;"-->
+<!--             alt="User avatar">-->
+<!--        <div class="flex-grow-1">-->
+<!--        <textarea class="form-control bg-transparent text-white border-0"-->
+<!--                  style="resize: none; height: 100px;"-->
+<!--                  placeholder="Что нового?"-->
+<!--                  th:field="*{content}"></textarea>-->
+
+<!--          <input type="text"-->
+<!--                 class="form-control bg-transparent text-white border-0 mt-2"-->
+<!--                 placeholder="Теги (через запятую)"-->
+<!--                 th:field="*{tags}"/>-->
+
+<!--          <div class="d-flex justify-content-between align-items-center mt-3">-->
+<!--            <div class="d-flex gap-2">-->
+<!--              <label class="btn btn-outline-primary btn-sm">-->
+<!--                <i class="fas fa-image"></i>-->
+<!--                <input type="file" name="media" style="display: none;" accept="image/*">-->
+<!--              </label>-->
+<!--            </div>-->
+<!--            <button type="submit" class="btn btn-primary btn-sm px-4">-->
+<!--              Опубликовать-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </form>-->
+<!--  </div>-->
 
   <!-- cписок постов Form -->
 <!--  <div class="posts-container">-->
@@ -449,6 +491,37 @@
 
 
 </div>
+<script>
+  document.querySelector('textarea').addEventListener('input', function(e) {
+    let text = e.target.value;
+    let cursorPos = e.target.selectionStart;
+    let lastAtSymbol = text.lastIndexOf('@', cursorPos);
+
+    if (lastAtSymbol !== -1 && cursorPos > lastAtSymbol) {
+      let username = text.substring(lastAtSymbol + 1, cursorPos);
+      if (username.length > 0) {
+        fetch(`/api/users/search?query=${username}`)
+                .then(response => response.json())
+                .then(users => {
+                  // Показать выпадающий список с пользователями
+                  showUserSuggestions(users, lastAtSymbol);
+                });
+      }
+    }
+  });
+
+  function showUserSuggestions(users, position) {
+    let suggestions = document.createElement('div');
+    suggestions.className = 'mention-suggestions';
+    users.forEach(user => {
+      let item = document.createElement('div');
+      item.textContent = '@' + user.username;
+      item.onclick = () => insertMention(user.username);
+      suggestions.appendChild(item);
+    });
+  }
+</script>
+
 <script>
   function handleFileSelect(input) {
     if (input.files && input.files[0]) {

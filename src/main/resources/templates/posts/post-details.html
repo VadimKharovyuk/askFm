@@ -182,6 +182,11 @@
             color: var(--blue-accent) !important;
             transition: color 0.2s;
         }
+        .mention {
+            color: var(--blue-accent);
+            position: relative;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
@@ -260,7 +265,7 @@
                                th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"
                                style="color: #e2e2e2 !important;"></small>
 
-                        <p class="mb-3" th:text="${post.content}"></p>
+                        <p class="post-content mb-3" th:text="${post.content}"></p>
 
                         <img th:if="${post.base64Media != null}"
                              th:src="'data:image/jpeg;base64,' + ${post.base64Media}"
@@ -417,6 +422,38 @@
         </div>
     </aside>
 </div>
+<script>
+    function convertMentions() {
+        try {
+            document.querySelectorAll('.post-content').forEach(el => {
+                el.innerHTML = el.textContent.replace(
+                    /@(\w+)/g,
+                    (match, username) => {
+                        const url = `/users/${username.trim()}`;
+                        console.log('Creating mention link:', url);
+                        return `<a href="${url}" class="mention" onclick="handleMentionClick(event, '${username}')">${match}</a>`;
+                    }
+                );
+            });
+        } catch (error) {
+            console.error('Error in convertMentions:', error);
+        }
+    }
+
+    function handleMentionClick(event, username) {
+        try {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('Handling mention click for user:', username);
+            window.location.href = `/users/${username.trim()}`;
+        } catch (error) {
+            console.error('Error in handleMentionClick:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', convertMentions);
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
