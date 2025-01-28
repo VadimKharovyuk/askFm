@@ -18,13 +18,14 @@ import java.util.List;
 public class BirthdayController {
     private final BirthdayService birthdayService;
 
+
     /**
      * Главная страница с днями рождения
      */
     @GetMapping
     public String getBirthdaysPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         String username = userDetails.getUsername();
-
+        model.addAttribute("currentUser", username);
         // Получаем дни рождения на сегодня
         List<UpcomingBirthdayDTO> todaysBirthdays = birthdayService.getTodaysBirthdays(username);
         model.addAttribute("todaysBirthdays", todaysBirthdays);

@@ -1,6 +1,7 @@
 package com.example.askfm.controller;
 
 import com.example.askfm.dto.PostCreateDTO;
+import com.example.askfm.dto.UpcomingBirthdayDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.service.*;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 @Controller
@@ -23,6 +25,7 @@ public class ProfileController {
     private final UserService userService;
     private final ImageService imageService;
     private final PostService postService;
+    private final BirthdayService birthdayService;
 
 
 
@@ -32,8 +35,14 @@ public class ProfileController {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
 
-        model.addAttribute("postForm", new PostCreateDTO());
+        // Получаем дни рождения на сегодня
+        List<UpcomingBirthdayDTO> todaysBirthdays = birthdayService.getTodaysBirthdays(username);
+        // Получаем предстоящие дни рождения
+        List<UpcomingBirthdayDTO> upcomingBirthdays = birthdayService.getUpcomingBirthdays(username, 7);
 
+        model.addAttribute("todaysBirthdays", todaysBirthdays);
+        model.addAttribute("upcomingBirthdays", upcomingBirthdays);
+        model.addAttribute("postForm", new PostCreateDTO());
         model.addAttribute("posts", postService.getUserPosts(username, username));
         model.addAttribute("username", username);
         model.addAttribute("profileUser", user);

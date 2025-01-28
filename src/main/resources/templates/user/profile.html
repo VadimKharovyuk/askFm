@@ -1,568 +1,637 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Профиль пользователя</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --background-dark: #050505;
-      --secondary-bg: #16181c;
-      --text-white: #dce3e7;
-      --text-gray: #e7eaee;
-      --border-color: #2f3336;
-      --blue-accent: #1d9bf0;
-      --blue-hover: #1a8cd8;
-    }
+    <title>Профиль пользователя</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --background-dark: #050505;
+            --secondary-bg: #16181c;
+            --text-white: #dce3e7;
+            --text-gray: #e7eaee;
+            --border-color: #2f3336;
+            --blue-accent: #1d9bf0;
+            --blue-hover: #1a8cd8;
+        }
 
-    body {
-      background-color: var(--background-dark);
-      color: var(--text-white);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-white);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    .navbar {
-      background-color: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
-    }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
 
-    .search-input {
-      background-color: #202327;
-      border: none;
-      color: var(--text-white);
-      border-radius: 9999px;
-    }
+        .search-input {
+            background-color: #202327;
+            border: none;
+            color: var(--text-white);
+            border-radius: 9999px;
+        }
 
-    .search-input:focus {
-      background-color: var(--background-dark);
-      color: var(--text-white);
-      box-shadow: none;
-      border: 1px solid var(--blue-accent);
-    }
+        .search-input:focus {
+            background-color: var(--background-dark);
+            color: var(--text-white);
+            box-shadow: none;
+            border: 1px solid var(--blue-accent);
+        }
 
-    .main-container {
-      max-width: 600px;
-      margin: 0 auto;
-      min-height: 100vh;
-      border-left: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-    }
+        .main-container {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
 
-    .profile-header {
-      border-bottom: 1px solid var(--border-color);
-      padding: 0 1rem;
-    }
+        .profile-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+        }
 
-    .cover-photo {
-      height: 200px;
-      background-color: #333639;
-      position: relative;
-    }
+        .cover-photo {
+            height: 200px;
+            background-color: #333639;
+            position: relative;
+        }
 
-    .profile-avatar {
-      width: 134px;
-      height: 134px;
-      border-radius: 50%;
-      border: 4px solid var(--background-dark);
-      position: absolute;
-      bottom: -67px;
-      left: 15px;
-      background-color: var(--background-dark);
-    }
+        .profile-avatar {
+            width: 134px;
+            height: 134px;
+            border-radius: 50%;
+            border: 4px solid var(--background-dark);
+            position: absolute;
+            bottom: -67px;
+            left: 15px;
+            background-color: var(--background-dark);
+        }
 
-    .profile-info {
-      margin-top: 70px;
-      padding: 1rem;
-    }
+        .profile-info {
+            margin-top: 70px;
+            padding: 1rem;
+        }
 
-    .edit-profile-btn {
-      background-color: transparent;
-      color: var(--text-white);
-      border: 1px solid var(--border-color);
-      border-radius: 9999px;
-      padding: 8px 16px;
-      font-weight: bold;
-      transition: background-color 0.2s;
-    }
+        .edit-profile-btn {
+            background-color: transparent;
+            color: var(--text-white);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
 
-    .edit-profile-btn:hover {
-      background-color: rgba(239, 243, 244, 0.1);
-    }
+        .edit-profile-btn:hover {
+            background-color: rgba(239, 243, 244, 0.1);
+        }
 
-    .stats-link {
-      color: var(--text-white);
-      text-decoration: none;
-      margin-right: 20px;
-    }
+        .stats-link {
+            color: var(--text-white);
+            text-decoration: none;
+            margin-right: 20px;
+        }
 
-    .stats-link:hover {
-      text-decoration: underline;
-      color: var(--text-white);
-    }
+        .stats-link:hover {
+            text-decoration: underline;
+            color: var(--text-white);
+        }
 
-    .nav-tabs {
-      border-bottom: none;
-    }
+        .nav-tabs {
+            border-bottom: none;
+        }
 
-    .nav-tabs .nav-link {
-      color: var(--text-gray);
-      background: transparent;
-      border: none;
-      padding: 1rem;
-      margin: 0;
-      font-weight: 500;
-    }
+        .nav-tabs .nav-link {
+            color: var(--text-gray);
+            background: transparent;
+            border: none;
+            padding: 1rem;
+            margin: 0;
+            font-weight: 500;
+        }
 
-    .nav-tabs .nav-link:hover {
-      color: var(--text-white);
-      background-color: rgba(239, 243, 244, 0.1);
-      border: none;
-    }
+        .nav-tabs .nav-link:hover {
+            color: var(--text-white);
+            background-color: rgba(239, 243, 244, 0.1);
+            border: none;
+        }
 
-    .nav-tabs .nav-link.active {
-      color: var(--text-white);
-      background: transparent;
-      border: none;
-      position: relative;
-    }
+        .nav-tabs .nav-link.active {
+            color: var(--text-white);
+            background: transparent;
+            border: none;
+            position: relative;
+        }
 
-    .nav-tabs .nav-link.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: var(--blue-accent);
-      border-radius: 9999px;
-    }
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: var(--blue-accent);
+            border-radius: 9999px;
+        }
 
-    .text-muted {
-      color: var(--text-gray) !important;
-    }
+        .text-muted {
+            color: var(--text-gray) !important;
+        }
 
-    #save-avatar {
-      background-color: var(--blue-accent);
-      color: white;
-      border: none;
-      border-radius: 15px;
-      padding: 4px 12px;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
+        #save-avatar {
+            background-color: var(--blue-accent);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 4px 12px;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
 
-    #save-avatar:hover {
-      background-color: var(--blue-hover);
-      transform: scale(1.05);
-    }
-    .page-container {
-      display: grid;
-      grid-template-columns: 275px 1fr;
-      min-height: 100vh;
-    }
+        #save-avatar:hover {
+            background-color: var(--blue-hover);
+            transform: scale(1.05);
+        }
 
-    .left-sidebar {
-      position: fixed;
-      width: 275px;
-      height: 100vh;
-      padding: 1rem;
-      border-right: 1px solid var(--border-color);
-      background-color: var(--background-dark);
-    }
+        .page-container {
+            display: grid;
+            grid-template-columns: 275px 1fr;
+            min-height: 100vh;
+        }
 
-    .logo-link {
-      display: flex;
-      align-items: center;
-      color: var(--text-white);
-      text-decoration: none;
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-      padding: 0.5rem;
-    }
+        .left-sidebar {
+            position: fixed;
+            width: 275px;
+            height: 100vh;
+            padding: 1rem;
+            border-right: 1px solid var(--border-color);
+            background-color: var(--background-dark);
+        }
 
-    .side-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+        .logo-link {
+            display: flex;
+            align-items: center;
+            color: var(--text-white);
+            text-decoration: none;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 0.5rem;
+        }
 
-    .side-link {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: var(--text-white);
-      text-decoration: none;
-      padding: 0.75rem 1rem;
-      border-radius: 9999px;
-      transition: background-color 0.2s;
-    }
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
-    .side-link:hover {
-      background-color: rgba(239, 243, 244, 0.1);
-      color: var(--text-white);
-    }
+        .side-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-white);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            transition: background-color 0.2s;
+        }
+
+        .side-link:hover {
+            background-color: rgba(239, 243, 244, 0.1);
+            color: var(--text-white);
+        }
 
 
-    .mention-suggestions {
-      position: absolute;
-      background: var(--secondary-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-  </style>
+        .mention-suggestions {
+            position: absolute;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /*день рождения */
+        .page-container {
+            display: grid;
+            grid-template-columns: 275px 1fr 350px;
+            min-height: 100vh;
+        }
+
+        .right-sidebar {
+            position: fixed;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            padding: 1rem;
+            border-left: 1px solid var(--border-color);
+            background-color: var(--background-dark);
+            overflow-y: auto;
+        }
+
+        .birthday-card {
+            background-color: var(--secondary-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .birthday-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .birthday-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .birthday-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .birthday-item:hover {
+            background-color: rgba(239, 243, 244, 0.1);
+        }
+
+        .birthday-info {
+            margin-left: 1rem;
+        }
+
+        .upcoming-birthdays-link {
+            color: var(--blue-accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            text-align: center;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .upcoming-birthdays-link:hover {
+            color: var(--blue-hover);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg position-sticky top-0">
-  <div class="container">
-    <a class="navbar-brand text-light" href="/">AskFM</a>
-    <div class="d-flex align-items-center">
-      <form class="d-flex me-3" action="/users/search" method="get">
-        <input class="form-control search-input me-2"
-               type="search"
-               name="query"
-               placeholder="Поиск пользователей..."
-               required>
-      </form>
-      <div class="dropdown">
-        <button class="btn btn-link text-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          <i class="fas fa-user"></i> <span th:text="${username}">Username</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end bg-dark">
-          <li><a class="dropdown-item text-light" href="#"><i class="fas fa-cog"></i> Настройки</a></li>
-          <li><a class="dropdown-item text-light" th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
-        </ul>
-      </div>
+    <div class="container">
+        <a class="navbar-brand text-light" href="/">AskFM</a>
+        <div class="d-flex align-items-center">
+            <form class="d-flex me-3" action="/users/search" method="get">
+                <input class="form-control search-input me-2"
+                       type="search"
+                       name="query"
+                       placeholder="Поиск пользователей..."
+                       required>
+            </form>
+            <div class="dropdown">
+                <button class="btn btn-link text-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i> <span th:text="${username}">Username</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end bg-dark">
+                    <li><a class="dropdown-item text-light" href="#"><i class="fas fa-cog"></i> Настройки</a></li>
+                    <li><a class="dropdown-item text-light" th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i>
+                        Выйти</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-  </div>
 </nav>
 <aside class="left-sidebar">
-  <a href="/" class="logo-link">
-    <i class="fas fa-comment-dots"></i>
-    <span>AskFM</span>
-  </a>
+    <a href="/" class="logo-link">
+        <i class="fas fa-comment-dots"></i>
+        <span>AskFM</span>
+    </a>
 
-  <nav class="side-nav">
-    <a href="/home" class="side-link">
-      <i class="fas fa-home"></i>
-      <span>Главная</span>
-    </a>
-    <a href="/explore" class="side-link">
-      <i class="fas fa-hashtag"></i>
-      <span>Поиск</span>
-    </a>
-    <a href="/notifications" class="side-link">
-      <i class="fas fa-bell"></i>
-      <span>Уведомления</span>
-    </a>
-    <a href="/messages" class="side-link">
-      <i class="fas fa-envelope"></i>
-      <span>Сообщения</span>
-    </a>
-    <a href="/saved" class="side-link">
-      <i class="fas fa-bookmark"></i>
-      <span>Закладки</span>
-    </a>
-    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
-      <i class="fas fa-user"></i>
-      <span>Профиль</span>
-    </a>
-  </nav>
+    <nav class="side-nav">
+        <a href="/home" class="side-link">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </a>
+        <a href="/explore" class="side-link">
+            <i class="fas fa-hashtag"></i>
+            <span>Поиск</span>
+        </a>
+        <a href="/notifications" class="side-link">
+            <i class="fas fa-bell"></i>
+            <span>Уведомления</span>
+        </a>
+        <a href="/messages" class="side-link">
+            <i class="fas fa-envelope"></i>
+            <span>Сообщения</span>
+        </a>
+        <a href="/saved" class="side-link">
+            <i class="fas fa-bookmark"></i>
+            <span>Закладки</span>
+        </a>
+        <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+    </nav>
+</aside>
+
+<aside class="right-sidebar">
+    <!-- Сегодняшние дни рождения -->
+    <div class="birthday-card" th:if="${not #lists.isEmpty(todaysBirthdays)}">
+        <div class="birthday-header">
+            <h5 class="mb-0">
+                <i class="fas fa-birthday-cake text-primary me-2"></i>
+                Дни рождения сегодня
+            </h5>
+        </div>
+        <div class="birthday-list">
+            <div th:each="birthday : ${todaysBirthdays}" class="birthday-item">
+                <img th:if="${birthday.avatarUrl}"
+                     th:src="${birthday.avatarUrl}"
+                     class="birthday-avatar"
+                     th:alt="${birthday.username + ' avatar'}">
+                <img th:unless="${birthday.avatarUrl}"
+                     src="/api/placeholder/48/48"
+                     class="birthday-avatar"
+                     th:alt="${birthday.username + ' avatar'}">
+                <div class="birthday-info">
+                    <a th:href="${birthday.userProfileUrl}" class="text-white text-decoration-none">
+                        <strong th:text="${birthday.username}">Username</strong>
+                    </a>
+                    <div class="text-muted" th:text="'Исполняется ' + ${birthday.upcomingAge} + ' лет'">
+                        Возраст
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Предстоящие дни рождения -->
+    <div class="birthday-card">
+        <div class="birthday-header">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar text-primary me-2"></i>
+                Предстоящие дни рождения
+            </h5>
+        </div>
+        <div class="birthday-list">
+            <div th:each="birthday : ${upcomingBirthdays}" class="birthday-item">
+                <img th:if="${birthday.avatarUrl}"
+                     th:src="${birthday.avatarUrl}"
+                     class="birthday-avatar"
+                     th:alt="${birthday.username + ' avatar'}">
+                <img th:unless="${birthday.avatarUrl}"
+                     src="/api/placeholder/48/48"
+                     class="birthday-avatar"
+                     th:alt="${birthday.username + ' avatar'}">
+                <div class="birthday-info">
+                    <a th:href="${birthday.userProfileUrl}" class="text-white text-decoration-none">
+                        <strong th:text="${birthday.username}">Username</strong>
+                    </a>
+                    <div class="text-muted">
+                        <span th:text="${birthday.formattedDate}">Дата</span>
+                        <small th:text="'(через ' + ${birthday.daysUntilBirthday} + ' дн.)'">
+                            Дней осталось
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/birthdays" class="upcoming-birthdays-link">
+            Показать все дни рождения
+        </a>
+    </div>
 </aside>
 <!-- Main Content -->
 <div class="main-container">
 
-  <!-- Profile Header -->
-  <div class="profile-header">
-    <div class="cover-photo">
-      <!-- Отображение обложки -->
-      <img th:if="${coverBase64 != null}"
-           th:src="@{'data:image/jpeg;base64,' + ${coverBase64}}"
-           class="w-100 h-100"
-           style="object-fit: cover;"
-           alt="Cover"
-           id="preview-cover">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="cover-photo">
+            <!-- Отображение обложки -->
+            <img th:if="${coverBase64 != null}"
+                 th:src="@{'data:image/jpeg;base64,' + ${coverBase64}}"
+                 class="w-100 h-100"
+                 style="object-fit: cover;"
+                 alt="Cover"
+                 id="preview-cover">
 
-      <!-- Placeholder для обложки -->
-      <img th:unless="${coverBase64 != null}"
-           src="/api/placeholder/600/200"
-           class="w-100 h-100"
-           style="object-fit: cover;"
-           alt="Cover"
-           id="preview-cover">
+            <!-- Placeholder для обложки -->
+            <img th:unless="${coverBase64 != null}"
+                 src="/api/placeholder/600/200"
+                 class="w-100 h-100"
+                 style="object-fit: cover;"
+                 alt="Cover"
+                 id="preview-cover">
 
-      <!-- Форма для загрузки обложки -->
-      <form th:if="${currentUser != null && currentUser == profileUser.username}"
-            th:action="@{/profile/cover}"
-            method="post"
-            enctype="multipart/form-data"
-            id="cover-form"
-            style="position: absolute; top: 10px; right: 10px;">
-        <div style="position: relative;">
-          <label for="cover-upload" class="btn btn-dark btn-sm">
-            <i class="fas fa-camera"></i> Изменить обложку
-          </label>
-          <input id="cover-upload"
-                 type="file"
-                 name="cover"
-                 accept="image/*"
-                 style="display: none;"
-                 onchange="handleCoverSelect(this)">
+            <!-- Форма для загрузки обложки -->
+            <form th:if="${currentUser != null && currentUser == profileUser.username}"
+                  th:action="@{/profile/cover}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="cover-form"
+                  style="position: absolute; top: 10px; right: 10px;">
+                <div style="position: relative;">
+                    <label for="cover-upload" class="btn btn-dark btn-sm">
+                        <i class="fas fa-camera"></i> Изменить обложку
+                    </label>
+                    <input id="cover-upload"
+                           type="file"
+                           name="cover"
+                           accept="image/*"
+                           style="display: none;"
+                           onchange="handleCoverSelect(this)">
+                </div>
+            </form>
+
+            <!-- Отображение аватара -->
+            <img th:if="${avatarBase64 != null}"
+                 th:src="@{'data:image/jpeg;base64,' + ${avatarBase64}}"
+                 class="profile-avatar"
+                 th:alt="${profileUser.username + ' avatar'}"
+                 id="preview-avatar">
+
+            <!-- Placeholder для новых пользователей -->
+            <img th:unless="${avatarBase64 != null}"
+                 src="/api/placeholder/134/134"
+                 class="profile-avatar"
+                 th:alt="${profileUser.username + ' avatar'}"
+                 id="preview-avatar">
+
+            <!-- Форма для загрузки аватара -->
+            <form th:if="${currentUser != null && currentUser == profileUser.username}"
+                  th:action="@{/profile/avatar}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="avatar-form"
+                  style="position: absolute; bottom: -30px; left: 120px;">
+                <div style="position: relative;">
+                    <label for="avatar-upload" class="btn btn-dark btn-sm rounded-circle"
+                           style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input id="avatar-upload"
+                           type="file"
+                           name="avatar"
+                           accept="image/*"
+                           style="display: none;"
+                           onchange="handleFileSelect(this)">
+
+                    <button type="submit"
+                            class="btn btn-primary btn-sm"
+                            id="save-avatar"
+                            style="display: none; position: absolute; left: 40px; top: 0;">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
         </div>
-      </form>
 
-      <!-- Отображение аватара -->
-      <img th:if="${avatarBase64 != null}"
-           th:src="@{'data:image/jpeg;base64,' + ${avatarBase64}}"
-           class="profile-avatar"
-           th:alt="${profileUser.username + ' avatar'}"
-           id="preview-avatar">
+        <div class="profile-info">
+            <div class="d-flex justify-content-end mb-3">
+                <form th:action="@{/profile/edit}" method="get">
+                    <button type="submit" class="edit-profile-btn">
+                        <i class="fas fa-edit me-2"></i>
+                        Редактировать профиль
+                    </button>
+                </form>
+            </div>
 
-      <!-- Placeholder для новых пользователей -->
-      <img th:unless="${avatarBase64 != null}"
-           src="/api/placeholder/134/134"
-           class="profile-avatar"
-           th:alt="${profileUser.username + ' avatar'}"
-           id="preview-avatar">
+            <h4 class="mb-1" th:text="${username}">Username</h4>
+            <div class="text-muted mb-3" th:text="'@' + ${username}">@username</div>
 
-      <!-- Форма для загрузки аватара -->
-      <form th:if="${currentUser != null && currentUser == profileUser.username}"
-            th:action="@{/profile/avatar}"
-            method="post"
-            enctype="multipart/form-data"
-            id="avatar-form"
-            style="position: absolute; bottom: -30px; left: 120px;">
-        <div style="position: relative;">
-          <label for="avatar-upload" class="btn btn-dark btn-sm rounded-circle"
-                 style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-camera"></i>
-          </label>
-          <input id="avatar-upload"
-                 type="file"
-                 name="avatar"
-                 accept="image/*"
-                 style="display: none;"
-                 onchange="handleFileSelect(this)">
-
-          <button type="submit"
-                  class="btn btn-primary btn-sm"
-                  id="save-avatar"
-                  style="display: none; position: absolute; left: 40px; top: 0;">
-            Сохранить
-          </button>
+            <div class="d-flex mb-3">
+                <a th:href="@{'/users/' + ${username} + '/following'}" class="stats-link">
+                    <span class="fw-bold">250</span> <span class="text-muted">подписок</span>
+                </a>
+                <a th:href="@{'/users/' + ${username} + '/followers'}" class="stats-link">
+                    <span class="fw-bold">1.2K</span> <span class="text-muted">подписчиков</span>
+                </a>
+            </div>
         </div>
-      </form>
     </div>
-
-    <div class="profile-info">
-      <div class="d-flex justify-content-end mb-3">
-        <form th:action="@{/profile/edit}" method="get">
-          <button type="submit" class="edit-profile-btn">
-            <i class="fas fa-edit me-2"></i>
-            Редактировать профиль
-          </button>
-        </form>
-      </div>
-
-      <h4 class="mb-1" th:text="${username}">Username</h4>
-      <div class="text-muted mb-3" th:text="'@' + ${username}">@username</div>
-
-      <div class="d-flex mb-3">
-        <a th:href="@{'/users/' + ${username} + '/following'}" class="stats-link">
-          <span class="fw-bold">250</span> <span class="text-muted">подписок</span>
-        </a>
-        <a th:href="@{'/users/' + ${username} + '/followers'}" class="stats-link">
-          <span class="fw-bold">1.2K</span> <span class="text-muted">подписчиков</span>
-        </a>
-      </div>
-    </div>
-  </div>
-  <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}" autocomplete="off">
-    <div class="d-flex gap-3">
-      <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"
-           class="rounded-circle"
-           style="width: 48px; height: 48px;"
-           alt="User avatar">
-      <div class="flex-grow-1">
+    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}"
+          autocomplete="off">
+        <div class="d-flex gap-3">
+            <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"
+                 class="rounded-circle"
+                 style="width: 48px; height: 48px;"
+                 alt="User avatar">
+            <div class="flex-grow-1">
      <textarea class="form-control bg-transparent text-white border-0"
                style="resize: none; height: 100px;"
                placeholder="Что нового?"
                th:field="*{content}"
                autocomplete="off"></textarea>
 
-        <input type="text"
-               class="form-control bg-transparent text-white border-0 mt-2"
-               placeholder="Теги (через запятую)"
-               th:field="*{tags}"
-               autocomplete="off"/>
+                <input type="text"
+                       class="form-control bg-transparent text-white border-0 mt-2"
+                       placeholder="Теги (через запятую)"
+                       th:field="*{tags}"
+                       autocomplete="off"/>
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <div class="d-flex gap-2">
-            <label class="btn btn-outline-primary btn-sm">
-              <i class="fas fa-image"></i>
-              <input type="file" name="media" style="display: none;" accept="image/*">
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary btn-sm px-4">
-            Опубликовать
-          </button>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="d-flex gap-2">
+                        <label class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-image"></i>
+                            <input type="file" name="media" style="display: none;" accept="image/*">
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">
+                        Опубликовать
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </form>
-<!--  &lt;!&ndash; Form for creating posts &ndash;&gt;-->
-<!--  <div class="post-form-container p-3 border-bottom" style="border-color: var(&#45;&#45;border-color) !important;">-->
-<!--    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}">-->
-<!--      <div class="d-flex gap-3">-->
-<!--        <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"-->
-<!--             class="rounded-circle"-->
-<!--             style="width: 48px; height: 48px;"-->
-<!--             alt="User avatar">-->
-<!--        <div class="flex-grow-1">-->
-<!--        <textarea class="form-control bg-transparent text-white border-0"-->
-<!--                  style="resize: none; height: 100px;"-->
-<!--                  placeholder="Что нового?"-->
-<!--                  th:field="*{content}"></textarea>-->
-
-<!--          <input type="text"-->
-<!--                 class="form-control bg-transparent text-white border-0 mt-2"-->
-<!--                 placeholder="Теги (через запятую)"-->
-<!--                 th:field="*{tags}"/>-->
-
-<!--          <div class="d-flex justify-content-between align-items-center mt-3">-->
-<!--            <div class="d-flex gap-2">-->
-<!--              <label class="btn btn-outline-primary btn-sm">-->
-<!--                <i class="fas fa-image"></i>-->
-<!--                <input type="file" name="media" style="display: none;" accept="image/*">-->
-<!--              </label>-->
-<!--            </div>-->
-<!--            <button type="submit" class="btn btn-primary btn-sm px-4">-->
-<!--              Опубликовать-->
-<!--            </button>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </form>-->
-<!--  </div>-->
-
-  <!-- cписок постов Form -->
-<!--  <div class="posts-container">-->
-<!--    <div th:each="post : ${posts}" class="post p-3 border-bottom">-->
-<!--      <div class="d-flex gap-3">-->
-<!--        <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"-->
-<!--             class="rounded-circle"-->
-<!--             style="width: 48px; height: 48px;">-->
-<!--        <div class="flex-grow-1">-->
-<!--          <div class="mb-2">-->
-<!--            <span class="fw-bold" th:text="${post.authorUsername}"></span>-->
-<!--          </div>-->
-<!--          <p th:text="${post.content}"></p>-->
-<!--          <img th:if="${post.base64Media != null}"-->
-<!--               th:src="'data:image/jpeg;base64,' + ${post.base64Media}"-->
-<!--               class="img-fluid rounded">-->
-<!--          <div class="d-flex justify-content-between align-items-center mt-2">-->
-<!--            <div class="d-flex gap-3">-->
-<!--              <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline">-->
-<!--                <button type="submit" class="btn btn-link text-white p-0">-->
-<!--                  <i class="fas" th:classappend="${post.isLikedByCurrentUser ? 'fa-heart text-danger' : 'fa-heart-o'}"></i>-->
-<!--                  <span th:text="${post.likesCount}"></span>-->
-<!--                </button>-->
-<!--              </form>-->
-<!--              <form th:if="${currentUser == post.authorUsername}"-->
-<!--                    th:action="@{/posts/{id}/delete(id=${post.id})}"-->
-<!--                    method="post"-->
-<!--                    class="d-inline">-->
-<!--                <button type="submit" class="btn btn-link text-danger p-0">-->
-<!--                  <i class="fas fa-trash"></i>-->
-<!--                </button>-->
-<!--              </form>-->
-<!--            </div>-->
-<!--            <small class="text-muted" th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"-->
-<!--                   style="color: #e2e2e2 !important;"></small>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
+    </form>
 
 
 </div>
+
 <script>
-  document.querySelector('textarea').addEventListener('input', function(e) {
-    let text = e.target.value;
-    let cursorPos = e.target.selectionStart;
-    let lastAtSymbol = text.lastIndexOf('@', cursorPos);
+    document.querySelector('textarea').addEventListener('input', function (e) {
+        let text = e.target.value;
+        let cursorPos = e.target.selectionStart;
+        let lastAtSymbol = text.lastIndexOf('@', cursorPos);
 
-    if (lastAtSymbol !== -1 && cursorPos > lastAtSymbol) {
-      let username = text.substring(lastAtSymbol + 1, cursorPos);
-      if (username.length > 0) {
-        fetch(`/api/users/search?query=${username}`)
-                .then(response => response.json())
-                .then(users => {
-                  // Показать выпадающий список с пользователями
-                  showUserSuggestions(users, lastAtSymbol);
-                });
-      }
-    }
-  });
-
-  function showUserSuggestions(users, position) {
-    let suggestions = document.createElement('div');
-    suggestions.className = 'mention-suggestions';
-    users.forEach(user => {
-      let item = document.createElement('div');
-      item.textContent = '@' + user.username;
-      item.onclick = () => insertMention(user.username);
-      suggestions.appendChild(item);
+        if (lastAtSymbol !== -1 && cursorPos > lastAtSymbol) {
+            let username = text.substring(lastAtSymbol + 1, cursorPos);
+            if (username.length > 0) {
+                fetch(`/api/users/search?query=${username}`)
+                    .then(response => response.json())
+                    .then(users => {
+                        // Показать выпадающий список с пользователями
+                        showUserSuggestions(users, lastAtSymbol);
+                    });
+            }
+        }
     });
-  }
+
+    function showUserSuggestions(users, position) {
+        let suggestions = document.createElement('div');
+        suggestions.className = 'mention-suggestions';
+        users.forEach(user => {
+            let item = document.createElement('div');
+            item.textContent = '@' + user.username;
+            item.onclick = () => insertMention(user.username);
+            suggestions.appendChild(item);
+        });
+    }
 </script>
 
 <script>
-  function handleFileSelect(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
 
-      reader.onload = function(e) {
-        // Обновляем превью изображения
-        document.getElementById('preview-avatar').src = e.target.result;
-        // Показываем кнопку сохранения
-        document.getElementById('save-avatar').style.display = 'block';
-      };
+            reader.onload = function (e) {
+                // Обновляем превью изображения
+                document.getElementById('preview-avatar').src = e.target.result;
+                // Показываем кнопку сохранения
+                document.getElementById('save-avatar').style.display = 'block';
+            };
 
-      reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
     }
-  }
 </script>
 <script>
-  document.getElementById('avatar-upload').onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('preview-avatar').src = e.target.result;
-        // Показываем кнопку сохранения
-        document.getElementById('save-avatar').style.display = 'block';
-      }
-      reader.readAsDataURL(file);
+    document.getElementById('avatar-upload').onchange = function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('preview-avatar').src = e.target.result;
+                // Показываем кнопку сохранения
+                document.getElementById('save-avatar').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
     }
-  }
-  function handleCoverSelect(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
 
-      reader.onload = function(e) {
-        document.getElementById('preview-cover').src = e.target.result;
-        input.form.submit(); // Автоматически отправляем форму
-      };
+    function handleCoverSelect(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
 
-      reader.readAsDataURL(input.files[0]);
+            reader.onload = function (e) {
+                document.getElementById('preview-cover').src = e.target.result;
+                input.form.submit(); // Автоматически отправляем форму
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
     }
-  }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

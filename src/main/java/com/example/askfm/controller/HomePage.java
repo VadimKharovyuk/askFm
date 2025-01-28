@@ -1,7 +1,9 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.UpcomingBirthdayDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.model.User;
+import com.example.askfm.service.BirthdayService;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,12 +19,12 @@ import java.util.List;
 @Controller
 public class HomePage {
     private final UserService userService;
+    private final BirthdayService birthdayService;
 
     @GetMapping
     public String home() {
         return "home";
     }
-
 
 
 
