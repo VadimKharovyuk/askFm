@@ -25,10 +25,12 @@ public class SecurityConfig {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
-    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder , CustomAuthenticationFailureHandler authenticationFailureHandler) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
     @Bean
@@ -43,6 +45,7 @@ public class SecurityConfig {
                                 "/register", "/login",
                                 "/logout-page",
                                 "/news/**",
+                                "/account-locked",
                                 "/support/**",
                                 "/css/**", "/js/**")
                         .permitAll()
@@ -53,6 +56,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/home", true)
                         .failureUrl("/login?error=true")
+                        .failureHandler(authenticationFailureHandler)
                         .permitAll()
                 )
                 .logout((logout) -> logout

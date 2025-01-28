@@ -47,6 +47,14 @@ public class User {
     @Column(name = "role")
     private UserRole role;
 
+    @Column(name = "is_locked", columnDefinition = "boolean default false")
+    private boolean locked = false;
+
+    @Column(name = "locked_at")
+    private LocalDateTime lockedAt;
+
+    @Column(name = "lock_reason")
+    private String lockReason;
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

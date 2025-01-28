@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.config.CookieService;
 import com.example.askfm.dto.UserRegistrationDTO;
+import com.example.askfm.model.User;
 import com.example.askfm.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,14 +51,68 @@ public class AuthController {
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(required = false) String error,
                                 @RequestParam(required = false) String registered,
+                                @RequestParam(required = false) String username,
                                 Model model) {
-        if (error != null) {
-            model.addAttribute("error", "Неверные учетные данные");
+
+        // Проверяем был ли передан username
+        if (username != null) {
+            try {
+                // Пытаемся найти пользователя в БД
+                User user = userService.findByUsername(username);
+
+                // Если пользователь найден и заблокирован
+                if (user.isLocked()) {
+                    // Перенаправляем на страницу с информацией о блокировке
+                    return "redirect:/account-locked?username=" + username;
+                }
+            } catch (UsernameNotFoundException e) {
+                // Если пользователь не найден, добавляем сообщение об ошибке
+                model.addAttribute("error", "Пользователь не найден");
+                return "aut/login";
+            }
         }
+
+        // Проверяем наличие ошибки аутентификации
+        if (error != null) {
+            // Если пользователь не найден ранее, показываем общее сообщение об ошибке
+            if (!model.containsAttribute("error")) {
+                model.addAttribute("error", "Неверные учетные данные");
+            }
+        }
+
+        // Если это успешная регистрация
         if (registered != null) {
             model.addAttribute("registered", "Регистрация успешна! Войдите в систему.");
         }
+
         return "aut/login";
+    }
+
+    @GetMapping("/account-locked")
+    public String showLockedAccountPage(@RequestParam String username,
+                                        Model model,
+                                        RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.findByUsername(username);
+
+            // Проверяем статус блокировки
+            if (!user.isLocked()) {
+                // Если пользователь не заблокирован, перенаправляем на страницу логина
+                return "redirect:/login";
+            }
+
+            // Добавляем информацию о блокировке в модель
+            model.addAttribute("username", username);
+            model.addAttribute("lockReason", user.getLockReason());
+            model.addAttribute("lockedAt", user.getLockedAt());
+
+            return "aut/account-locked";
+
+        } catch (UsernameNotFoundException e) {
+            // Если пользователь не найден, перенаправляем на логин с сообщением об ошибке
+            redirectAttributes.addAttribute("error", "Пользователь не найден");
+            return "redirect:/login";
+        }
     }
 
     @PostMapping("/login-success")

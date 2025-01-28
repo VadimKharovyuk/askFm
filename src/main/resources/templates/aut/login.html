@@ -196,7 +196,14 @@
 
   <!-- Alerts -->
   <div th:if="${param.error}" class="alert">
-    Неверное имя пользователя или пароль.
+    <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']} != null">
+      <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION'] instanceof T(org.springframework.security.authentication.LockedException)}">
+        Аккаунт заблокирован. Перенаправление...
+      </div>
+      <div th:unless="${session['SPRING_SECURITY_LAST_EXCEPTION'] instanceof T(org.springframework.security.authentication.LockedException)}">
+        Неверное имя пользователя или пароль.
+      </div>
+    </div>
   </div>
 
   <div th:if="${param.logout}" class="alert alert-success">

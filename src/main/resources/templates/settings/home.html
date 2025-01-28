@@ -152,9 +152,10 @@
       <i class="fas fa-bookmark"></i>
       <span>Закладки</span>
     </a>
-    <a href="/profile" class="side-link">
+    <a th:href="@{'/users/' + ${username}}" class="side-link">
       <i class="fas fa-user"></i>
       <span>Профиль</span>
+    </a>
     </a>
     <a href="/settings" class="side-link" style="background-color: #e8f5fe; color: #1da1f2;">
       <i class="fas fa-cog"></i>

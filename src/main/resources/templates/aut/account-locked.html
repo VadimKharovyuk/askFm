@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аккаунт заблокирован</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .lock-icon {
+      font-size: 64px;
+      color: #dc3545;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .message {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .reason {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #721c24;
+    }
+
+    .date {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .back-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+
+    .support-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .support-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .support-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <i class="fas fa-lock lock-icon"></i>
+  <h1>Аккаунт заблокирован</h1>
+
+  <p class="message">
+    К сожалению, ваш аккаунт был заблокирован администрацией.
+  </p>
+
+  <div class="reason" th:if="${lockReason}">
+    <strong>Причина блокировки:</strong><br>
+    <span th:text="${lockReason}"></span>
+  </div>
+
+  <div class="date" th:if="${lockedAt}">
+    <strong>Дата блокировки:</strong><br>
+    <span th:text="${#temporals.format(lockedAt, 'dd.MM.yyyy HH:mm')}"></span>
+  </div>
+
+  <a href="/" class="back-button">
+    <i class="fas fa-home"></i> На главную
+  </a>
+
+  <p class="support-text">
+    Если вы считаете, что это ошибка, пожалуйста,
+    <a href="/support" class="support-link">свяжитесь с поддержкой</a>
+  </p>
+</div>
+</body>
+</html>

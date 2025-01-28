@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,11 +41,15 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-
+        if (user.isLocked()) {
+            throw new LockedException("Аккаунт заблокирован. " +
+                    (user.getLockReason() != null ? "Причина: " + user.getLockReason() : ""));
+        }
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .roles("USER")
+                .accountLocked(user.isLocked())
                 .build();
     }
 
@@ -208,5 +213,44 @@ public class UserService implements UserDetailsService {
         // Устанавливаем новый пароль
         user.setPassword(passwordEncoder.encode(passwordDTO.getNewPassword()));
         userRepository.save(user);
+    }
+
+
+
+    // Метод для блокировки пользователя
+    public void lockUser(String username, String reason) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        user.setLocked(true);
+        user.setLockedAt(LocalDateTime.now());
+        user.setLockReason(reason);
+
+        userRepository.save(user);
+        log.info("User {} has been locked. Reason: {}", username, reason);
+    }
+
+    // Метод для разблокировки пользователя
+    public void unlockUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        user.setLocked(false);
+        user.setLockedAt(null);
+        user.setLockReason(null);
+
+        userRepository.save(user);
+        log.info("User {} has been unlocked", username);
+    }
+
+    // Метод для проверки статуса блокировки
+    public boolean isUserLocked(String username) {
+        return userRepository.findByUsername(username)
+                .map(User::isLocked)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 }

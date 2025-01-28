@@ -1,17 +1,20 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.UserLockDTO;
 import com.example.askfm.enums.UserRole;
 import com.example.askfm.model.User;
 import com.example.askfm.service.NewsService;
 import com.example.askfm.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -19,6 +22,48 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminDashboardController {
     private final UserService userService;
 //    private final NewsService newsService;
+
+    @GetMapping("/settings")
+    public String showSettings(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.findByUsername(userDetails.getUsername());
+        if (currentUser.getRole() != UserRole.ADMIN) {
+            return "redirect:/login";
+        }
+
+        List<User> users = userService.findAllUsers();
+        model.addAttribute("users", users);
+        return "admin/settings";
+    }
+
+    @GetMapping("/search-user")
+    public String searchUser(@RequestParam String username, Model model) {
+        User users = userService.findByUsername(username);
+        model.addAttribute("users", users);
+        return "admin/settings";
+    }
+
+    @PostMapping("/users/{username}/lock")
+    @ResponseBody
+    public ResponseEntity<?> lockUser(@PathVariable String username,
+                                      @RequestBody UserLockDTO lockDTO) {
+        try {
+            userService.lockUser(username, lockDTO.getReason());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/users/{username}/unlock")
+    @ResponseBody
+    public ResponseEntity<?> unlockUser(@PathVariable String username) {
+        try {
+            userService.unlockUser(username);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
@@ -53,13 +98,5 @@ public class AdminDashboardController {
         return "admin/analytics";
     }
 
-    @GetMapping("/settings")
-    public String showSettings(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User currentUser = userService.findByUsername(userDetails.getUsername());
-        if (currentUser.getRole() != UserRole.ADMIN) {
-            return "redirect:/login";
-        }
-        // Добавить настройки
-        return "admin/settings";
-    }
+
 }
