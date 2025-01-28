@@ -1,5 +1,4 @@
 package com.example.askfm.service;
-
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.exception.PostNotFoundException;
@@ -8,7 +7,6 @@ import com.example.askfm.model.PostView;
 import com.example.askfm.model.Tag;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.*;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -72,27 +69,6 @@ public class PostService {
         return postRepository.save(post);
     }
 
-
-    public PostDTO getPostDTO(Post post, String currentUsername) {
-        return PostDTO.builder()
-                .id(post.getId())
-                .authorUsername(post.getAuthor().getUsername())
-                .authorAvatar(imageService.getBase64Avatar(post.getAuthor().getAvatar()))
-                .content(post.getContent())
-                .base64Media(post.getMedia() != null ?
-                        imageService.getBase64Avatar(post.getMedia()) : null)
-                .publishedAt(post.getPublishedAt())
-                .tags(new HashSet<>(post.getTags().stream()
-                        .map(Tag::getName)
-                        .collect(Collectors.toSet())))
-                .likesCount(post.getLikedBy().size())
-                .isLikedByCurrentUser(currentUsername != null &&
-                        post.getLikedBy().stream()
-                                .anyMatch(user -> user.getUsername().equals(currentUsername)))
-                .commentsCount(commentRepository.countByPostId(post.getId()))
-                .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(post.getId(), currentUsername))
-                .build();
-    }
 
     public void likePost(Long postId, String username) {
         Post post = postRepository.findById(postId)
@@ -181,5 +157,26 @@ public class PostService {
         String cleanTag = tags.replace("[", "").replace("]", "").trim();
         Page<Post> posts = postRepository.findByTagNameContaining(cleanTag, pageable);
         return posts.map(post -> getPostDTO(post, currentUsername));
+    }
+
+    public PostDTO getPostDTO(Post post, String currentUsername) {
+        return PostDTO.builder()
+                .id(post.getId())
+                .authorUsername(post.getAuthor().getUsername())
+                .authorAvatar(imageService.getBase64Avatar(post.getAuthor().getAvatar()))
+                .content(post.getContent())
+                .base64Media(post.getMedia() != null ?
+                        imageService.getBase64Avatar(post.getMedia()) : null)
+                .publishedAt(post.getPublishedAt())
+                .tags(new HashSet<>(post.getTags().stream()
+                        .map(Tag::getName)
+                        .collect(Collectors.toSet())))
+                .likesCount(post.getLikedBy().size())
+                .isLikedByCurrentUser(currentUsername != null &&
+                        post.getLikedBy().stream()
+                                .anyMatch(user -> user.getUsername().equals(currentUsername)))
+                .commentsCount(commentRepository.countByPostId(post.getId()))
+                .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(post.getId(), currentUsername))
+                .build();
     }
 }

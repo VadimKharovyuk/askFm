@@ -1,6 +1,7 @@
 package com.example.askfm.service;
 
 import com.example.askfm.dto.SubscriptionDTO;
+import com.example.askfm.dto.UpcomingBirthdayDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.model.Subscription;
 import com.example.askfm.model.User;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
+
 
     public void follow(String subscriberUsername, String subscribedToUsername) {
         // Проверяем, что пользователь не пытается подписаться на самого себя
@@ -136,6 +139,7 @@ public class SubscriptionService {
                         .build())
                 .collect(Collectors.toList());
     }
+
 
     private SubscriptionDTO convertToDTO(Subscription subscription) {
         return SubscriptionDTO.builder()
