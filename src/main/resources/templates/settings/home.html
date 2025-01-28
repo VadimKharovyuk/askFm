@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+    }
+
+    /* Боковая панель */
+    .left-sidebar {
+      width: 250px;
+      height: 100vh;
+      background-color: white;
+      padding: 20px;
+      position: fixed;
+      border-right: 1px solid #e1e8ed;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      color: #1da1f2;
+      text-decoration: none;
+      margin-bottom: 30px;
+    }
+
+    .logo-link span {
+      margin-left: 10px;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 25px;
+      margin-bottom: 5px;
+    }
+
+    .side-link:hover {
+      background-color: #e8f5fe;
+      color: #1da1f2;
+    }
+
+    .side-link i {
+      width: 24px;
+      margin-right: 15px;
+    }
+
+    /* Основной контент */
+    .main-content {
+      margin-left: 250px;
+      padding: 30px;
+      width: calc(100% - 250px);
+    }
+
+    .settings-header {
+      margin-bottom: 30px;
+    }
+
+    .settings-header h1 {
+      font-size: 24px;
+      color: #333;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+    }
+
+    .settings-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .settings-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .settings-card h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .settings-card h2 i {
+      margin-right: 10px;
+      color: #1da1f2;
+    }
+
+    .settings-card p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<!-- Боковая панель -->
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a href="/profile" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/settings" class="side-link" style="background-color: #e8f5fe; color: #1da1f2;">
+      <i class="fas fa-cog"></i>
+      <span>Настройки</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Основной контент -->
+<main class="main-content">
+  <div class="settings-header">
+    <h1>Настройки профиля</h1>
+    <p th:text="${username}" style="color: #666; margin-top: 5px;"></p>
+  </div>
+
+  <div class="settings-grid">
+    <!-- Блок изменения пароля -->
+    <a href="/settings/password" class="settings-card">
+      <h2>
+        <i class="fas fa-key"></i>
+        Изменить пароль
+      </h2>
+      <p>Обновите свой пароль для обеспечения безопасности аккаунта</p>
+    </a>
+
+    <!-- Блок изменения аватара -->
+    <a href="/settings/avatar" class="settings-card">
+      <h2>
+        <i class="fas fa-user-circle"></i>
+        Изменить аватар
+      </h2>
+      <p>Загрузите новую фотографию профиля</p>
+    </a>
+
+    <!-- Блок настроек приватности -->
+    <a href="/settings/privacy" class="settings-card">
+      <h2>
+        <i class="fas fa-shield-alt"></i>
+        Приватность
+      </h2>
+      <p>Управляйте настройками конфиденциальности вашего аккаунта</p>
+    </a>
+
+    <!-- Блок настроек профиля -->
+    <a href="/settings/profile" class="settings-card">
+      <h2>
+        <i class="fas fa-user-edit"></i>
+        Редактировать профиль
+      </h2>
+      <p>Измените информацию в вашем профиле</p>
+    </a>
+
+    <!-- Блок настроек уведомлений -->
+    <a href="/settings/notifications" class="settings-card">
+      <h2>
+        <i class="fas fa-bell"></i>
+        Уведомления
+      </h2>
+      <p>Настройте параметры уведомлений</p>
+    </a>
+
+    <!-- Блок настроек безопасности -->
+    <a href="/settings/security" class="settings-card">
+      <h2>
+        <i class="fas fa-lock"></i>
+        Безопасность
+      </h2>
+      <p>Управляйте параметрами безопасности вашего аккаунта</p>
+    </a>
+  </div>
+</main>
+</body>
+</html>

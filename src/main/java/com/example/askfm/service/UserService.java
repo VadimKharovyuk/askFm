@@ -1,6 +1,7 @@
 package com.example.askfm.service;
 
 import com.example.askfm.config.CacheMonitor;
+import com.example.askfm.dto.ChangePasswordDTO;
 import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.enums.UserRole;
@@ -188,5 +189,24 @@ public class UserService implements UserDetailsService {
     public User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+    }
+
+    public void changePassword(String username, ChangePasswordDTO passwordDTO) {
+        // Проверяем совпадение паролей
+        if (!passwordDTO.getNewPassword().equals(passwordDTO.getConfirmPassword())) {
+            throw new IllegalArgumentException("Пароли не совпадают");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+
+        // Проверяем, что старый пароль верный
+        if (!passwordEncoder.matches(passwordDTO.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Неверный текущий пароль");
+        }
+
+        // Устанавливаем новый пароль
+        user.setPassword(passwordEncoder.encode(passwordDTO.getNewPassword()));
+        userRepository.save(user);
     }
 }

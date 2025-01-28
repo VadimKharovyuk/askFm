@@ -304,7 +304,7 @@
                     <i class="fas fa-user"></i> <span th:text="${username}">Username</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end bg-dark">
-                    <li><a class="dropdown-item text-light" href="#"><i class="fas fa-cog"></i> Настройки</a></li>
+                    <li><a class="dropdown-item text-light" href="/settings"><i class="fas fa-cog"></i> Настройки</a></li>
                     <li><a class="dropdown-item text-light" th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i>
                         Выйти</a></li>
                 </ul>
@@ -345,7 +345,6 @@
         </a>
     </nav>
 </aside>
-
 <aside class="right-sidebar">
     <!-- Сегодняшние дни рождения -->
     <div class="birthday-card" th:if="${not #lists.isEmpty(todaysBirthdays)}">
@@ -413,8 +412,10 @@
         </a>
     </div>
 </aside>
+
 <!-- Main Content -->
 <div class="main-container">
+
 
     <!-- Profile Header -->
     <div class="profile-header">
@@ -558,6 +559,7 @@
 
 
 </div>
+
 
 <script>
     document.querySelector('textarea').addEventListener('input', function (e) {
