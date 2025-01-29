@@ -230,6 +230,7 @@ public class UserService implements UserDetailsService {
         log.info("User {} has been locked. Reason: {}", username, reason);
     }
 
+
     // Метод для разблокировки пользователя
     public void unlockUser(String username) {
         User user = userRepository.findByUsername(username)

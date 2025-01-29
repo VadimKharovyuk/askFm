@@ -18,9 +18,11 @@ public class PostReportDTO {
     private Long postId;
     private String postContent; // краткое содержание поста
     private String reporterUsername;
+    private String authorUsername;
     private ReportCategory category;
     private String categoryDisplayName;
     private String reason;
     private LocalDateTime createdAt;
     private Integer similarReportsCount;
+
 }

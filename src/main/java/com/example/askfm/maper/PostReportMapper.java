@@ -40,6 +40,7 @@ public class PostReportMapper {
                 .reason(report.getReason())
                 .createdAt(report.getCreatedAt())
                 .similarReportsCount(report.getSimilarReportsCount())
+                .authorUsername(report.getPost().getAuthor().getUsername())
                 .build();
     }
 

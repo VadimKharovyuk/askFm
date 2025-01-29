@@ -5,6 +5,7 @@ import com.example.askfm.maper.PostReportMapper;
 import com.example.askfm.model.Post;
 import com.example.askfm.service.PostReportService;
 import com.example.askfm.service.PostService;
+import com.example.askfm.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ReportController {
     private final PostReportService reportService;
     private final PostService postService;
+    private final UserService userService;
+
+
+    @PostMapping("/lockUser")
+    public String lockUser(@RequestParam String username,
+                           @RequestParam(required = false, defaultValue = "Нарушение правил сообщества") String reason) {
+        log.info("Attempting to lock user: {}", username);
+        try {
+            userService.lockUser(username, reason);
+            log.info("Successfully locked user: {}", username);
+        } catch (Exception e) {
+            log.error("Error locking user {}: {}", username, e.getMessage());
+            throw e;
+        }
+        return "redirect:/admin/reports";
+    }
 
 
 

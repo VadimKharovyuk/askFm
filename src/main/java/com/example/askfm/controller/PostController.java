@@ -8,6 +8,7 @@ import com.example.askfm.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-
+@Slf4j
 @Controller
 @RequestMapping("/posts")
 @RequiredArgsConstructor
@@ -56,6 +56,7 @@ public class PostController {
 
         // Для отображения формы добавления комментария
         model.addAttribute("newComment", new CommentDTO());
+
 
         PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
         model.addAttribute("post", post);
