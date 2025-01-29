@@ -13,22 +13,41 @@ public class ThreadPoolConfig {
     @Value("${server.cpu-cores:4}")
     private int availableCores;
 
-    @Bean(name = "messageProcessor")
-    public ExecutorService messageProcessingPool() {
-        int optimalThreads = Math.max(2, availableCores);
+//    @Bean(name = "messageProcessor")
+//    public ExecutorService messageProcessingPool() {
+//        int optimalThreads = Math.max(2, availableCores);
+//
+//        return new ThreadPoolExecutor(
+//                optimalThreads,
+//                optimalThreads,
+//                60L, TimeUnit.SECONDS,
+//                new ArrayBlockingQueue<>(100),
+//                r -> {
+//                    Thread thread = new Thread(r);
+//                    thread.setName("MsgProcessor-" + Thread.currentThread().getId());
+//                    thread.setPriority(Thread.NORM_PRIORITY - 1);
+//                    return thread;
+//                },
+//                new ThreadPoolExecutor.CallerRunsPolicy()
+//        );
+//    }
+@Bean(name = "messageProcessor")
+public ExecutorService messageProcessingPool() {
+    int optimalThreads = Math.max(2, availableCores);
+    AtomicInteger threadCounter = new AtomicInteger(0);
 
-        return new ThreadPoolExecutor(
-                optimalThreads,
-                optimalThreads,
-                60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(100),
-                r -> {
-                    Thread thread = new Thread(r);
-                    thread.setName("MsgProcessor-" + Thread.currentThread().getId());
-                    thread.setPriority(Thread.NORM_PRIORITY - 1);
-                    return thread;
-                },
-                new ThreadPoolExecutor.CallerRunsPolicy()
-        );
-    }
+    return new ThreadPoolExecutor(
+            optimalThreads,
+            optimalThreads,
+            60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(100),
+            r -> {
+                Thread thread = new Thread(r);
+                thread.setName("MsgProcessor-" + threadCounter.incrementAndGet());
+                thread.setPriority(Thread.NORM_PRIORITY);
+                return thread;
+            },
+            new ThreadPoolExecutor.CallerRunsPolicy()
+    );
+}
 }

@@ -1,5 +1,8 @@
 package com.example.askfm.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum NewsCategory {
     FEATURE_UPDATES("Обновления функционала"),
     SECURITY("Безопасность"),

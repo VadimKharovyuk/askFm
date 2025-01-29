@@ -1,4 +1,5 @@
 package com.example.askfm.service;
+
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.exception.PostNotFoundException;
@@ -9,6 +10,7 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -96,13 +99,12 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException( postId));
+                .orElseThrow(() -> new PostNotFoundException(postId));
 
         postViewRepository.deleteByPostId(postId);
         tagRepository.deleteByPostId(postId);
         postRepository.delete(post);
     }
-
 
 
     @Transactional
@@ -178,5 +180,12 @@ public class PostService {
                 .commentsCount(commentRepository.countByPostId(post.getId()))
                 .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(post.getId(), currentUsername))
                 .build();
+    }
+
+
+
+    public Post findById(@NotNull(message = "ID поста обязателен") Long postId) {
+        return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+
     }
 }

@@ -30,7 +30,7 @@ public void registerStompEndpoints(StompEndpointRegistry registry) {
             .setAllowedOriginPatterns("http://localhost:*")
             .withSockJS()
             .setWebSocketEnabled(true)
-            .setHeartbeatTime(25000); // Добавляем heartbeat
+            .setHeartbeatTime(10000);
 }
 
     @EventListener

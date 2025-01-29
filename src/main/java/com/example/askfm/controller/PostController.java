@@ -1,9 +1,7 @@
 package com.example.askfm.controller;
 
-import com.example.askfm.dto.CommentDTO;
-import com.example.askfm.dto.ListCommentDTO;
-import com.example.askfm.dto.PostCreateDTO;
-import com.example.askfm.dto.PostDTO;
+import com.example.askfm.dto.*;
+import com.example.askfm.enums.ReportCategory;
 import com.example.askfm.model.Post;
 import com.example.askfm.service.CommentService;
 import com.example.askfm.service.PostService;
@@ -50,6 +48,8 @@ public class PostController {
         model.addAttribute("postViews", postViews);
         model.addAttribute("currentUser", currentUsername);
 
+        model.addAttribute("reportForm", new PostReportCreateDTO());
+        model.addAttribute("categories", ReportCategory.values());
 
         Page<ListCommentDTO> comments = commentService.getPostCommentsList(postId, pageable);
         model.addAttribute("comments", comments);
