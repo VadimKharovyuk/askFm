@@ -7,6 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -61,5 +62,6 @@ public class Post {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Tag> tags = new HashSet<>();
 
-
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<PostReport> reports;
 }

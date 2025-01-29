@@ -96,17 +96,27 @@
               </a>
             </div>
           </div>
-
           <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-outline-danger btn-sm">
-              <i class="fas fa-trash"></i> Удалить пост
-            </button>
+            <!-- Форма для удаления поста -->
+            <form th:action="@{/report/delete}" method="post" style="display: inline;">
+              <input type="hidden" name="id" th:value="${report.postId}" />
+              <button type="submit" class="btn btn-outline-danger btn-sm"
+                      th:onclick="'return confirm(\'Вы уверены, что хотите удалить пост?\');'">
+                <i class="fas fa-trash"></i> Удалить пост
+              </button>
+            </form>
+
+            <!-- Остальные кнопки -->
             <button class="btn btn-outline-warning btn-sm">
               <i class="fas fa-ban"></i> Заблокировать автора
             </button>
-            <button class="btn btn-outline-success btn-sm">
-              <i class="fas fa-check"></i> Отклонить жалобу
-            </button>
+            <form th:action="@{/report/delete-report}" method="post" style="display: inline;">
+              <input type="hidden" name="id" th:value="${report.id}" />
+              <button type="submit" class="btn btn-outline-success btn-sm"
+                      th:onclick="'return confirm(\'Вы уверены, что хотите отклонить жалобу?\');'">
+                <i class="fas fa-check"></i> Отклонить жалобу
+              </button>
+            </form>
           </div>
         </div>
       </div>

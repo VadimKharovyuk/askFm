@@ -9,7 +9,8 @@ public class AskFmApplication {
     public static void main(String[] args) {
         SpringApplication.run(AskFmApplication.class, args);
     }
-//заблокировать юзера
+
     //посты которые лайкнул юзер
 // добавить пагинацию в список юзеров для админа
+    //удалление посста с ролью админ
 }

@@ -1,24 +1,44 @@
 package com.example.askfm.controller;
 
 import com.example.askfm.dto.PostReportCreateDTO;
+import com.example.askfm.maper.PostReportMapper;
+import com.example.askfm.model.Post;
 import com.example.askfm.service.PostReportService;
+import com.example.askfm.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/report")
 public class ReportController {
     private final PostReportService reportService;
+    private final PostService postService;
+
+
+
+    @PostMapping("/delete-report")
+    public String deleteReport(@RequestParam Long id) {
+        reportService.deleteReport(id);
+        return "redirect:/admin/reports";
+    }
+
+
+    @PostMapping("/delete")
+    public String deletePost(@RequestParam Long id) {
+        postService.deletePostAdmin(id);
+        return "redirect:/admin/reports";
+
+    }
 
 
     @PostMapping("/post")
@@ -40,5 +60,6 @@ public class ReportController {
 
         return "redirect:/posts/" + reportDTO.getPostId();
     }
+
 
 }

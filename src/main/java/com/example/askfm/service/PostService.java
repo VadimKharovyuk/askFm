@@ -38,6 +38,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final SavedPostRepository savedPostRepository;
     private final MentionService mentionService;
+    private final PostReportRepository postReportRepository;
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -94,7 +95,14 @@ public class PostService {
             postRepository.save(post);
         }
     }
+    @Transactional
+    public void deletePostAdmin(Long postId) {
 
+        postViewRepository.deleteByPostId(postId);
+        tagRepository.deleteByPostId(postId);
+        postRepository.deleteById(postId);
+        postReportRepository.deleteById(postId);
+    }
 
     @Transactional
     public void deletePost(Long postId) {

@@ -19,12 +19,13 @@ public class PostReport {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false  )
     private Post post;
 
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

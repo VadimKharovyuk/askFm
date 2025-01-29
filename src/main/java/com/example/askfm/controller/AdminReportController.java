@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AdminReportController {
     private final PostReportService postReportService;
 
+
     @GetMapping
     public String getAllReports(
             @RequestParam(defaultValue = "0") int page,

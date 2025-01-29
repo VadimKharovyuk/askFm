@@ -23,14 +23,20 @@ public class PostReportService {
         return reportMapper.toDTO(reportRepository.save(report));
     }
 
+    // Метод для админа с пагинацией
+    public Page<PostReportDTO> getAllReports(Pageable pageable) {
+        Page<PostReport> reportPage = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return reportPage.map(reportMapper::toDTO);
+    }
+
     public List<PostReportDTO> getReportsForPost(Long postId) {
         return reportMapper.toDTOList(
                 reportRepository.findByPostIdOrderByCreatedAtDesc(postId)
         );
     }
-    // Метод для админа с пагинацией
-    public Page<PostReportDTO> getAllReports(Pageable pageable) {
-        Page<PostReport> reportPage = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
-        return reportPage.map(reportMapper::toDTO);
+
+
+    public void deleteReport(Long id) {
+        reportRepository.deleteById(id);
     }
 }
