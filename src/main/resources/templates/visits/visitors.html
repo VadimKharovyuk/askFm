@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Recent Visitors</title>
+ <style>
+   .container {
+     max-width: 800px;
+     margin: 0 auto;
+     padding: 20px;
+   }
+
+   .visitors-list {
+     margin-top: 20px;
+   }
+
+   .visitor-card {
+     padding: 15px;
+     border: 1px solid #e1e1e1;
+     border-radius: 8px;
+     margin-bottom: 10px;
+     background-color: #fff;
+   }
+
+   .visitor-info {
+     display: flex;
+     align-items: center;
+   }
+
+   .avatar {
+     width: 50px;
+     height: 50px;
+     border-radius: 50%;
+     margin-right: 15px;
+     object-fit: cover;
+   }
+
+   .visitor-details {
+     display: flex;
+     flex-direction: column;
+   }
+
+   .username {
+     font-weight: bold;
+     color: #333;
+     text-decoration: none;
+     margin-bottom: 5px;
+   }
+
+   .username:hover {
+     color: #007bff;
+   }
+
+   .visit-time {
+     font-size: 0.9em;
+     color: #666;
+   }
+
+   .pagination {
+     margin-top: 20px;
+     display: flex;
+     justify-content: center;
+   }
+
+   .pagination-buttons {
+     display: flex;
+     gap: 10px;
+   }
+
+   .pagination-button {
+     padding: 8px 12px;
+     border: 1px solid #ddd;
+     border-radius: 4px;
+     text-decoration: none;
+     color: #333;
+   }
+
+   .pagination-button:hover {
+     background-color: #f5f5f5;
+   }
+
+   .pagination-button.active {
+     background-color: #007bff;
+     color: white;
+     border-color: #007bff;
+   }
+ </style>
+</head>
+<body>
+<div class="container">
+  <h1>Recent Visitors</h1>
+  <p>Unique visitors in last 24 hours: <span th:text="${uniqueVisitors}"></span></p>
+
+  <!-- Список посетителей -->
+  <div class="visitors-list">
+    <div th:each="visitor : ${visitors}" class="visitor-card">
+      <div class="visitor-info">
+        <<img th:if="${visitor.visitorAvatar != null}"
+              th:src="@{'data:image/jpeg;base64,' + ${visitor.visitorAvatar}}"
+              class="avatar"
+              alt="Avatar">
+        <img th:unless="${visitor.visitorAvatar != null}"
+             src="/images/default-avatar.png"
+             class="avatar"
+             alt="Default Avatar">
+        <div class="visitor-details">
+          <a th:href="@{'/users/' + ${visitor.visitorUsername}}"
+             class="username"
+             th:text="${visitor.visitorUsername}">
+          </a>
+          <span class="visit-time"
+                th:text="${#temporals.format(visitor.visitedAt, 'dd-MM-yyyy HH:mm')}">
+                        </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div class="pagination" th:if="${totalPages > 1}">
+    <div class="pagination-buttons">
+      <a th:if="${currentPage > 0}"
+         th:href="@{/visits/my(page=${currentPage - 1})}"
+         class="pagination-button">&laquo; Previous</a>
+
+      <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:if="${pageNum != currentPage}"
+                       th:href="@{/visits/my(page=${pageNum})}"
+                       th:text="${pageNum + 1}"
+                       class="pagination-button">
+                    </a>
+                    <span th:if="${pageNum == currentPage}"
+                          th:text="${pageNum + 1}"
+                          class="pagination-button active">
+                    </span>
+                </span>
+
+      <a th:if="${currentPage < totalPages - 1}"
+         th:href="@{/visits/my(page=${currentPage + 1})}"
+         class="pagination-button">Next &raquo;</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

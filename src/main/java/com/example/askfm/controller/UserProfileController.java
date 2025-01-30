@@ -34,6 +34,8 @@ public class UserProfileController {
     private final SuggestedUsersService suggestedUsersService;
     private final PostService postService;
     private final CommentService commentService;
+    private final VisitService visitService;
+
 
 
 
@@ -93,6 +95,11 @@ public class UserProfileController {
             isFollowing = subscriptionService.isFollowing(currentUser.getUsername(), username);
         }
 
+
+        if (currentUser != null) {
+            User visitor = userService.findByUsername(currentUser.getUsername());
+            visitService.recordVisit(visitor, user);
+        }
 
         // Существующие атрибуты
         model.addAttribute("profileUser", user);

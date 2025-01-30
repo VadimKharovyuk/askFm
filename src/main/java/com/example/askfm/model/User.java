@@ -75,4 +75,13 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<SavedPost> savedPosts = new HashSet<>();
+
+    // Добавленные атрибуты для отслеживания визитов
+    @OneToMany(mappedBy = "visitedUser")
+    @OrderBy("visitedAt DESC")  // Явно указываем порядок
+    private List<Visit> pageVisits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "visitor")
+    @OrderBy("visitedAt DESC")  // Явно указываем порядок
+    private List<Visit> myVisits = new ArrayList<>();
 }
