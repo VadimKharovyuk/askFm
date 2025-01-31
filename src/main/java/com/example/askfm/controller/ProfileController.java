@@ -77,6 +77,7 @@ public class ProfileController {
         return "user/profile";
     }
 
+
     @PostMapping("/profile/avatar")
     public String updateAvatar(@RequestParam("avatar") MultipartFile file,
                                @AuthenticationPrincipal UserDetails currentUser) {

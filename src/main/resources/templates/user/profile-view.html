@@ -492,12 +492,22 @@
                 <span>Истории</span>
             </a>
 
-
             <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
                 <i class="fas fa-user"></i>
                 <span>Профиль</span>
             </a>
+            <a href="/settings" class="side-link">
+                <i class="fas fa-cog"></i>
+                <span>Налаштування</span>
+            </a>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Вийти</span>
+                </button>
+            </form>
         </nav>
+
     </aside>
 
     <!-- Main Content -->

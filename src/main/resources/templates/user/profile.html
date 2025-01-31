@@ -346,6 +346,8 @@
 
         .feed-section {
             padding: 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
         }
         .pagination-section {
@@ -431,10 +433,26 @@
             <i class="fas fa-bookmark"></i>
             <span>Закладки</span>
         </a>
+        <!-- Или вариант с иконкой глаза, что символизирует просмотры -->
+        <a href="/visits/my" class="side-link">
+            <i class="fas fa-eye"></i>
+            <span>Истории</span>
+        </a>
         <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
             <i class="fas fa-user"></i>
             <span>Профиль</span>
         </a>
+        <a href="/settings" class="side-link">
+            <i class="fas fa-cog"></i>
+            <span>Налаштування</span>
+        </a>
+
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Вийти</span>
+            </button>
+        </form>
     </nav>
 </aside>
 <aside class="right-sidebar">
@@ -671,9 +689,9 @@
                 <a th:href="@{'/posts/' + ${post.id}}" class="text-decoration-none">
                     <div class="post-content">
                         <p th:text="${post.content}" class="text-white">Контент поста</p>
-                        <!--                    <img th:if="${post.media != null}"-->
-                        <!--                         th:src="${'data:image/jpeg;base64,' + post.media}"-->
-                        <!--                         class="img-fluid">-->
+                                            <img th:if="${post.media != null}"
+                                                 th:src="${'data:image/jpeg;base64,' + post.media}"
+                                                 class="img-fluid">
                     </div>
                 </a>
 

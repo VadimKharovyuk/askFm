@@ -6,6 +6,16 @@
   <title>Настройки</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
+    :root {
+      --background-dark: #050505;
+      --secondary-bg: #16181c;
+      --text-white: #dce3e7;
+      --text-gray: #e7eaee;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,8 +23,9 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-white);
       display: flex;
     }
 
@@ -22,17 +33,17 @@
     .left-sidebar {
       width: 250px;
       height: 100vh;
-      background-color: white;
+      background-color: var(--secondary-bg);
       padding: 20px;
       position: fixed;
-      border-right: 1px solid #e1e8ed;
+      border-right: 1px solid var(--border-color);
     }
 
     .logo-link {
       display: flex;
       align-items: center;
       font-size: 24px;
-      color: #1da1f2;
+      color: var(--blue-accent);
       text-decoration: none;
       margin-bottom: 30px;
     }
@@ -50,15 +61,16 @@
       display: flex;
       align-items: center;
       padding: 12px;
-      color: #333;
+      color: var(--text-white);
       text-decoration: none;
       border-radius: 25px;
       margin-bottom: 5px;
+      transition: background-color 0.2s;
     }
 
     .side-link:hover {
-      background-color: #e8f5fe;
-      color: #1da1f2;
+      background-color: var(--border-color);
+      color: var(--blue-accent);
     }
 
     .side-link i {
@@ -79,7 +91,7 @@
 
     .settings-header h1 {
       font-size: 24px;
-      color: #333;
+      color: var(--text-white);
     }
 
     .settings-grid {
@@ -90,11 +102,11 @@
     }
 
     .settings-card {
-      background: white;
+      background: var(--secondary-bg);
+      border: 1px solid var(--border-color);
       border-radius: 15px;
       padding: 25px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
+      transition: transform 0.2s, background-color 0.2s;
       cursor: pointer;
       text-decoration: none;
       color: inherit;
@@ -102,10 +114,11 @@
 
     .settings-card:hover {
       transform: translateY(-5px);
+      background-color: var(--border-color);
     }
 
     .settings-card h2 {
-      color: #333;
+      color: var(--text-white);
       margin-bottom: 15px;
       font-size: 20px;
       display: flex;
@@ -114,13 +127,28 @@
 
     .settings-card h2 i {
       margin-right: 10px;
-      color: #1da1f2;
+      color: var(--blue-accent);
     }
 
     .settings-card p {
-      color: #666;
+      color: var(--text-gray);
       font-size: 14px;
       line-height: 1.5;
+    }
+
+    /* Additional icons and hover effects */
+    .settings-card:hover i {
+      transform: scale(1.1);
+      transition: transform 0.2s;
+    }
+
+    .side-link i,
+    .settings-card h2 i {
+      transition: transform 0.2s;
+    }
+
+    .side-link:hover i {
+      transform: scale(1.1);
     }
   </style>
 </head>
@@ -131,13 +159,14 @@
     <i class="fas fa-comment-dots"></i>
     <span>AskFM</span>
   </a>
+
   <nav class="side-nav">
     <a href="/home" class="side-link">
       <i class="fas fa-home"></i>
       <span>Главная</span>
     </a>
     <a href="/explore" class="side-link">
-      <i class="fas fa-hashtag"></i>
+      <i class="fas fa-compass"></i>
       <span>Поиск</span>
     </a>
     <a href="/notifications" class="side-link">
@@ -152,15 +181,25 @@
       <i class="fas fa-bookmark"></i>
       <span>Закладки</span>
     </a>
-    <a th:href="@{'/users/' + ${username}}" class="side-link">
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-history"></i>
+      <span>Истории</span>
+    </a>
+    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
       <i class="fas fa-user"></i>
       <span>Профиль</span>
     </a>
-    </a>
-    <a href="/settings" class="side-link" style="background-color: #e8f5fe; color: #1da1f2;">
+    <a href="/settings" class="side-link">
       <i class="fas fa-cog"></i>
-      <span>Настройки</span>
+      <span>Налаштування</span>
     </a>
+
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button type="submit" class="side-link border-0 w-100 text-start" style="background: none; border: none; cursor: pointer;">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Вийти</span>
+      </button>
+    </form>
   </nav>
 </aside>
 
@@ -168,11 +207,10 @@
 <main class="main-content">
   <div class="settings-header">
     <h1>Настройки профиля</h1>
-    <p th:text="${username}" style="color: #666; margin-top: 5px;"></p>
+    <p th:text="${username}" style="color: var(--text-gray); margin-top: 5px;"></p>
   </div>
 
   <div class="settings-grid">
-    <!-- Блок изменения пароля -->
     <a href="/settings/password" class="settings-card">
       <h2>
         <i class="fas fa-key"></i>
@@ -181,7 +219,6 @@
       <p>Обновите свой пароль для обеспечения безопасности аккаунта</p>
     </a>
 
-    <!-- Блок изменения аватара -->
     <a href="/settings/avatar" class="settings-card">
       <h2>
         <i class="fas fa-user-circle"></i>
@@ -190,7 +227,6 @@
       <p>Загрузите новую фотографию профиля</p>
     </a>
 
-    <!-- Блок настроек приватности -->
     <a href="/settings/privacy" class="settings-card">
       <h2>
         <i class="fas fa-shield-alt"></i>
@@ -199,7 +235,6 @@
       <p>Управляйте настройками конфиденциальности вашего аккаунта</p>
     </a>
 
-    <!-- Блок настроек профиля -->
     <a href="/settings/profile" class="settings-card">
       <h2>
         <i class="fas fa-user-edit"></i>
@@ -208,7 +243,6 @@
       <p>Измените информацию в вашем профиле</p>
     </a>
 
-    <!-- Блок настроек уведомлений -->
     <a href="/settings/notifications" class="settings-card">
       <h2>
         <i class="fas fa-bell"></i>
@@ -217,13 +251,20 @@
       <p>Настройте параметры уведомлений</p>
     </a>
 
-    <!-- Блок настроек безопасности -->
     <a href="/settings/security" class="settings-card">
       <h2>
         <i class="fas fa-lock"></i>
         Безопасность
       </h2>
       <p>Управляйте параметрами безопасности вашего аккаунта</p>
+    </a>
+
+    <a href="/settings/updateUsername" class="settings-card">
+      <h2>
+        <i class="fas fa-lock"></i>
+        изменения имени
+      </h2>
+      <p>Управляйте  именем для вашего аккаунта</p>
     </a>
   </div>
 </main>

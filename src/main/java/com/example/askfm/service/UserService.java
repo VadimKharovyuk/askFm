@@ -13,6 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,15 +117,37 @@ public class UserService implements UserDetailsService {
     }
 
 //    @CacheEvict(value = "users", allEntries = true)
+    @Transactional
     public void updateUsername(String oldUsername, String newUsername) {
         if (userRepository.existsByUsername(newUsername)) {
             throw new IllegalArgumentException("Username already exists: " + newUsername);
         }
+
         User user = userRepository.findByUsername(oldUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + oldUsername));
+
+        // Сохраняем текущий контекст аутентификации
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         user.setUsername(newUsername);
         userRepository.save(user);
-        log.info("Username updated and cache cleared: {} -> {}", oldUsername, newUsername);
+
+        // Создаем новое UserDetails с обновленным именем
+        UserDetails updatedUser = org.springframework.security.core.userdetails.User
+                .withUsername(newUsername)
+                .password(user.getPassword())
+                .authorities(auth.getAuthorities())
+                .build();
+
+        // Обновляем аутентификацию с сохранением прав
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                updatedUser,
+                user.getPassword(),
+                auth.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+        log.info("Username updated: {} -> {}", oldUsername, newUsername);
     }
 
 

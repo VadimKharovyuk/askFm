@@ -21,6 +21,15 @@ import java.util.List;
 public class SavedPostController {
     private final SavedPostService savedPostService;
 
+    @GetMapping
+    public String getSavedPosts(@AuthenticationPrincipal UserDetails userDetails,
+                                Model model) {
+        List<SavedPostDTO> savedPosts = savedPostService.getUserSavedPosts(userDetails.getUsername());
+        model.addAttribute("savedPosts", savedPosts);
+        model.addAttribute("currentUser", userDetails.getUsername());
+        return "saved/saved-posts";
+    }
+
 
     @PostMapping("/remove/{postId}")
     public String removeSavedPost(@PathVariable Long postId,
@@ -39,13 +48,4 @@ public class SavedPostController {
     }
 
 
-
-    @GetMapping
-    public String getSavedPosts(@AuthenticationPrincipal UserDetails userDetails,
-                                Model model) {
-        List<SavedPostDTO> savedPosts = savedPostService.getUserSavedPosts(userDetails.getUsername());
-        model.addAttribute("savedPosts", savedPosts);
-        model.addAttribute("currentUser", userDetails.getUsername());
-        return "saved/saved-posts";
-    }
 }
