@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Успешная запись</title>
+</head>
+<body>
+<div class="container">
+  <h1>Спасибо за вашу заявку!</h1>
+  <div th:if="${message}" th:text="${message}"></div>
+
+  <div class="success-details">
+    <p>Ваши данные успешно сохранены.</p>
+    <p>Мы свяжемся с вами в ближайшее время.</p>
+  </div>
+
+  <div class="navigation-links">
+    <a href="/home" class="btn">Вернуться на главную</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${ad.title}">Реклама</title>
+</head>
+<body>
+
+<div class="container">
+    <!-- Отображение рекламы -->
+    <div class="ad-content">
+        <h1 th:text="${ad.title}">Заголовок рекламы</h1>
+        <p th:text="${ad.content}">Содержание рекламы</p>
+
+        <div th:if="${ad.imageUrl}">
+            <img th:src="${ad.imageUrl}" alt="Рекламное изображение"/>
+        </div>
+
+        <div th:if="${ad.targetUrl}">
+            <a th:href="${ad.targetUrl}" target="_blank">Подробнее</a>
+        </div>
+    </div>
+
+    <!-- Форма для лида -->
+    <div class="lead-form">
+        <h2>Оставить заявку</h2>
+
+        <form th:action="@{/public/ads/{adId}/submit(adId=${ad.id})}"
+              th:object="${leadForm}"
+              method="post">
+
+            <div class="form-group">
+                <label for="username">Имя:</label>
+                <input type="text"
+                       id="username"
+                       th:field="*{username}"
+                       readonly/>
+                <span th:if="${#fields.hasErrors('username')}"
+                      th:errors="*{username}"
+                      class="error"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email"
+                       id="email"
+                       th:field="*{email}"
+                       readonly/>
+                <span th:if="${#fields.hasErrors('email')}"
+                      th:errors="*{email}"
+                      class="error"></span>
+            </div>
+
+            <button type="submit">Записаться</button>
+        </form>
+
+        <div th:if="${error}"
+             class="error-message"
+             th:text="${error}"></div>
+    </div>
+</div>
+</body>
+</html>

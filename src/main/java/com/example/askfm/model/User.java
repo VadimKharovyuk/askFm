@@ -4,6 +4,7 @@ import com.example.askfm.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,4 +85,9 @@ public class User {
     @OneToMany(mappedBy = "visitor")
     @OrderBy("visitedAt DESC")  // Явно указываем порядок
     private List<Visit> myVisits = new ArrayList<>();
+
+    @Column(nullable = false, precision = 19, scale = 2) // Храним с двумя знаками после запятой
+    private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
+
+
 }

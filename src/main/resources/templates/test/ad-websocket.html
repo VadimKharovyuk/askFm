@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест WebSocket рекламы</title>
+  <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+</head>
+<body>
+<div id="ad-container">
+  <h2>Ожидание рекламы...</h2>
+</div>
+
+<script>
+  const socket = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, function(frame) {
+    console.log('Connected: ' + frame);
+
+    stompClient.subscribe('/topic/ads', function(adMessage) {
+      const ad = JSON.parse(adMessage.body);
+      updateAdDisplay(ad);
+    });
+  });
+
+  function updateAdDisplay(ad) {
+    const container = document.getElementById('ad-container');
+    container.innerHTML = `
+            <div class="ad-content">
+                <h2>${ad.title}</h2>
+                <p>${ad.content}</p>
+                ${ad.imageUrl ? `<img src="${ad.imageUrl}" alt="Ad image"/>` : ''}
+                <a href="/test/ads/view?adId=${ad.id}" class="btn">Подробнее</a>
+            </div>
+        `;
+  }
+</script>
+
+<style>
+  .ad-content {
+    padding: 20px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+</body>
+</html>

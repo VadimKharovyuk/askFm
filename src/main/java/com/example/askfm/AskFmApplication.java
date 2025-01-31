@@ -2,8 +2,10 @@ package com.example.askfm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class AskFmApplication {
 
     public static void main(String[] args) {
@@ -18,4 +20,7 @@ public class AskFmApplication {
     //вощврат пароля чреез почту
     //гугл  регистрация
     //репост   поста
+
+    //поставть колокоотчик для получание поств нотификация
+    //админ может пополнить счет  баланс
 }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание рекламы</title>
+</head>
+<body>
+<div class="container">
+  <h1>Создание рекламы</h1>
+
+  <div class="user-info">
+    <p>Пользователь: <span th:text="${username}"></span></p>
+    <p>Баланс: <span th:text="${balance}"></span> монет</p>
+  </div>
+
+  <form th:action="@{/ads/create}" th:object="${adCreateDto}" method="post">
+    <input type="hidden" name="userId" th:value="${userId}" />
+
+    <div class="form-group">
+      <label for="title">Название:</label>
+      <input type="text" id="title" th:field="*{title}" required />
+      <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="content">Описание:</label>
+      <textarea id="content" th:field="*{content}" required></textarea>
+      <span th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">URL изображения:</label>
+      <input type="url" id="imageUrl" th:field="*{imageUrl}" />
+    </div>
+
+    <!-- Добавляем новое поле targetUrl -->
+    <div class="form-group">
+      <label for="targetUrl">Целевой URL:</label>
+      <input type="url" id="targetUrl" th:field="*{targetUrl}"
+             placeholder="https://example.com"/>
+    </div>
+
+    <div class="form-group">
+      <label for="startTime">Дата начала:</label>
+      <input type="datetime-local" id="startTime" th:field="*{startTime}" required />
+      <span th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="endTime">Дата окончания:</label>
+      <input type="datetime-local" id="endTime" th:field="*{endTime}" required />
+      <span th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="totalBudget">Бюджет (монет):</label>
+      <input type="number" id="totalBudget" th:field="*{totalBudget}"
+             min="1" step="1" required />
+      <span th:if="${#fields.hasErrors('totalBudget')}" th:errors="*{totalBudget}"></span>
+    </div>
+
+    <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <button type="submit">Создать рекламу</button>
+  </form>
+
+  <a href="/" class="btn-back">Вернуться на главную</a>
+</div>
+</body>
+</html>

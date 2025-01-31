@@ -52,4 +52,6 @@ public void registerStompEndpoints(StompEndpointRegistry registry) {
         registration.setSendTimeLimit(20 * 1000);
         registration.setSendBufferSizeLimit(512 * 1024);
     }
+
+
 }
