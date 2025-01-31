@@ -2,10 +2,15 @@ package com.example.askfm.controller;
 
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.UpcomingBirthdayDTO;
+import com.example.askfm.model.Post;
 import com.example.askfm.model.User;
 import com.example.askfm.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,12 +31,18 @@ public class ProfileController {
     private final ImageService imageService;
     private final PostService postService;
     private final BirthdayService birthdayService;
+    private final FeedService feedService;
 
 
 
 
     @GetMapping("/home")
-    public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String home(
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size
+    ) {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
 
@@ -40,15 +51,28 @@ public class ProfileController {
         // Получаем предстоящие дни рождения
         List<UpcomingBirthdayDTO> upcomingBirthdays = birthdayService.getUpcomingBirthdays(username, 7);
 
+        // Создаем объект Pageable и получаем посты
+        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
+        Page<Post> feedPosts = feedService.getFeedPosts(username, pageable);
+
         model.addAttribute("todaysBirthdays", todaysBirthdays);
         model.addAttribute("upcomingBirthdays", upcomingBirthdays);
         model.addAttribute("postForm", new PostCreateDTO());
-        model.addAttribute("posts", postService.getUserPosts(username, username));
+        model.addAttribute("userPosts", postService.getUserPosts(username, username));
+        model.addAttribute("feedPosts", feedPosts);
         model.addAttribute("username", username);
         model.addAttribute("profileUser", user);
         model.addAttribute("currentUser", username);
         model.addAttribute("coverBase64", imageService.getBase64Avatar(user.getCover()));
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));
+
+        // Добавляем информацию о пагинации
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", feedPosts.getTotalPages());
+        model.addAttribute("totalItems", feedPosts.getTotalElements());
+        // Добавляем флаги для навигации
+        model.addAttribute("hasNext", feedPosts.hasNext());
+        model.addAttribute("hasPrevious", feedPosts.hasPrevious());
 
         return "user/profile";
     }

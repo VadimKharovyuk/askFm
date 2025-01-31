@@ -33,6 +33,7 @@ public class VisitController {
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
+
         // Валидация параметров пагинации
         page = Math.max(0, page);
         size = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
@@ -53,6 +54,7 @@ public class VisitController {
         model.addAttribute("totalPages", visitors.getTotalPages());
         model.addAttribute("uniqueVisitors", uniqueVisitors);
         model.addAttribute("username", username);
+
 
         return "visits/visitors";
     }
