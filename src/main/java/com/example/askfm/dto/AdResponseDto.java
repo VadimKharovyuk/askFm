@@ -1,5 +1,7 @@
 package com.example.askfm.dto;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+
 public class AdResponseDto {
     private Long id;
     private String title;
@@ -19,4 +22,5 @@ public class AdResponseDto {
     private int clickCount;
     private BigDecimal totalBudget;
     private BigDecimal remainingBudget;
+    private long leadsCount;
 }

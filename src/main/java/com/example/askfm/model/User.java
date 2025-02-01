@@ -86,7 +86,7 @@ public class User {
     @OrderBy("visitedAt DESC")  // Явно указываем порядок
     private List<Visit> myVisits = new ArrayList<>();
 
-    @Column(nullable = false, precision = 19, scale = 2) // Храним с двумя знаками после запятой
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
 
 

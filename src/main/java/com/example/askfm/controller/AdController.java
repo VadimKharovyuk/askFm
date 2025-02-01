@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.dto.AdCreateDto;
 import com.example.askfm.dto.AdLeadFormDTO;
+import com.example.askfm.dto.AdLeadResponseDTO;
 import com.example.askfm.dto.AdResponseDto;
 import com.example.askfm.model.Ad;
 import com.example.askfm.model.User;
@@ -10,6 +11,8 @@ import com.example.askfm.service.AdService;
 import com.example.askfm.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -18,7 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/ads")
@@ -38,6 +41,28 @@ public class AdController {
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeAds", activeAds);
         return "ad/dashboard";
+    }
+
+    @GetMapping("/{adId}/leads")
+    public String showAdLeads(
+            @PathVariable Long adId,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+
+        Page<AdLeadResponseDTO> leadsPage = adLeadService.getAdLeadsByAdId(adId, page);
+        Ad ad = adService.findById(adId);
+
+        model.addAttribute("ad", ad);
+        model.addAttribute("leads", leadsPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", leadsPage.getTotalPages());
+
+        return "ad/ad-leads";
+    }
+    @PostMapping("/{id}/delete")
+    public String deleteAd(@PathVariable Long id) {
+        adService.deleteAd(id);
+        return "redirect:/ads";
     }
 
 

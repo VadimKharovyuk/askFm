@@ -177,6 +177,32 @@
     .ad-stat i {
       color: var(--blue-accent);
     }
+
+    .ad-actions {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .ad-actions .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .ad-actions .btn-primary {
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+
+    .ad-actions .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .ad-actions .fas {
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -250,6 +276,15 @@
               <i class="fas fa-coins"></i>
               <span th:text="${ad.remainingBudget}">0</span> монет
             </div>
+          </div>
+          <div class="ad-stat">
+            <i class="fas fa-users"></i>
+            <span th:text="${ad.leadsCount}">0</span> лидов
+          </div>
+          <div class="ad-actions">
+            <a th:href="@{/ads/{id}/leads(id=${ad.id})}" class="btn btn-primary">
+              <i class="fas fa-users"></i> Просмотреть лиды
+            </a>
           </div>
         </div>
       </div>

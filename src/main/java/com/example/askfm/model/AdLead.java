@@ -29,6 +29,5 @@ public class AdLead {
 
     private String username;
     private String email;
-
-    private LocalDateTime submittedAt = LocalDateTime.now();
-}
+    private LocalDateTime submittedAt;
+    }

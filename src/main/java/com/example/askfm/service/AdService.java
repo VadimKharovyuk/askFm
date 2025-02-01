@@ -6,8 +6,10 @@ import com.example.askfm.dto.AdResponseDto;
 import com.example.askfm.maper.AdMapper;
 import com.example.askfm.model.Ad;
 import com.example.askfm.model.User;
+import com.example.askfm.repository.AdLeadRepository;
 import com.example.askfm.repository.AdRepository;
 import com.example.askfm.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final Random random = new Random();
+    private final AdLeadRepository adLeadRepository;
 
     private static final BigDecimal COST_PER_VIEW = new BigDecimal("1.00");
 
@@ -109,9 +112,27 @@ public class AdService {
         }
     }
     public List<AdResponseDto> getActiveAdsByUser(Long userId) {
-        return adRepository.findByCreatedByIdAndIsActiveTrue(userId)
-                .stream()
-                .map(adMapper::toDto)
+        List<Ad> ads = adRepository.findByCreatedByIdAndIsActiveTrue(userId);
+        return ads.stream()
+                .map(ad -> {
+                    AdResponseDto dto = new AdResponseDto();
+                    dto.setId(ad.getId());
+                    dto.setTitle(ad.getTitle());
+                    dto.setContent(ad.getContent());
+                    dto.setImpressions(ad.getImpressions());
+                    dto.setClickCount(ad.getClickCount());
+                    dto.setRemainingBudget(ad.getRemainingBudget());
+                    // Добавляем количество лидов
+                    dto.setLeadsCount(adLeadRepository.countByAdId(ad.getId()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteAd(Long id) {
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Реклама не найдена"));
+        adRepository.delete(ad);
     }
 }

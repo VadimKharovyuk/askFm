@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -41,6 +44,10 @@ public class Ad {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal remainingBudget; // Оставшийся бюджет
+
+
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdLead> leads = new ArrayList<>();
 
     public void decreaseBudget(BigDecimal amount) {
         if (remainingBudget.compareTo(amount) >= 0) {
