@@ -4,6 +4,8 @@
     <title>Профиль пользователя</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!--    <meta http-equiv="refresh" content="10;url=/home">-->
+    <meta http-equiv="refresh" content="600;url=/home"> <!-- 10 минут -->
     <style>
         :root {
             --background-dark: #050505;
@@ -377,6 +379,166 @@
             border-color: var(--border-color);
             color: #6c757d;
         }
+
+
+
+        /* Стили для правой боковой панели */
+        .right-sidebar {
+            width: 350px;
+            height: 100vh;
+            padding: 20px;
+            border-left: 1px solid var(--border-color);
+            position: fixed;
+            right: 0;
+            top: 0;
+            background-color: var(--background-dark);
+            overflow-y: auto;
+            margin-top: 150px;
+        }
+
+        /* Стили для карточек дней рождения */
+        .birthday-card {
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .birthday-header {
+            margin-bottom: 15px;
+        }
+
+        .birthday-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .birthday-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .birthday-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .birthday-info {
+            flex-grow: 1;
+        }
+
+        .upcoming-birthdays-link {
+            display: block;
+            color: var(--blue-accent);
+            text-decoration: none;
+            padding: 10px 0;
+            margin-top: 10px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .upcoming-birthdays-link:hover {
+            color: var(--blue-hover);
+        }
+
+        /* Стили для рекламного блока */
+        .container-ad {
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .ad-content {
+            margin-bottom: 20px;
+        }
+
+        .ad-content h1 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--text-white);
+        }
+
+        .ad-content p {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .ad-content img {
+            width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .ad-content a {
+            display: inline-block;
+            color: var(--blue-accent);
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        /* Стили для формы */
+        .lead-form {
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .lead-form h2 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--text-white);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--background-dark);
+            color: var(--text-white);
+        }
+
+        .lead-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--blue-accent);
+            color: var(--text-white);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .lead-form button:hover {
+            background-color: var(--blue-hover);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container-ad {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
     </style>
 </head>
 <body>
@@ -525,7 +687,53 @@
             Показать все дни рождения
         </a>
     </div>
+
+
+    <div class="container-ad">
+        <!-- Отображение рекламы -->
+        <div class="ad-content">
+            <h1 th:text="${ad.title}">Заголовок рекламы</h1>
+            <p th:text="${ad.content}">Содержание рекламы</p>
+
+            <div th:if="${ad.imageUrl}">
+                <img th:src="${ad.imageUrl}" alt="Рекламное изображение"/>
+            </div>
+
+            <div th:if="${ad.targetUrl}">
+                <a th:href="${ad.targetUrl}" target="_blank">Подробнее</a>
+            </div>
+        </div>
+
+        <!-- Форма для лида -->
+        <div class="lead-form">
+            <h2>Оставить заявку</h2>
+            <form th:action="@{/ads/submit(adId=${ad.id})}"
+                  th:object="${leadForm}"
+                  method="post">
+                <div class="form-group">
+                    <label for="username">Имя:</label>
+                    <input type="text"
+                           id="username"
+                           th:field="*{username}"
+                           readonly/>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email"
+                           id="email"
+                           th:field="*{email}"
+                           readonly/>
+                </div>
+
+                <button type="submit">Записаться</button>
+            </form>
+        </div>
+    </div>
 </aside>
+
+
+
 
 <!-- Main Content -->
 <div class="main-container">

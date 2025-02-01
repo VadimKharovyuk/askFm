@@ -1,24 +1,212 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Активные рекламы</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --background-dark: #050505;
+      --secondary-bg: #16181c;
+      --text-white: #dce3e7;
+      --text-gray: #e7eaee;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --success-green: #00ba7c;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .page-header {
+      background-color: var(--secondary-bg);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .ad-card {
+      background-color: var(--secondary-bg);
+      border-radius: 15px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      display: grid;
+      gap: 15px;
+    }
+
+    .ad-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .ad-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-white);
+      margin: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .ad-content {
+      color: var(--text-gray);
+      font-size: 14px;
+    }
+
+    .ad-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-gray);
+    }
+
+    .stat-item i {
+      color: var(--blue-accent);
+      width: 16px;
+    }
+
+    .stat-value {
+      color: var(--text-white);
+      font-weight: 500;
+    }
+
+    .budget-info {
+      background-color: rgba(29, 155, 240, 0.1);
+      padding: 12px;
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .create-ad-btn {
+      background-color: var(--blue-accent);
+      color: var(--text-white);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .create-ad-btn:hover {
+      background-color: var(--blue-hover);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ad-card {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      background-color: var(--secondary-bg);
+      border-radius: 15px;
+      color: var(--text-gray);
+    }
+  </style>
 </head>
 <body>
-<h1>Активные рекламы</h1>
+<div class="container">
+  <div class="page-header">
+    <h1>
+      <i class="fas fa-bullhorn"></i>
+      Активные рекламы
+    </h1>
+    <a href="/ads/create" class="create-ad-btn">
+      <i class="fas fa-plus"></i>
+      Создать рекламу
+    </a>
+  </div>
 
-<div th:each="ad : ${activeAds}">
-  <h2 th:text="${ad.title}"></h2>
-  <p th:text="${ad.content}"></p>
-  <p><strong>Дата начала:</strong> <span th:text="${ad.startTime}"></span></p>
-  <p><strong>Дата окончания:</strong> <span th:text="${ad.endTime}"></span></p>
-  <p><strong>Бюджет:</strong> <span th:text="${ad.totalBudget}"></span></p>
-  <p><strong>Остаток бюджета:</strong> <span th:text="${ad.remainingBudget}"></span></p>
+  <div th:if="${#lists.isEmpty(activeAds)}" class="empty-state">
+    <i class="fas fa-search fa-3x" style="color: var(--text-gray); margin-bottom: 20px;"></i>
+    <h3>Активных реклам пока нет</h3>
+    <p>Создайте свою первую рекламу прямо сейчас!</p>
+  </div>
+
+  <div class="ads-grid" th:unless="${#lists.isEmpty(activeAds)}">
+    <div th:each="ad : ${activeAds}" class="ad-card">
+      <h2 class="ad-title">
+        <i class="fas fa-ad"></i>
+        <span th:text="${ad.title}"></span>
+      </h2>
+
+      <p class="ad-content" th:text="${ad.content}"></p>
+
+      <div class="ad-stats">
+        <div class="stat-item">
+          <i class="fas fa-calendar-plus"></i>
+          <span th:text="${ad.startTime}"></span>
+        </div>
+
+        <div class="stat-item">
+          <i class="fas fa-calendar-minus"></i>
+          <span th:text="${ad.endTime}"></span>
+        </div>
+      </div>
+
+      <div class="budget-info">
+        <div class="stat-item">
+          <i class="fas fa-coins"></i>
+          Бюджет:
+          <span class="stat-value" th:text="${ad.totalBudget}"></span>
+        </div>
+
+        <div class="stat-item">
+          <i class="fas fa-wallet"></i>
+          Остаток:
+          <span class="stat-value" th:text="${ad.remainingBudget}"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-<form action="/ads/trigger" method="post">
-  <button type="submit">Запустить показ рекламы вручную</button>
-</form>
 </body>
 </html>

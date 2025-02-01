@@ -25,8 +25,8 @@ public class SettingsUserController {
     @GetMapping
     public String settings(Model model,
                            @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        model.addAttribute("username", username);
+        String currentUser = userDetails.getUsername();
+        model.addAttribute("currentUser", currentUser);
         return "settings/home";
     }
 

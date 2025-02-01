@@ -1,5 +1,7 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.AdLeadFormDTO;
+import com.example.askfm.dto.AdPublicDto;
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.UpcomingBirthdayDTO;
 import com.example.askfm.model.Post;
@@ -32,6 +34,7 @@ public class ProfileController {
     private final PostService postService;
     private final BirthdayService birthdayService;
     private final FeedService feedService;
+    private final AdService adService;
 
 
 
@@ -45,6 +48,16 @@ public class ProfileController {
     ) {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
+
+        AdPublicDto ad = adService.getRandomAd();
+        // Создаем DTO для формы
+        AdLeadFormDTO leadFormDTO = new AdLeadFormDTO();
+        leadFormDTO.setUsername(user.getUsername());
+        leadFormDTO.setEmail(user.getEmail());
+
+        model.addAttribute("ad", ad);
+        model.addAttribute("leadForm", leadFormDTO);
+
 
         // Получаем дни рождения на сегодня
         List<UpcomingBirthdayDTO> todaysBirthdays = birthdayService.getTodaysBirthdays(username);

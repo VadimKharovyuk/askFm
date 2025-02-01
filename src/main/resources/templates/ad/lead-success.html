@@ -1,22 +1,185 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Успешная запись</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <h1>Спасибо за вашу заявку!</h1>-->
+
+
+<!--  <div class="success-details">-->
+<!--    <p>Ваши данные успешно сохранены.</p>-->
+<!--    <p>Мы свяжемся с вами в ближайшее время.</p>-->
+<!--  </div>-->
+
+<!--  <div class="navigation-links">-->
+<!--    <a href="/home" class="btn">Вернуться на главную</a>-->
+<!--  </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Успешная запись</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --background-dark: #000000;
+      --secondary-bg: #16181c;
+      --text-white: #e7e9ea;
+      --text-gray: #71767b;
+      --border-color: #2f3336;
+      --blue-accent: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --success-green: #00ba7c;
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: var(--secondary-bg);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-icon {
+      color: var(--success-green);
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+
+    h1 {
+      color: var(--text-white);
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .success-details {
+      color: var(--text-gray);
+      margin: 30px 0;
+      line-height: 1.6;
+    }
+
+    .success-details p {
+      margin: 10px 0;
+    }
+
+    .navigation-links {
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--blue-accent);
+      color: var(--text-white);
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--blue-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(29, 155, 240, 0.2);
+    }
+
+    .additional-actions {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .action-link {
+      color: var(--text-gray);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .action-link:hover {
+      color: var(--blue-accent);
+      background-color: rgba(29, 155, 240, 0.1);
+    }
+
+  </style>
 </head>
 <body>
 <div class="container">
+  <i class="fas fa-check-circle success-icon"></i>
   <h1>Спасибо за вашу заявку!</h1>
-  <div th:if="${message}" th:text="${message}"></div>
 
   <div class="success-details">
-    <p>Ваши данные успешно сохранены.</p>
-    <p>Мы свяжемся с вами в ближайшее время.</p>
+    <p><i class="fas fa-check"></i> Ваши данные успешно сохранены.</p>
+    <p><i class="fas fa-clock"></i> Мы свяжемся с вами в ближайшее время.</p>
   </div>
 
   <div class="navigation-links">
-    <a href="/home" class="btn">Вернуться на главную</a>
+    <a href="/home" class="btn">
+      <i class="fas fa-home"></i>
+      Вернуться на главную
+    </a>
+  </div>
+
+  <div class="additional-actions">
+    <a href="/ads" class="action-link">
+      <i class="fas fa-ad"></i>
+     Заказать рекламу
+    </a>
+    <a th:href="@{/users/{username}(username=${user.username})}" class="action-link">
+      <i class="fas fa-user"></i>
+      Мой профиль
+    </a>
   </div>
 </div>
 </body>

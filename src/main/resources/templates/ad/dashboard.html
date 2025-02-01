@@ -204,7 +204,7 @@
       <i class="fas fa-ad"></i>
       <span>Мои рекламы</span>
     </a>
-    <a href="/profile" class="side-link">
+    <a th:href="@{/users/{username}(username=${currentUser.username})}" class="side-link">
       <i class="fas fa-user"></i>
       <span>Профиль</span>
     </a>

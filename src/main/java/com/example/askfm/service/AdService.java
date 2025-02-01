@@ -80,22 +80,6 @@ public class AdService {
 
         return adMapper.toPublicDto(ad);
     }
-    public Map<String, Object> getAdStatistics(Long adId) {
-        Ad ad = findById(adId);
-        Map<String, Object> statistics = new HashMap<>();
-
-        statistics.put("impressions", ad.getImpressions());
-        statistics.put("clicks", ad.getClickCount());
-        statistics.put("ctr", calculateCTR(ad));
-        statistics.put("remainingBudget", ad.getRemainingBudget());
-
-        return statistics;
-    }
-
-    private double calculateCTR(Ad ad) {
-        if (ad.getImpressions() == 0) return 0.0;
-        return (double) ad.getClickCount() / ad.getImpressions() * 100;
-    }
 
 
     // Новый метод для получения случайной рекламы

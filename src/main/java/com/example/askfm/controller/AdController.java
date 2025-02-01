@@ -8,11 +8,13 @@ import com.example.askfm.model.User;
 import com.example.askfm.service.AdLeadService;
 import com.example.askfm.service.AdService;
 import com.example.askfm.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,7 @@ public class AdController {
 
     private final AdService adService;
     private final UserService userService;
-
-
+    private final AdLeadService adLeadService;
 
     @GetMapping
     public String adsHome(Model model, @AuthenticationPrincipal UserDetails userDetails) {
@@ -34,10 +35,11 @@ public class AdController {
         // Получаем список активных реклам текущего пользователя
         List<AdResponseDto> activeAds = adService.getActiveAdsByUser(currentUser.getId());
 
-        model.addAttribute("user", currentUser);
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeAds", activeAds);
         return "ad/dashboard";
     }
+
 
     // Отображение формы для создания рекламы
     @GetMapping("/create")
@@ -63,6 +65,40 @@ public class AdController {
             return "ad/create"; // В случае ошибки возвращаем на форму с ошибкой
         }
     }
+
+
+
+    // Обработка отправки формы
+    @PostMapping("/submit")
+    public String submitLead(@RequestParam Long adId,
+                             @Valid @ModelAttribute("leadForm") AdLeadFormDTO leadFormDTO,
+                             BindingResult bindingResult,
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             Model model) {
+        // Проверка валидации
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("ad", adService.getPublicAd(adId));
+            return "test/ad-view";
+        }
+
+        try {
+            // Сохраняем лид и обновляем статистику
+            adLeadService.submitLead(adId, userDetails.getUsername(), leadFormDTO);
+            return "redirect:/ads/lead-success";
+        } catch (Exception e) {
+            model.addAttribute("error", "Произошла ошибка при отправке формы");
+            model.addAttribute("ad", adService.getPublicAd(adId));
+            return "test/ad-view";
+        }
+    }
+
+//лид записался
+    @GetMapping("/lead-success")
+    public String showLeadSuccess(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        model.addAttribute("user", userService.findByUsername(userDetails.getUsername()));
+        return "ad/lead-success";
+    }
+
 
     // Просмотр активных реклам
     @GetMapping("/active")
