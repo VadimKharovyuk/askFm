@@ -167,6 +167,21 @@
     .oauth-icon {
       margin-right: 8px;
     }
+    .forgot-password-button {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--blue-accent);
+      border-radius: 9999px;
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    .forgot-password-button:hover {
+      background-color: rgba(29, 155, 240, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -236,7 +251,12 @@
 
     <button type="submit" class="btn-login">Войти</button>
   </form>
-
+  <button type="button"
+          onclick="window.location.href='/forgot-password'"
+          class="forgot-password-button">
+    <i class="fas fa-key"></i>
+    Забыли пароль?
+  </button><br><br>
   <!-- Register Link -->
   <p class="text-center text-gray">
     Нет аккаунта?

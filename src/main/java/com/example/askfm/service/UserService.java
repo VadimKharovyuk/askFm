@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,6 +73,7 @@ public class UserService implements UserDetailsService {
                 .role(UserRole.USER)
                 .createdAt(LocalDateTime.now())
                 .password(passwordEncoder.encode(registrationDTO.getPassword()))
+                .balance(BigDecimal.ZERO)
                 .build();;
 
         return userRepository.save(user);
@@ -280,5 +282,13 @@ public class UserService implements UserDetailsService {
 
     public List<User> findAllUsers() {
         return userRepository.findAll();
+    }
+
+    public User findByEmail(String email) {
+       return userRepository.findByEmail(email);
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 }

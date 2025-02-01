@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/news/**",
                                 "/account-locked",
                                 "/support/**",
+                                "/forgot-password/**",
                                 "/css/**", "/js/**")
                         .permitAll()
                         .anyRequest().authenticated()

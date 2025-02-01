@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -87,11 +84,11 @@ public class AdService {
 
     // Новый метод для получения случайной рекламы
     @Transactional
-    public AdPublicDto getRandomAd() {
+    public Optional<AdPublicDto> getRandomAd() {
         List<Ad> activeAds = adRepository.findByIsActiveTrue();
 
         if (activeAds.isEmpty()) {
-            throw new RuntimeException("Нет активных реклам");
+            return Optional.empty();
         }
 
         Ad ad = activeAds.get(random.nextInt(activeAds.size()));
@@ -104,13 +101,38 @@ public class AdService {
             ad.decreaseBudget(COST_PER_VIEW);
             adRepository.save(ad);
 
-            return adMapper.toPublicDto(ad);
+            return Optional.of(adMapper.toPublicDto(ad));
         } else {
             ad.setActive(false);
             adRepository.save(ad);
-            throw new RuntimeException("Бюджет рекламы исчерпан");
+            return Optional.empty();
         }
     }
+//    @Transactional
+//    public AdPublicDto getRandomAd() {
+//        List<Ad> activeAds = adRepository.findByIsActiveTrue();
+//
+//        if (activeAds.isEmpty()) {
+//            throw new RuntimeException("Нет активных реклам");
+//        }
+//
+//        Ad ad = activeAds.get(random.nextInt(activeAds.size()));
+//
+//        if (ad.getRemainingBudget().compareTo(COST_PER_VIEW) >= 0) {
+//            // Увеличиваем счетчик показов
+//            ad.setImpressions(ad.getImpressions() + 1);
+//
+//            // Снимаем монеты за показ
+//            ad.decreaseBudget(COST_PER_VIEW);
+//            adRepository.save(ad);
+//
+//            return adMapper.toPublicDto(ad);
+//        } else {
+//            ad.setActive(false);
+//            adRepository.save(ad);
+//            throw new RuntimeException("Бюджет рекламы исчерпан");
+//        }
+//    }
     public List<AdResponseDto> getActiveAdsByUser(Long userId) {
         List<Ad> ads = adRepository.findByCreatedByIdAndIsActiveTrue(userId);
         return ads.stream()

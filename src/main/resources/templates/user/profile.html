@@ -689,7 +689,8 @@
     </div>
 
 
-    <div class="container-ad">
+    <!-- Рекламный блок -->
+    <div th:if="${hasAd}" class="container-ad">
         <!-- Отображение рекламы -->
         <div class="ad-content">
             <h1 th:text="${ad.title}">Заголовок рекламы</h1>
@@ -730,6 +731,17 @@
             </form>
         </div>
     </div>
+
+    <!-- Сообщение, если реклам нет -->
+    <div th:unless="${hasAd}" class="no-ads-message">
+<!--        <div class="empty-ad-container">-->
+<!--            <i class="fas fa-ad"></i>-->
+<!--            <h3>Тут может быть ваша реклама</h3>-->
+<!--            <p>Разместите свою рекламу и получите новых клиентов!</p>-->
+<!--            <a href="/ads/create" class="btn btn-primary">Разместить рекламу</a>-->
+<!--        </div>-->
+    </div>
+
 </aside>
 
 

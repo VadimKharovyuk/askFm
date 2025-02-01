@@ -73,5 +73,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             u.createdAt DESC
         """)
     Page<User> findPaginatedSuggestedUsers(String currentUsername, Pageable pageable);
-    }
+
+    User findByEmail(String email);
+
+}
 

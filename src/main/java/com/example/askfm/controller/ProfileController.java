@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -49,14 +50,22 @@ public class ProfileController {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
 
-        AdPublicDto ad = adService.getRandomAd();
-        // Создаем DTO для формы
-        AdLeadFormDTO leadFormDTO = new AdLeadFormDTO();
-        leadFormDTO.setUsername(user.getUsername());
-        leadFormDTO.setEmail(user.getEmail());
+        // Получаем опциональную рекламу
+        Optional<AdPublicDto> adOptional = adService.getRandomAd();
 
-        model.addAttribute("ad", ad);
-        model.addAttribute("leadForm", leadFormDTO);
+        // Если есть активная реклама, добавляем её и форму в модель
+        if (adOptional.isPresent()) {
+            AdPublicDto ad = adOptional.get();
+            AdLeadFormDTO leadFormDTO = new AdLeadFormDTO();
+            leadFormDTO.setUsername(user.getUsername());
+            leadFormDTO.setEmail(user.getEmail());
+
+            model.addAttribute("ad", ad);
+            model.addAttribute("leadForm", leadFormDTO);
+            model.addAttribute("hasAd", true);
+        } else {
+            model.addAttribute("hasAd", false);
+        }
 
 
         // Получаем дни рождения на сегодня

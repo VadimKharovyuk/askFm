@@ -87,6 +87,7 @@ public class User {
     private List<Visit> myVisits = new ArrayList<>();
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
 
 
