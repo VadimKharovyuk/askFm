@@ -20,10 +20,10 @@ public class PasswordResetController {
 
     @GetMapping
     public String showForgotPasswordForm() {
-        return "aut/forgot-password";  // Исправлен путь к шаблону
+        return "aut/forgot-password";
     }
 
-    @PostMapping("/reset-password")  // Более REST-подобный путь
+    @PostMapping("/reset-password")
     public String processForgotPassword(@RequestParam("email") String email,
                                         RedirectAttributes redirectAttributes) {
         try {

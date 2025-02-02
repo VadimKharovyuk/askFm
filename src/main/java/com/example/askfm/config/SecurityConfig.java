@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 "/register", "/login",
                                 "/logout-page",
                                 "/news/**",
+                                "/dev/hash",
+                                "/newsletter/subscribe",
                                 "/account-locked",
                                 "/support/**",
                                 "/forgot-password/**",

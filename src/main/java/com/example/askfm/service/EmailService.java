@@ -46,6 +46,14 @@ public class EmailService {
         message.setText(text);
         mailSender.send(message);
     }
+
+
+    // Можно добавить метод для просмотра размера очереди
+    public int getQueueSize() {
+        return emailQueue.size();
+    }
+
+
     @Data
     @AllArgsConstructor
     public class EmailMessage {

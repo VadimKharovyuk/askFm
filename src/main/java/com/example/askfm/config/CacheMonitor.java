@@ -17,7 +17,7 @@ public class CacheMonitor {
         CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache(cacheName);
         if (caffeineCache != null) {
             Cache<Object, Object> nativeCache = caffeineCache.getNativeCache();
-            log.info("Cache: {} - Size: {}", cacheName, nativeCache.estimatedSize());
+//            log.info("Cache: {} - Size: {}", cacheName, nativeCache.estimatedSize());
         }
     }
 }

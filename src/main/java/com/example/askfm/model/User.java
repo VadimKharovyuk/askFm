@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
 
     @Column(name = "avatar", columnDefinition = "bytea")
     private byte[] avatar;
@@ -43,10 +46,6 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private UserRole role;
 
     @Column(name = "is_locked", columnDefinition = "boolean default false")
     private boolean locked = false;

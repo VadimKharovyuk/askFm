@@ -464,12 +464,37 @@
       </div>
       <div class="col-md-4 mb-4">
         <h5 class="mb-3">Подпишитесь на новости</h5>
-        <form class="mb-3">
+        <form class="mb-3" th:action="@{/newsletter/subscribe}" method="post">
           <div class="input-group">
-            <input type="email" class="form-control" placeholder="Ваш email" style="background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-white);">
+            <input type="email"
+                   name="email"
+                   class="form-control"
+                   placeholder="Ваш email"
+                   required
+                   style="background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-white);">
             <button class="btn btn-custom" type="submit">Подписаться</button>
           </div>
         </form>
+
+        <!-- Сообщения об успехе/ошибке -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i>
+          <span th:text="${success}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span th:text="${error}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+<!--        <h5 class="mb-3">Подпишитесь на новости</h5>-->
+<!--        <form class="mb-3">-->
+<!--          <div class="input-group">-->
+<!--            <input type="email" class="form-control" placeholder="Ваш email" style="background-color: var(&#45;&#45;card-bg); border-color: var(&#45;&#45;border-color); color: var(&#45;&#45;text-white);">-->
+<!--            <button class="btn btn-custom" type="submit">Подписаться</button>-->
+<!--          </div>-->
+<!--        </form>-->
         <div class="social-links">
           <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
           <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
