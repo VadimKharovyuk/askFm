@@ -3,6 +3,7 @@ package com.example.askfm.controller;
 import com.example.askfm.enums.UserRole;
 import com.example.askfm.model.User;
 import com.example.askfm.service.AdService;
+import com.example.askfm.service.AuthorizationService;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,34 +26,19 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminCoinController {
     private final UserService userService;
     public final AdService adService;
+    private final AuthorizationService authorizationService;
 
     @GetMapping("/add-coins")
     public String showAddCoinsPage(Model model ,@AuthenticationPrincipal UserDetails userDetails) {
 
-        // Проверка на null перед использованием
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
-        try {
-            // Безопасное получение имени пользователя
-            String username = userDetails.getUsername();
-            User currentUser = userService.findByUsername(username);
-
-            if (currentUser == null || currentUser.getRole() != UserRole.ADMIN) {
-                return "redirect:/login";
-            }
-
-        } catch (Exception e) {
-            log.error("Error processing newsletter list for user: {}",
-                    userDetails.getUsername(), e);
-            return "redirect:/login";
+        String redirect = authorizationService.redirectIfNotAdmin(userDetails);
+        if (redirect != null) {
+            return redirect;
         }
         model.addAttribute("users", Collections.emptyList());
-
 
         return "admin/add-coins";
     }
