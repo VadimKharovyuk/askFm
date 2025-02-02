@@ -7,9 +7,11 @@ import com.example.askfm.model.NewsletterSubscriber;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.NewsletterRepository;
 import com.example.askfm.repository.NewsletterSubscriberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,7 +27,7 @@ public class NewsletterService {
     private final EmailService emailService;
     private final UserService userService;
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Newsletter createNewsletter(NewsletterDTO dto, Long adminId) {
         User admin = userService.findById(adminId);
 
@@ -76,7 +78,7 @@ public class NewsletterService {
         }
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Newsletter> getAllNewsletters() {
         return newsletterRepository.findAll();
     }
@@ -152,4 +154,12 @@ public class NewsletterService {
 
         emailService.queueEmail(email, subject, content);
     }
+    //удаление
+    public void deleteNewsletterById(Long newsletterId) {
+        if (!newsletterRepository.existsById(newsletterId)) {
+            throw new EntityNotFoundException("Newsletter not found");
+        }
+        newsletterRepository.deleteById(newsletterId);
+    }
+
 }

@@ -48,13 +48,16 @@
   </div>
 
   <!-- Alerts -->
-  <div th:if="${success}" class="alert alert-success" role="alert">
+  <div th:if="${param.success}" class="alert alert-success" role="alert">
     <i class="fas fa-check-circle me-2"></i>
-    <span th:text="${success}"></span>
+    Рассылка успешно удалена
   </div>
-  <div th:if="${error}" class="alert alert-danger" role="alert">
+  <div th:if="${param.error}" class="alert alert-danger" role="alert">
     <i class="fas fa-exclamation-circle me-2"></i>
-    <span th:text="${error}"></span>
+    <span th:switch="${param.error}">
+      <span th:case="'notFound'">Рассылка не найдена</span>
+      <span th:case="*">Произошла ошибка при удалении</span>
+    </span>
   </div>
 
   <!-- Newsletters List -->
@@ -70,14 +73,14 @@
                   <i class="far fa-clock me-1"></i>
                   Запланировано на:
                   <span th:text="${#temporals.format(newsletter.scheduledTime, 'dd.MM.yyyy HH:mm')}">
-                                        </span>
+                  </span>
                 </small>
               </p>
             </div>
             <span th:class="'status-badge status-' + ${#strings.toLowerCase(newsletter.status)}"
                   th:text="${newsletter.status.displayName}">
-                                Статус
-                            </span>
+              Статус
+            </span>
           </div>
           <p class="card-text" th:text="${newsletter.content}">Содержание рассылки</p>
           <div class="d-flex justify-content-between align-items-center mt-3">
@@ -85,10 +88,18 @@
               Создано:
               <span th:text="${newsletter.createdBy.username}"></span>
             </small>
-            <div th:if="${newsletter.status == T(com.example.askfm.enums.NewsletterStatus).SCHEDULED}">
-              <form th:action="@{/admin/newsletters/{id}/cancel(id=${newsletter.id})}"
+            <div class="d-flex">
+              <form th:action="@{/admin/newsletters/delete}" method="post" style="display: inline;">
+                <input type="hidden" name="id" th:value="${newsletter.id}">
+                <button type="submit" class="btn btn-danger btn-sm me-2">
+                  <i class="fas fa-trash me-1"></i> Удалить
+                </button>
+              </form>
+
+              <form th:if="${newsletter.status == T(com.example.askfm.enums.NewsletterStatus).SCHEDULED}"
+                    th:action="@{/admin/newsletters/{id}/cancel(id=${newsletter.id})}"
                     method="post" style="display: inline;">
-                <button type="submit" class="btn btn-danger btn-sm">
+                <button type="submit" class="btn btn-warning btn-sm">
                   <i class="fas fa-ban me-1"></i> Отменить
                 </button>
               </form>
@@ -99,5 +110,7 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

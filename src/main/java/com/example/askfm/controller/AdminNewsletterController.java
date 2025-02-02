@@ -5,6 +5,7 @@ import com.example.askfm.enums.UserRole;
 import com.example.askfm.model.User;
 import com.example.askfm.service.NewsletterService;
 import com.example.askfm.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +28,26 @@ public class AdminNewsletterController {
 
     @GetMapping
     public String showNewsletterList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        // Получаем пользователя и проверяем его роль
-        User currentUser = userService.findByUsername(userDetails.getUsername());
-        if (currentUser.getRole() != UserRole.ADMIN) {
+        // Проверка на null перед использованием
+        if (userDetails == null) {
             return "redirect:/login";
         }
-        model.addAttribute("newsletters", newsletterService.getAllNewsletters());
-        return "admin/newsletters/list";
+        try {
+            // Безопасное получение имени пользователя
+            String username = userDetails.getUsername();
+            User currentUser = userService.findByUsername(username);
+
+            if (currentUser == null || currentUser.getRole() != UserRole.ADMIN) {
+                return "redirect:/login";
+            }
+            model.addAttribute("newsletters", newsletterService.getAllNewsletters());
+            return "admin/newsletters/list";
+
+        } catch (Exception e) {
+            log.error("Error processing newsletter list for user: {}",
+                    userDetails.getUsername(), e);
+            return "redirect:/login";
+        }
     }
 
     @GetMapping("/create")
@@ -41,6 +55,7 @@ public class AdminNewsletterController {
         model.addAttribute("newsletterDTO", new NewsletterDTO());
         return "admin/newsletters/create";
     }
+
     @PostMapping("/create")
     public String createNewsletter(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -79,5 +94,16 @@ public class AdminNewsletterController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/newsletters";
+    }
+
+    @PostMapping("/delete")
+    public String deleteById(@RequestParam Long id) {
+        try {
+            newsletterService.deleteNewsletterById(id);
+            return "redirect:/admin/newsletters?success=true";
+        } catch (EntityNotFoundException e) {
+            return "redirect:/admin/newsletters?error=notFound";
+        }
+
     }
 }

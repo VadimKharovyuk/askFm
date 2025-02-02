@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
+//подписка main page
 @Entity
 @Table(name = "newsletter_subscribers")
 @Data
