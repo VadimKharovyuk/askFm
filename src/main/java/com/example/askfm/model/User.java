@@ -32,6 +32,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
+    private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private UserRole role;
@@ -85,9 +89,7 @@ public class User {
     @OrderBy("visitedAt DESC")  // Явно указываем порядок
     private List<Visit> myVisits = new ArrayList<>();
 
-    @Column(nullable = false, precision = 19, scale = 2)
-    @Builder.Default
-    private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
+
 
 
 }

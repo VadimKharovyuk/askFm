@@ -13,6 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class AdminUserController {
     private final UserService userService;
 
+    // Поиск пользователей
+    @GetMapping("/users/search")
+    public String searchUsers(@RequestParam String query, Model model) {
+        model.addAttribute("users", userService.searchUsers(query));
+        model.addAttribute("roles", UserRole.values());
+        return "admin/users";
+    }
+
     // Страница управления пользователями
     @GetMapping("/users")
     public String userManagement(Model model) {
@@ -33,11 +41,6 @@ public class AdminUserController {
         }
     }
 
-    // Поиск пользователей
-    @GetMapping("/users/search")
-    public String searchUsers(@RequestParam String query, Model model) {
-        model.addAttribute("users", userService.searchUsers(query));
-        model.addAttribute("roles", UserRole.values());
-        return "admin/users";
-    }
+
+
 }

@@ -11,13 +11,14 @@ import com.example.askfm.repository.AdRepository;
 import com.example.askfm.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AdService {
@@ -108,31 +109,7 @@ public class AdService {
             return Optional.empty();
         }
     }
-//    @Transactional
-//    public AdPublicDto getRandomAd() {
-//        List<Ad> activeAds = adRepository.findByIsActiveTrue();
-//
-//        if (activeAds.isEmpty()) {
-//            throw new RuntimeException("Нет активных реклам");
-//        }
-//
-//        Ad ad = activeAds.get(random.nextInt(activeAds.size()));
-//
-//        if (ad.getRemainingBudget().compareTo(COST_PER_VIEW) >= 0) {
-//            // Увеличиваем счетчик показов
-//            ad.setImpressions(ad.getImpressions() + 1);
-//
-//            // Снимаем монеты за показ
-//            ad.decreaseBudget(COST_PER_VIEW);
-//            adRepository.save(ad);
-//
-//            return adMapper.toPublicDto(ad);
-//        } else {
-//            ad.setActive(false);
-//            adRepository.save(ad);
-//            throw new RuntimeException("Бюджет рекламы исчерпан");
-//        }
-//    }
+
     public List<AdResponseDto> getActiveAdsByUser(Long userId) {
         List<Ad> ads = adRepository.findByCreatedByIdAndIsActiveTrue(userId);
         return ads.stream()
@@ -156,5 +133,29 @@ public class AdService {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Реклама не найдена"));
         adRepository.delete(ad);
+    }
+
+    public User addCoins(Long userId, BigDecimal amount, String adminUsername) {
+        // Проверка корректности суммы
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("Attempt to add non-positive amount of coins: {}", amount);
+            throw new IllegalArgumentException("Сумма пополнения должна быть положительной");
+        }
+
+        // Находим пользователя или бросаем исключение
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+
+        // Увеличиваем баланс
+        user.setBalance(user.getBalance().add(amount));
+
+        // Сохраняем пользователя
+        User updatedUser = userRepository.save(user);
+
+        // Логирование
+        log.info("Admin {} added {} coins to user {}",
+                adminUsername, amount, user.getUsername());
+
+        return updatedUser;
     }
 }
