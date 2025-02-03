@@ -23,6 +23,26 @@ public class RepostController {
     private final RepostService repostService;
     private final UserService userService;
 
+    @PostMapping("/delete")
+    public String deleteRepost(@RequestParam("postId") Long postId,
+                               @AuthenticationPrincipal UserDetails userDetails,
+                               RedirectAttributes redirectAttributes) {
+        log.debug("Attempting to delete repost for postId: {} by user: {}", postId, userDetails.getUsername());
+
+        try {
+            String username = userDetails.getUsername();
+            User user = userService.findByUsername(username);
+            log.debug("Found user with id: {}", user.getId());
+
+            repostService.deleteRepost(user.getId(), postId);
+            log.debug("Successfully deleted repost");
+            redirectAttributes.addFlashAttribute("success", "Repost removed successfully");
+        } catch (Exception e) {
+            log.error("Error deleting repost: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/users/" + userDetails.getUsername();
+    }
 
     @PostMapping("/{postId}/repost")
     public String repost(@PathVariable Long postId,
@@ -47,24 +67,6 @@ public class RepostController {
         return "redirect:/users/" + userDetails.getUsername();
     }
 
-    @GetMapping("/user/{userId}")
-    public String getUserReposts(@PathVariable Long userId, Model model,
-                                 @PageableDefault(size = 20) Pageable pageable) {
-        model.addAttribute("reposts", repostService.getUserReposts(userId, pageable));
-        return "reposts/user-reposts";
-    }
 
 
-    @DeleteMapping("/{repostId}")
-    public String deleteRepost(@PathVariable Long repostId,
-                               @AuthenticationPrincipal User user,
-                               RedirectAttributes redirectAttributes) {
-        try {
-            repostService.deleteRepost(user.getId(), repostId);
-            redirectAttributes.addFlashAttribute("success", "Repost removed successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/reposts";
-    }
 }

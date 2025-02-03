@@ -31,7 +31,6 @@ public class PostService {
     private final ImageService imageService;
     private final PostViewRepository postViewRepository;
     private final TagRepository tagRepository;
-    private final EntityManager entityManager;
     private final CommentRepository commentRepository;
     private final SavedPostRepository savedPostRepository;
     private final MentionService mentionService;

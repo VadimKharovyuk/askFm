@@ -694,17 +694,55 @@
 
                 <!-- Repost header -->
                 <div th:if="${post.repostedBy}" class="d-flex align-items-center gap-2 mb-3">
-                    <i class="fas fa-retweet" style="color: var(--blue-accent);"></i>
-                    <span class="text-muted" th:text="${post.repostedBy + ' reposted'}"></span>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-retweet" style="color: var(--blue-accent);"></i>
+                        <span class="text-muted ms-2" th:text="${post.repostedBy + ' reposted'}"></span>
+                    </div>
+
+                    <!-- Кнопка удаления репоста -->
+                    <form th:if="${post.repostedBy == currentUser}"
+                          th:action="@{/reposts/delete}"
+                          method="post"
+                          class="ms-auto">
+                        <input type="hidden" name="postId" th:value="${post.id}"/>
+                        <button type="submit" class="btn btn-link p-0 text-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <span th:text="${'DEBUG: Post ID=' + post.id}" style="display:none;"></span>
+                    </form>
                 </div>
 
-                <!-- Ссылка на пост (весь контейнер) -->
-                <a th:href="@{/posts/{id}(id=${post.id})}" class="text-decoration-none stretched-link" style="color: inherit;">
-                    <!-- Reposted content в рамке -->
-                    <div th:if="${post.repostedBy}" class="border rounded p-3 mb-3"
-                         style="border-color: var(--border-color) !important; background-color: rgba(255, 255, 255, 0.03);">
+                <!-- Контент поста с ссылкой -->
+                <div class="position-relative">
+                    <a th:href="@{/posts/{id}(id=${post.id})}" class="text-decoration-none stretched-link" style="color: inherit;">
+                        <!-- Reposted content в рамке -->
+                        <div th:if="${post.repostedBy}" class="border rounded p-3 mb-3"
+                             style="border-color: var(--border-color) !important; background-color: rgba(255, 255, 255, 0.03);">
+                            <div class="d-flex gap-3">
+                                <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"
+                                     class="rounded-circle"
+                                     style="width: 48px; height: 48px;"
+                                     alt="User avatar">
 
-                        <div class="d-flex gap-3">
+                                <div class="flex-grow-1">
+                                    <div class="mb-2">
+                                        <span class="fw-bold" th:text="${post.authorUsername}"></span>
+                                        <small class="text-muted ms-2"
+                                               th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"
+                                               style="color: #e2e2e2 !important;"></small>
+                                    </div>
+
+                                    <p th:text="${post.content}"></p>
+
+                                    <img th:if="${post.base64Media != null}"
+                                         th:src="'data:image/jpeg;base64,' + ${post.base64Media}"
+                                         class="img-fluid rounded mb-3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Обычный пост без рамки -->
+                        <div th:unless="${post.repostedBy}" class="d-flex gap-3">
                             <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"
                                  class="rounded-circle"
                                  style="width: 48px; height: 48px;"
@@ -725,41 +763,18 @@
                                      class="img-fluid rounded mb-3">
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Обычный пост без рамки -->
-                    <div th:unless="${post.repostedBy}" class="d-flex gap-3">
-                        <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"
-                             class="rounded-circle"
-                             style="width: 48px; height: 48px;"
-                             alt="User avatar">
-
-                        <div class="flex-grow-1">
-                            <div class="mb-2">
-                                <span class="fw-bold" th:text="${post.authorUsername}"></span>
-                                <small class="text-muted ms-2"
-                                       th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"
-                                       style="color: #e2e2e2 !important;"></small>
-                            </div>
-
-                            <p th:text="${post.content}"></p>
-
-                            <img th:if="${post.base64Media != null}"
-                                 th:src="'data:image/jpeg;base64,' + ${post.base64Media}"
-                                 class="img-fluid rounded mb-3">
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
 
                 <!-- Actions -->
-                <div class="post-actions d-flex justify-content-between mt-3" style="max-width: 425px;">
-                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                <div class="post-actions d-flex justify-content-between mt-3">
+                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"
                             style="color: var(--blue-accent);">
                         <i class="far fa-comment"></i>
                         <span th:text="${post.commentsCount ?: 0}"></span>
                     </button>
 
-                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"
                             onclick="event.stopPropagation()"
                             data-bs-toggle="modal"
                             th:data-bs-target="'#repostModal' + ${post.id}"
@@ -768,9 +783,9 @@
                         <span th:text="${post.repostsCount ?: 0}"></span>
                     </button>
 
-                    <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline">
+                    <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline flex-grow-1">
                         <button type="submit"
-                                class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                                class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"
                                 th:style="${post.isLikedByCurrentUser ? 'color: #f91880;' : 'color: var(--blue-accent);'}">
                             <i class="fas"
                                th:classappend="${post.isLikedByCurrentUser ? 'fa-heart' : 'fa-heart-o'}"></i>
@@ -778,7 +793,7 @@
                         </button>
                     </form>
 
-                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover"
+                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"
                             style="color: var(--blue-accent);">
                         <i class="far fa-chart-bar"></i>
                         <span th:text="${post.views}"></span>
@@ -786,6 +801,106 @@
                 </div>
             </div>
         </div>
+
+<!--        <div class="posts-container">-->
+
+<!--            <div th:each="post : ${posts}" class="post p-3 border-bottom position-relative"-->
+<!--                 style="border-color: var(&#45;&#45;border-color) !important;">-->
+
+<!--                &lt;!&ndash; Repost header &ndash;&gt;-->
+<!--                <div th:if="${post.repostedBy}" class="d-flex align-items-center gap-2 mb-3">-->
+<!--                    <i class="fas fa-retweet" style="color: var(&#45;&#45;blue-accent);"></i>-->
+<!--                    <span class="text-muted" th:text="${post.repostedBy + ' reposted'}"></span>-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; Ссылка на пост (весь контейнер) &ndash;&gt;-->
+<!--                <a th:href="@{/posts/{id}(id=${post.id})}" class="text-decoration-none stretched-link" style="color: inherit;">-->
+<!--                    &lt;!&ndash; Reposted content в рамке &ndash;&gt;-->
+<!--                    <div th:if="${post.repostedBy}" class="border rounded p-3 mb-3"-->
+<!--                         style="border-color: var(&#45;&#45;border-color) !important; background-color: rgba(255, 255, 255, 0.03);">-->
+
+<!--                        <div class="d-flex gap-3">-->
+<!--                            <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"-->
+<!--                                 class="rounded-circle"-->
+<!--                                 style="width: 48px; height: 48px;"-->
+<!--                                 alt="User avatar">-->
+
+<!--                            <div class="flex-grow-1">-->
+<!--                                <div class="mb-2">-->
+<!--                                    <span class="fw-bold" th:text="${post.authorUsername}"></span>-->
+<!--                                    <small class="text-muted ms-2"-->
+<!--                                           th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"-->
+<!--                                           style="color: #e2e2e2 !important;"></small>-->
+<!--                                </div>-->
+
+<!--                                <p th:text="${post.content}"></p>-->
+
+<!--                                <img th:if="${post.base64Media != null}"-->
+<!--                                     th:src="'data:image/jpeg;base64,' + ${post.base64Media}"-->
+<!--                                     class="img-fluid rounded mb-3">-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Обычный пост без рамки &ndash;&gt;-->
+<!--                    <div th:unless="${post.repostedBy}" class="d-flex gap-3">-->
+<!--                        <img th:src="${post.authorAvatar != null ? 'data:image/jpeg;base64,' + post.authorAvatar : '/api/placeholder/48/48'}"-->
+<!--                             class="rounded-circle"-->
+<!--                             style="width: 48px; height: 48px;"-->
+<!--                             alt="User avatar">-->
+
+<!--                        <div class="flex-grow-1">-->
+<!--                            <div class="mb-2">-->
+<!--                                <span class="fw-bold" th:text="${post.authorUsername}"></span>-->
+<!--                                <small class="text-muted ms-2"-->
+<!--                                       th:text="${#temporals.format(post.publishedAt, 'dd MMM, HH:mm')}"-->
+<!--                                       style="color: #e2e2e2 !important;"></small>-->
+<!--                            </div>-->
+
+<!--                            <p th:text="${post.content}"></p>-->
+
+<!--                            <img th:if="${post.base64Media != null}"-->
+<!--                                 th:src="'data:image/jpeg;base64,' + ${post.base64Media}"-->
+<!--                                 class="img-fluid rounded mb-3">-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </a>-->
+
+<!--                &lt;!&ndash; Actions &ndash;&gt;-->
+<!--                <div class="post-actions d-flex justify-content-between mt-3">-->
+<!--                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"-->
+<!--                            style="color: var(&#45;&#45;blue-accent);">-->
+<!--                        <i class="far fa-comment"></i>-->
+<!--                        <span th:text="${post.commentsCount ?: 0}"></span>-->
+<!--                    </button>-->
+
+<!--                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"-->
+<!--                            onclick="event.stopPropagation()"-->
+<!--                            data-bs-toggle="modal"-->
+<!--                            th:data-bs-target="'#repostModal' + ${post.id}"-->
+<!--                            style="color: var(&#45;&#45;blue-accent);">-->
+<!--                        <i class="fas fa-retweet"></i>-->
+<!--                        <span th:text="${post.repostsCount ?: 0}"></span>-->
+<!--                    </button>-->
+
+<!--                    <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post" class="d-inline flex-grow-1">-->
+<!--                        <button type="submit"-->
+<!--                                class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"-->
+<!--                                th:style="${post.isLikedByCurrentUser ? 'color: #f91880;' : 'color: var(&#45;&#45;blue-accent);'}">-->
+<!--                            <i class="fas"-->
+<!--                               th:classappend="${post.isLikedByCurrentUser ? 'fa-heart' : 'fa-heart-o'}"></i>-->
+<!--                            <span th:text="${post.likesCount}"></span>-->
+<!--                        </button>-->
+<!--                    </form>-->
+
+<!--                    <button class="btn btn-link p-0 d-flex align-items-center gap-2 action-hover flex-grow-1"-->
+<!--                            style="color: var(&#45;&#45;blue-accent);">-->
+<!--                        <i class="far fa-chart-bar"></i>-->
+<!--                        <span th:text="${post.views}"></span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
     </main>
 

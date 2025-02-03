@@ -32,4 +32,6 @@ public interface RepostRepository extends JpaRepository<Repost, Long> {
     boolean existsByUserAndOriginalPost(User user, Post originalPost);
     List<Repost> findByUserId(@Param("userId") Long userId, Pageable pageable);
     List<Repost> findByOriginalPostId(@Param("postId") Long postId, Pageable pageable);
+
+    Optional<Repost> findByUserIdAndOriginalPostId(Long userId, Long originalPostId);
 }

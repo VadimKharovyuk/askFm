@@ -11,13 +11,14 @@ import com.example.askfm.repository.PostRepository;
 import com.example.askfm.repository.RepostRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,31 +45,24 @@ public class RepostService {
                 .user(user)
                 .originalPost(originalPost)
                 .repostedAt(LocalDateTime.now())
+
                 .build();
 
         return repostMapper.toDto(repostRepository.save(repost));
     }
 
-    public void deleteRepost(Long userId, Long repostId) {
-        Repost repost = repostRepository.findById(repostId)
-                .orElseThrow(() -> new RepostNotFoundException("Repost not found"));
-
+    public void deleteRepost(Long userId, Long postId) {
+        // Находим репост по userId и postId оригинального поста
+        Repost repost = repostRepository.findByUserIdAndOriginalPostId(userId, postId)
+                .orElseThrow(() -> {
+                    return new RepostNotFoundException("Repost not found");
+                });
         if (!repost.getUser().getId().equals(userId)) {
+            log.warn("Unauthorized delete attempt. Repost user: {}, Request user: {}",
+                    repost.getUser().getId(), userId);
             throw new UnauthorizedException("Not authorized to delete this repost");
         }
-
         repostRepository.delete(repost);
     }
 
-    public List<RepostDTO> getUserReposts(Long userId, Pageable pageable) {
-        return repostMapper.toDtoList(
-                repostRepository.findByUserId(userId, pageable)
-        );
-    }
-
-    public List<RepostDTO> getPostReposts(Long postId, Pageable pageable) {
-        return repostMapper.toDtoList(
-                repostRepository.findByOriginalPostId(postId, pageable)
-        );
-    }
 }
