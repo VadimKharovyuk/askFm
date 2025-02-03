@@ -29,4 +29,10 @@ public class PostDTO {
     private boolean isSavedByCurrentUser;
 
     private Set<String> tags;
+
+    private String repostedBy;
+    private LocalDateTime repostedAt;
+    private String originalAuthorUsername;  // Оригинальный автор для репостов
+    private LocalDateTime originalPublishedAt; // Оригинальная дата публикации
+
 }

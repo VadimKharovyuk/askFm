@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/newsletter/subscribe",
                                 "/account-locked",
                                 "/support/**",
+                                "/contact",
                                 "/forgot-password/**",
                                 "/css/**", "/js/**")
                         .permitAll()

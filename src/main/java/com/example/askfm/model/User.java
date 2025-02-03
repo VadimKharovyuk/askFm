@@ -89,6 +89,8 @@ public class User {
     @OrderBy("visitedAt DESC")  // Явно указываем порядок
     private List<Visit> myVisits = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<Repost> reposts = new ArrayList<>();
 
 
 

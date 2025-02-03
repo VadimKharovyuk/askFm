@@ -73,8 +73,8 @@ public class UserProfileController {
         }
 
 // Получаем количество просмотров для каждого поста
-        List<PostDTO> userPostsViews = postService.getUserPostsWiews(username, currentUsername);
-        model.addAttribute("posts", userPostsViews);
+//        List<PostDTO> userPostsViews = postService.getUserPostsWiews(username, currentUsername);
+//        model.addAttribute("posts", userPostsViews);
 
 
         // Получение рекомендуемых пользователей

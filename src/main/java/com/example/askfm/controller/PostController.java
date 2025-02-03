@@ -3,8 +3,11 @@ package com.example.askfm.controller;
 import com.example.askfm.dto.*;
 import com.example.askfm.enums.ReportCategory;
 import com.example.askfm.model.Post;
+import com.example.askfm.model.User;
 import com.example.askfm.service.CommentService;
 import com.example.askfm.service.PostService;
+import com.example.askfm.service.RepostService;
+import com.example.askfm.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
@@ -36,6 +40,8 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final RepostService repostService;
+    private final UserService userService;
 
     @GetMapping("/{postId}")
     public String getPostDetails(@PathVariable Long postId,
@@ -56,11 +62,32 @@ public class PostController {
 
         // Для отображения формы добавления комментария
         model.addAttribute("newComment", new CommentDTO());
+        //форма для репоста
+        model.addAttribute("repostForm", new CreateRepostRequest());
 
 
         PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
         model.addAttribute("post", post);
         return "posts/post-details";
+    }
+
+    @PostMapping("/{postId}/repost")
+    public String repost(@PathVariable Long postId,
+                         @AuthenticationPrincipal UserDetails userDetails,
+                         @ModelAttribute CreateRepostRequest request,
+                         RedirectAttributes redirectAttributes) {
+        try {
+            String username = userDetails.getUsername();
+            User user = userService.findByUsername(username);
+
+            request.setPostId(postId);
+            repostService.createRepost(user.getId(), request);
+            redirectAttributes.addFlashAttribute("success", "Post successfully reposted!");
+        } catch (Exception e) {
+            log.error("Repost error: ", e);
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/posts/" + postId;
     }
 
     @GetMapping("/search")

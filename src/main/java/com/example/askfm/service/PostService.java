@@ -3,10 +3,7 @@ package com.example.askfm.service;
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.exception.PostNotFoundException;
-import com.example.askfm.model.Post;
-import com.example.askfm.model.PostView;
-import com.example.askfm.model.Tag;
-import com.example.askfm.model.User;
+import com.example.askfm.model.*;
 import com.example.askfm.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,6 +36,61 @@ public class PostService {
     private final SavedPostRepository savedPostRepository;
     private final MentionService mentionService;
     private final PostReportRepository postReportRepository;
+    private final RepostRepository repostRepository;
+
+
+    public List<PostDTO> getUserPosts(String username, String currentUsername) {
+
+        List<Post> originalPosts = postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username);
+        List<Repost> reposts = repostRepository.findByUserUsernameOrderByRepostedAtDesc(username);
+        // Add original posts with views
+        List<PostDTO> allPosts = new ArrayList<>(originalPosts.stream()
+                .map(post -> {
+                    PostDTO dto = getPostDTO(post, currentUsername);
+                    dto.setViews(getPostViews(post.getId()));
+                    return dto;
+                })
+                .toList());
+
+        // Add reposts
+        for (Repost repost : reposts) {
+            Post originalPost = repost.getOriginalPost();
+
+            PostDTO repostDTO = PostDTO.builder()
+                    .id(originalPost.getId())
+                    .authorUsername(originalPost.getAuthor().getUsername())
+                    .authorAvatar(imageService.getBase64Avatar(originalPost.getAuthor().getAvatar()))
+                    .content(originalPost.getContent())
+                    .base64Media(originalPost.getMedia() != null ?
+                            imageService.getBase64Avatar(originalPost.getMedia()) : null)
+                    .publishedAt(originalPost.getPublishedAt())
+                    .views(getPostViews(originalPost.getId()))
+                    .tags(new HashSet<>(originalPost.getTags().stream()
+                            .map(Tag::getName)
+                            .collect(Collectors.toSet())))
+                    .likesCount(originalPost.getLikedBy().size())
+                    .isLikedByCurrentUser(currentUsername != null &&
+                            originalPost.getLikedBy().stream()
+                                    .anyMatch(user -> user.getUsername().equals(currentUsername)))
+                    .commentsCount(commentRepository.countByPostId(originalPost.getId()))
+                    .repostsCount(originalPost.getReposts().size())
+                    .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(
+                            originalPost.getId(), currentUsername))
+                    .repostedBy(username)
+                    .repostedAt(repost.getRepostedAt())
+                    .build();
+
+            allPosts.add(repostDTO);
+        }
+
+        List<PostDTO> sortedPosts = allPosts.stream()
+                .sorted(Comparator.comparing(post ->
+                                post.getRepostedAt() != null ? post.getRepostedAt() : post.getPublishedAt(),
+                        Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+        return sortedPosts;
+    }
+
 
     public Post createPost(String username, PostCreateDTO postDTO) {
         User author = userRepository.findByUsername(username)
@@ -147,12 +199,14 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostDTO> getUserPosts(String username, String currentUsername) {
-        return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
-                .stream()
-                .map(post -> getPostDTO(post, currentUsername))
-                .collect(Collectors.toList());
-    }
+
+
+//    public List<PostDTO> getUserPosts(String username, String currentUsername) {
+//        return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
+//                .stream()
+//                .map(post -> getPostDTO(post, currentUsername))
+//                .collect(Collectors.toList());
+//    }
 
     public Post getPost(Long postId) {
         return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
@@ -187,6 +241,8 @@ public class PostService {
                                 .anyMatch(user -> user.getUsername().equals(currentUsername)))
                 .commentsCount(commentRepository.countByPostId(post.getId()))
                 .isSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserUsername(post.getId(), currentUsername))
+                .repostedBy(post.getReposts().isEmpty() ? null : post.getReposts().get(0).getUser().getUsername())
+                .repostedAt(post.getReposts().isEmpty() ? null : post.getReposts().get(0).getRepostedAt())
                 .build();
     }
 
@@ -196,4 +252,6 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
 
     }
+
+
 }

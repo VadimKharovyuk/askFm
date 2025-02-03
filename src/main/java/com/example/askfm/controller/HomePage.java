@@ -26,7 +26,10 @@ public class HomePage {
         return "home";
     }
 
-
+@GetMapping("/contact")
+public String contact(Model model) {
+        return "contact";
+}
 
     @GetMapping("/users/search")
     public String searchUsers(@RequestParam String query,
