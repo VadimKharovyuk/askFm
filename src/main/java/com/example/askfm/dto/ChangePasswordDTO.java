@@ -14,7 +14,7 @@ public class ChangePasswordDTO {
     private String oldPassword;
 
     @NotBlank(message = "Новый пароль обязателен")
-    @Size(min = 8, message = "Пароль должен содержать минимум 8 символов")
+    @Size(min = 1, message = "Пароль должен содержать минимум 8 символов")
     private String newPassword;
 
     @NotBlank(message = "Подтверждение пароля обязательно")

@@ -11,7 +11,9 @@ import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,28 +46,49 @@ public class UserService implements UserDetailsService {
     private final CacheMonitor cacheMonitor;
 
 
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        // Проверяем пароль на null или пустоту
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            log.error("User {} has empty password", username);
+            throw new IllegalStateException("User has no password set");
+        }
+
         if (user.isLocked()) {
             throw new LockedException("Аккаунт заблокирован. " +
                     (user.getLockReason() != null ? "Причина: " + user.getLockReason() : ""));
         }
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles("USER")
+                .roles(user.getRole().name())
                 .accountLocked(user.isLocked())
                 .build();
     }
 
     public User registerNewUser(UserRegistrationDTO registrationDTO) {
+        // Валидация входных данных
+        if (registrationDTO.getPassword() == null || registrationDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+
         if (userRepository.existsByUsername(registrationDTO.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
+
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
+        }
+
+        // Создание пользователя с обязательным паролем
+        String encodedPassword = passwordEncoder.encode(registrationDTO.getPassword());
+        if (encodedPassword == null || encodedPassword.isEmpty()) {
+            throw new IllegalStateException("Failed to encode password");
         }
 
         User user = User.builder()
@@ -72,53 +96,53 @@ public class UserService implements UserDetailsService {
                 .email(registrationDTO.getEmail())
                 .role(UserRole.USER)
                 .createdAt(LocalDateTime.now())
-                .password(passwordEncoder.encode(registrationDTO.getPassword()))
+                .password(encodedPassword)
                 .balance(BigDecimal.ZERO)
-                .build();;
+                .locked(false)
+                .build();
 
+        log.info("Created new user with username: {}", user.getUsername());
         return userRepository.save(user);
     }
 
 
-//    @Cacheable(value = "userSearch", key = "#query + '_' + #currentUsername", unless = "#result.isEmpty()")
+    @Cacheable(value = "userSearch", key = "#query.toLowerCase() + '_' + #currentUsername")
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
-        List<UserSearchDTO> results;
-        if (query == null || query.trim().isEmpty()) {
-            results = Collections.emptyList();
-        } else {
-            results = userRepository.searchByUsername(query.trim())
-                    .stream()
-                    .map(user -> UserSearchDTO.builder()
-                            .username(user.getUsername())
-                            .avatar(user.getAvatar() != null ?
-                                    "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
-                                    null)
-                            .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
-                            .isFollowing(currentUsername != null &&
-                                    subscriptionService.isFollowing(currentUsername, user.getUsername()))
-                            .build())
-                    .collect(Collectors.toList());
+        log.debug("Performing user search with query: '{}' for user: {}", query, currentUsername);
+
+        if (!StringUtils.hasText(query)) {
+            return Collections.emptyList();
         }
 
-        cacheMonitor.showCacheStats("userSearch");
+        String trimmedQuery = query.trim().toLowerCase();
+        List<UserSearchDTO> results = userRepository.searchByUsername(trimmedQuery)
+                .stream()
+                .map(user -> UserSearchDTO.builder()
+                        .username(user.getUsername())
+                        .avatar(user.getAvatar() != null ?
+                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+                                null)
+                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+                        .isFollowing(currentUsername != null &&
+                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
+                        .build())
+                .collect(Collectors.toList());
+
+        log.debug("Found {} results for query: '{}'", results.size(), query);
         return results;
     }
 
 
 
-//@Cacheable(value = "users", key = "#username", unless = "#result == null")
+    @Cacheable(value = "users", key = "#username", unless = "#result == null")
     public User findByUsername(String username) {
-    cacheMonitor.showCacheStats("users");
+//    cacheMonitor.showCacheStats("users");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-//    @CacheEvict(value = "users", key = "#username")
-    public void evictUserCache(String username) {
-        log.info("Evicting cache for user: {}", username);
-    }
 
-//    @CacheEvict(value = "users", allEntries = true)
+
     @Transactional
     public void updateUsername(String oldUsername, String newUsername) {
         if (userRepository.existsByUsername(newUsername)) {
@@ -158,8 +182,10 @@ public class UserService implements UserDetailsService {
         user.setCover(cover);
         return userRepository.save(user);
     }
-
-    // Специальный метод для обновления аватара
+//    @Caching(evict = {
+//            @CacheEvict(value = "users", key = "#username"),
+//            @CacheEvict(value = "userProfiles", key = "#username")
+//    })
     public User updateAvatar(String username, byte[] avatar) {
         User user = findByUsername(username);
         user.setAvatar(avatar);
@@ -198,9 +224,25 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+//    @Cacheable(value = "userSearch",
+//            key = "#query.trim().toLowerCase()",
+//            unless = "#query == null || #query.trim().isEmpty()")
     public List<User> searchUsers(String query) {
-        return userRepository.findByUsernameContainingIgnoreCase(query);
+        log.debug("Performing database search for users with query: '{}'", query);
+
+        if (query == null || query.trim().isEmpty()) {
+            log.debug("Search query is empty, returning empty list");
+            return Collections.emptyList();
+        }
+
+        String trimmedQuery = query.trim();
+        List<User> results = userRepository.findByUsernameContainingIgnoreCase(trimmedQuery);
+        log.debug("Found {} users matching query: '{}'", results.size(), trimmedQuery);
+
+        return results;
     }
+
+
     public long getTotalUsersCount() {
         return userRepository.count();
     }
@@ -225,23 +267,35 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
+
     public void changePassword(String username, ChangePasswordDTO passwordDTO) {
-        // Проверяем совпадение паролей
+        log.debug("Changing password for user: {}", username);
+
+        // Проверка входных данных
+        if (passwordDTO.getNewPassword() == null || passwordDTO.getNewPassword().isEmpty()) {
+            throw new IllegalArgumentException("New password cannot be empty");
+        }
+
         if (!passwordDTO.getNewPassword().equals(passwordDTO.getConfirmPassword())) {
-            throw new IllegalArgumentException("Пароли не совпадают");
+            throw new IllegalArgumentException("Passwords do not match");
         }
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+        User user = findByUsername(username);
 
-        // Проверяем, что старый пароль верный
+        // Проверка старого пароля
         if (!passwordEncoder.matches(passwordDTO.getOldPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Неверный текущий пароль");
+            throw new IllegalArgumentException("Current password is incorrect");
         }
 
-        // Устанавливаем новый пароль
-        user.setPassword(passwordEncoder.encode(passwordDTO.getNewPassword()));
+        // Кодирование и установка нового пароля
+        String encodedPassword = passwordEncoder.encode(passwordDTO.getNewPassword());
+        if (encodedPassword == null || encodedPassword.isEmpty()) {
+            throw new IllegalStateException("Failed to encode new password");
+        }
+
+        user.setPassword(encodedPassword);
         userRepository.save(user);
+        log.info("Password changed successfully for user: {}", username);
     }
 
 

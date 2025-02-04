@@ -8,6 +8,7 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.SubscriptionRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,25 +65,25 @@ public class SubscriptionService {
         subscriptionRepository.deleteBySubscriberAndSubscribedTo(subscriber, subscribedTo);
     }
 
-    public List<SubscriptionDTO> getSubscriptions(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
+//    public List<SubscriptionDTO> getSubscriptions(String username) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
+//
+//        return subscriptionRepository.findBySubscriber(user)
+//                .stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
 
-        return subscriptionRepository.findBySubscriber(user)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<SubscriptionDTO> getSubscribers(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
-
-        return subscriptionRepository.findBySubscribedTo(user)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+//    public List<SubscriptionDTO> getSubscribers(String username) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
+//
+//        return subscriptionRepository.findBySubscribedTo(user)
+//                .stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
 
     public boolean isFollowing(String subscriberUsername, String subscribedToUsername) {
         User subscriber = userRepository.findByUsername(subscriberUsername)
@@ -92,13 +93,6 @@ public class SubscriptionService {
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
 
         return subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo);
-    }
-
-    public long getSubscriptionsCount(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
-
-        return subscriptionRepository.countBySubscriber(user);
     }
 
     public long getSubscribersCount(String username) {
@@ -116,13 +110,16 @@ public class SubscriptionService {
                 .stream()
                 .map(subscription -> UserSearchDTO.builder()
                         .username(subscription.getSubscribedTo().getUsername())
-//                        .avatar(subscription.getSubscribedTo().getAvatar())
+                        .avatar(subscription.getSubscribedTo().getAvatar() != null ?
+                                "data:image/jpeg;base64," + imageService.getBase64Avatar(subscription.getSubscribedTo().getAvatar()) :
+                                null)
                         .followersCount(getSubscribersCount(subscription.getSubscribedTo().getUsername()))
                         .isFollowing(currentUsername != null &&
                                 isFollowing(currentUsername, subscription.getSubscribedTo().getUsername()))
                         .build())
                 .collect(Collectors.toList());
     }
+
 
     public List<UserSearchDTO> getFollowers(String username, String currentUsername) {
         User user = userRepository.findByUsername(username)
@@ -132,14 +129,15 @@ public class SubscriptionService {
                 .stream()
                 .map(subscription -> UserSearchDTO.builder()
                         .username(subscription.getSubscriber().getUsername())
-//                        .avatar(subscription.getSubscriber().getAvatar())
+                        .avatar(subscription.getSubscriber().getAvatar() != null ?
+                                "data:image/jpeg;base64," + imageService.getBase64Avatar(subscription.getSubscriber().getAvatar()) :
+                                null)
                         .followersCount(getSubscribersCount(subscription.getSubscriber().getUsername()))
                         .isFollowing(currentUsername != null &&
                                 isFollowing(currentUsername, subscription.getSubscriber().getUsername()))
                         .build())
                 .collect(Collectors.toList());
     }
-
 
     private SubscriptionDTO convertToDTO(Subscription subscription) {
         return SubscriptionDTO.builder()

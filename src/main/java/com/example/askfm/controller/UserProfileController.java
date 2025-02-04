@@ -105,7 +105,7 @@ public class UserProfileController {
         model.addAttribute("profileUser", user);
         model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("followersCount", subscriptionService.getSubscribersCount(username));
-        model.addAttribute("followingCount", subscriptionService.getSubscriptionsCount(username));
+        model.addAttribute("followingCount", subscriptionService.getSubscribersCount(username));
         model.addAttribute("questionRequest", questionRequest);
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));

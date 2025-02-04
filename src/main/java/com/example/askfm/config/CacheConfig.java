@@ -16,8 +16,8 @@ public class CacheConfig {
     @Bean
     public Caffeine<Object, Object> caffeineConfig() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .expireAfterWrite(10, TimeUnit.MINUTES)  // было 5 минут
+                .expireAfterAccess(15, TimeUnit.MINUTES) // было 10 минут
                 .initialCapacity(100)
                 .maximumSize(1000)
                 .recordStats();
@@ -26,12 +26,11 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "users",           // Кеш для пользователей
-                "suggestions",     // Кеш для рекомендаций
-                "followers",       // Кеш для подписчиков
-                "userProfiles",     // Кеш для профилей
-                "userSearch" //  кеш для поиска
-
+                "users",           // Кэш для сущностей пользователей
+                "suggestions",     // Кэш для рекомендаций
+                "followers",       // Кэш для подписчиков
+                "userProfiles",    // Кэш для профилей
+                "userSearch"       // Кэш для поиска
         );
         cacheManager.setCaffeine(caffeine);
         return cacheManager;
