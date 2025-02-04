@@ -1,9 +1,6 @@
 package com.example.askfm.controller;
 
-import com.example.askfm.dto.AdLeadFormDTO;
-import com.example.askfm.dto.AdPublicDto;
-import com.example.askfm.dto.PostCreateDTO;
-import com.example.askfm.dto.UpcomingBirthdayDTO;
+import com.example.askfm.dto.*;
 import com.example.askfm.model.Post;
 import com.example.askfm.model.User;
 import com.example.askfm.service.*;
@@ -75,7 +72,8 @@ public class ProfileController {
 
         // Создаем объект Pageable и получаем посты
         Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
-        Page<Post> feedPosts = feedService.getFeedPosts(username, pageable);
+        Page<PostDTO> feedPosts = feedService.getFeedPosts(username, pageable);
+        model.addAttribute("posts", feedPosts);
 
         model.addAttribute("todaysBirthdays", todaysBirthdays);
         model.addAttribute("upcomingBirthdays", upcomingBirthdays);

@@ -100,16 +100,11 @@ public class UserService implements UserDetailsService {
                 .balance(BigDecimal.ZERO)
                 .locked(false)
                 .build();
-
-        log.info("Created new user with username: {}", user.getUsername());
         return userRepository.save(user);
     }
 
 
-    @Cacheable(value = "userSearch", key = "#query.toLowerCase() + '_' + #currentUsername")
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
-        log.debug("Performing user search with query: '{}' for user: {}", query, currentUsername);
-
         if (!StringUtils.hasText(query)) {
             return Collections.emptyList();
         }
@@ -127,16 +122,11 @@ public class UserService implements UserDetailsService {
                                 subscriptionService.isFollowing(currentUsername, user.getUsername()))
                         .build())
                 .collect(Collectors.toList());
-
-        log.debug("Found {} results for query: '{}'", results.size(), query);
         return results;
     }
 
 
-
-    @Cacheable(value = "users", key = "#username", unless = "#result == null")
     public User findByUsername(String username) {
-//    cacheMonitor.showCacheStats("users");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
@@ -173,7 +163,6 @@ public class UserService implements UserDetailsService {
         );
 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
-        log.info("Username updated: {} -> {}", oldUsername, newUsername);
     }
 
 
@@ -182,10 +171,7 @@ public class UserService implements UserDetailsService {
         user.setCover(cover);
         return userRepository.save(user);
     }
-//    @Caching(evict = {
-//            @CacheEvict(value = "users", key = "#username"),
-//            @CacheEvict(value = "userProfiles", key = "#username")
-//    })
+
     public User updateAvatar(String username, byte[] avatar) {
         User user = findByUsername(username);
         user.setAvatar(avatar);
@@ -224,9 +210,6 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-//    @Cacheable(value = "userSearch",
-//            key = "#query.trim().toLowerCase()",
-//            unless = "#query == null || #query.trim().isEmpty()")
     public List<User> searchUsers(String query) {
         log.debug("Performing database search for users with query: '{}'", query);
 

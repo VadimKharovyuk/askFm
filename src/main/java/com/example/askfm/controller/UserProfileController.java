@@ -104,8 +104,8 @@ public class UserProfileController {
         // Существующие атрибуты
         model.addAttribute("profileUser", user);
         model.addAttribute("isFollowing", isFollowing);
-        model.addAttribute("followersCount", subscriptionService.getSubscribersCount(username));
-        model.addAttribute("followingCount", subscriptionService.getSubscribersCount(username));
+        model.addAttribute("followersCount", subscriptionService.getSubscribersCount(username));    // Кол-во подписчиков
+        model.addAttribute("followingCount", subscriptionService.getSubscriptionsCount(username));  // Кол-во подписок
         model.addAttribute("questionRequest", questionRequest);
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
         model.addAttribute("avatarBase64", imageService.getBase64Avatar(user.getAvatar()));

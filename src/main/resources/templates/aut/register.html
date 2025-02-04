@@ -206,20 +206,6 @@
   <h1 class="form-title">Создать аккаунт</h1>
   <p class="form-text">Присоединяйтесь к нашему сообществу сегодня</p>
 
-  <!-- OAuth Buttons -->
-  <button class="oauth-button">
-    <i class="fab fa-google oauth-icon"></i>
-    Регистрация через Google
-  </button>
-  <button class="oauth-button">
-    <i class="fab fa-github oauth-icon"></i>
-    Регистрация через GitHub
-  </button>
-
-  <!-- Divider -->
-  <div class="divider">
-    <span>или</span>
-  </div>
 
   <!-- Registration Form -->
   <form th:action="@{/register}" th:object="${user}" method="post">

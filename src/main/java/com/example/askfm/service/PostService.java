@@ -32,8 +32,6 @@ public class PostService {
     private final ImageService imageService;
     private final PostViewRepository postViewRepository;
     private final TagRepository tagRepository;
-    private final CommentRepository commentRepository;
-    private final SavedPostRepository savedPostRepository;
     private final MentionService mentionService;
     private final PostReportRepository postReportRepository;
     private final RepostRepository repostRepository;
@@ -171,12 +169,6 @@ public class PostService {
         return postViewRepository.countByPostId(postId);
     }
 
-    public List<PostDTO> getUserPostsWiews(String username, String currentUsername) {
-        return postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username)
-                .stream()
-                .map(post -> postMapper.toDto(post, currentUsername))
-                .collect(Collectors.toList());
-    }
 
     public Post getPost(Long postId) {
         return findById(postId);

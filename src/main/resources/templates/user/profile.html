@@ -4,7 +4,7 @@
     <title>Профиль пользователя</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!--    <meta http-equiv="refresh" content="10;url=/home">-->
+    <!--    <meta http-equiv="refresh" content="10;url=/home">-->
     <meta http-equiv="refresh" content="600;url=/home"> <!-- 10 минут -->
     <style>
         :root {
@@ -287,7 +287,6 @@
         }
 
 
-
         .post-card {
             background-color: var(--secondary-bg);
             border: 1px solid var(--border-color);
@@ -352,6 +351,7 @@
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
         }
+
         .pagination-section {
             margin: 2rem 0;
         }
@@ -379,7 +379,6 @@
             border-color: var(--border-color);
             color: #6c757d;
         }
-
 
 
         /* Стили для правой боковой панели */
@@ -531,8 +530,12 @@
 
         /* Анимации */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .container-ad {
@@ -560,7 +563,8 @@
                     <i class="fas fa-user"></i> <span th:text="${username}">Username</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end bg-dark">
-                    <li><a class="dropdown-item text-light" href="/settings"><i class="fas fa-cog"></i> Настройки</a></li>
+                    <li><a class="dropdown-item text-light" href="/settings"><i class="fas fa-cog"></i> Настройки</a>
+                    </li>
                     <li><a class="dropdown-item text-light" th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i>
                         Выйти</a></li>
                 </ul>
@@ -734,17 +738,15 @@
 
     <!-- Сообщение, если реклам нет -->
     <div th:unless="${hasAd}" class="no-ads-message">
-<!--        <div class="empty-ad-container">-->
-<!--            <i class="fas fa-ad"></i>-->
-<!--            <h3>Тут может быть ваша реклама</h3>-->
-<!--            <p>Разместите свою рекламу и получите новых клиентов!</p>-->
-<!--            <a href="/ads/create" class="btn btn-primary">Разместить рекламу</a>-->
-<!--        </div>-->
+        <!--        <div class="empty-ad-container">-->
+        <!--            <i class="fas fa-ad"></i>-->
+        <!--            <h3>Тут может быть ваша реклама</h3>-->
+        <!--            <p>Разместите свою рекламу и получите новых клиентов!</p>-->
+        <!--            <a href="/ads/create" class="btn btn-primary">Разместить рекламу</a>-->
+        <!--        </div>-->
     </div>
 
 </aside>
-
-
 
 
 <!-- Main Content -->
@@ -891,17 +893,106 @@
         </div>
     </form>
 
+    <!--    <div class="feed-section">-->
+    <!--        &lt;!&ndash; Лента новостей &ndash;&gt;-->
+    <!--        <div class="posts-container">-->
+    <!--            <div th:each="post : ${feedPosts}" class="post-card">-->
+    <!--                <div class="post-header d-flex align-items-center">-->
+    <!--                    <img th:src="${'data:image/jpeg;base64,' + post.getAuthor().getAvatar()}"-->
+    <!--                         class="rounded-circle me-2"-->
+    <!--                         style="width: 40px; height: 40px;"-->
+    <!--                         th:alt="${post.getAuthor().username}">-->
+    <!--                    <div>-->
+    <!--                        <h6 class="mb-0" th:text="${post.getAuthor().username}">Автор</h6>-->
+    <!--                        <small class="text-muted"-->
+    <!--                               th:text="${#temporals.format(post.publishedAt, 'dd.MM.yyyy HH:mm')}">-->
+    <!--                            Дата-->
+    <!--                        </small>-->
+    <!--                    </div>-->
+    <!--                </div>-->
+
+    <!--                &lt;!&ndash; Сделаем контент кликабельным &ndash;&gt;-->
+    <!--                <a th:href="@{'/posts/' + ${post.id}}" class="text-decoration-none">-->
+    <!--                    <div class="post-content">-->
+    <!--                        <p th:text="${post.content}" class="text-white">Контент поста</p>-->
+    <!--                                            <img th:if="${post.media != null}"-->
+    <!--                                                 th:src="${'data:image/jpeg;base64,' + post.media}"-->
+    <!--                                                 class="img-fluid">-->
+    <!--                    </div>-->
+    <!--                </a>-->
+
+    <!--                <div class="post-footer">-->
+    <!--                    <button class="btn btn-sm btn-outline-primary me-2"-->
+    <!--                            th:attr="onclick='likePost(' + ${post.id} + ')'">-->
+    <!--                        <i class="fas fa-heart"></i>-->
+    <!--                        &lt;!&ndash;                        <span th:text="${post.likesCount}">0</span>&ndash;&gt;-->
+    <!--                    </button>-->
+    <!--                    &lt;!&ndash; Изменим кнопку комментариев на ссылку &ndash;&gt;-->
+    <!--                    <a th:href="@{'/posts/' + ${post.id}}"-->
+    <!--                       class="btn btn-sm btn-outline-secondary me-2">-->
+    <!--                        <i class="fas fa-comment"></i>-->
+    <!--                        &lt;!&ndash;                        <span th:text="${post.commentsCount}">0</span>&ndash;&gt;-->
+    <!--                    </a>-->
+    <!--                    &lt;!&ndash; Добавим кнопку для просмотра деталей &ndash;&gt;-->
+    <!--                    <a th:href="@{'/posts/' + ${post.id}}"-->
+    <!--                       class="btn btn-sm btn-outline-secondary">-->
+    <!--                        <i class="fas fa-eye"></i> Подробнее-->
+    <!--                    </a>-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--        &lt;!&ndash; Пагинация &ndash;&gt;-->
+    <!--        <div th:if="${totalPages > 1}" class="pagination-section mt-4">-->
+    <!--            <nav aria-label="Page navigation">-->
+    <!--                <ul class="pagination justify-content-center">-->
+    <!--                    &lt;!&ndash; Кнопка "Назад" &ndash;&gt;-->
+    <!--                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">-->
+    <!--                        <a class="page-link"-->
+    <!--                           th:href="@{/home(page=${currentPage - 1})}"-->
+    <!--                           th:unless="${currentPage == 0}">-->
+    <!--                            Назад-->
+    <!--                        </a>-->
+    <!--                        <span class="page-link" th:if="${currentPage == 0}">Назад</span>-->
+    <!--                    </li>-->
+
+    <!--                    &lt;!&ndash; Номера страниц &ndash;&gt;-->
+    <!--                    <li class="page-item"-->
+    <!--                        th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"-->
+    <!--                        th:classappend="${pageNumber == currentPage ? 'active' : ''}">-->
+    <!--                        <a class="page-link"-->
+    <!--                           th:href="@{/home(page=${pageNumber})}"-->
+    <!--                           th:text="${pageNumber + 1}">1</a>-->
+    <!--                    </li>-->
+
+    <!--                    &lt;!&ndash; Кнопка "Вперед" &ndash;&gt;-->
+    <!--                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">-->
+    <!--                        <a class="page-link"-->
+    <!--                           th:href="@{/home(page=${currentPage + 1})}"-->
+    <!--                           th:unless="${currentPage >= totalPages - 1}">-->
+    <!--                            Вперед-->
+    <!--                        </a>-->
+    <!--                        <span class="page-link" th:if="${currentPage >= totalPages - 1}">Вперед</span>-->
+    <!--                    </li>-->
+    <!--                </ul>-->
+    <!--            </nav>-->
+    <!--        </div>-->
     <div class="feed-section">
-        <!-- Лента новостей -->
         <div class="posts-container">
             <div th:each="post : ${feedPosts}" class="post-card">
                 <div class="post-header d-flex align-items-center">
-                    <img th:src="${'data:image/jpeg;base64,' + post.getAuthor().getAvatar()}"
+                    <!-- Аватар автора -->
+                    <img th:if="${post.authorAvatar}"
+                         th:src="${post.authorAvatar}"
                          class="rounded-circle me-2"
                          style="width: 40px; height: 40px;"
-                         th:alt="${post.getAuthor().username}">
+                         th:alt="${post.authorUsername}">
+                    <img th:unless="${post.authorAvatar}"
+                         src="/images/default-avatar.png"
+                         class="rounded-circle me-2"
+                         style="width: 40px; height: 40px;"
+                         alt="Default avatar">
                     <div>
-                        <h6 class="mb-0" th:text="${post.getAuthor().username}">Автор</h6>
+                        <h6 class="mb-0" th:text="${post.authorUsername}">Автор</h6>
                         <small class="text-muted"
                                th:text="${#temporals.format(post.publishedAt, 'dd.MM.yyyy HH:mm')}">
                             Дата
@@ -909,41 +1000,70 @@
                     </div>
                 </div>
 
-                <!-- Сделаем контент кликабельным -->
                 <a th:href="@{'/posts/' + ${post.id}}" class="text-decoration-none">
                     <div class="post-content">
+
                         <p th:text="${post.content}" class="text-white">Контент поста</p>
-                                            <img th:if="${post.media != null}"
-                                                 th:src="${'data:image/jpeg;base64,' + post.media}"
-                                                 class="img-fluid">
+                        <!-- Медиа контент -->
+                        <img th:if="${post.base64Media}"
+                             th:src="${post.base64Media}"
+                             class="img-fluid"
+                             alt="Post media">
                     </div>
                 </a>
 
+
+                <!-- Теги -->
+                <div th:if="${post.tags != null and not #sets.isEmpty(post.tags)}" class="post-tags mt-2">
+    <span th:each="tag : ${post.tags}"
+          class="badge bg-secondary me-1"
+          th:if="${tag != null and tag != ''}">
+        <i class="fas fa-tag"></i>
+        <span th:text="${tag}"></span>
+    </span>
+                </div>
+
+
                 <div class="post-footer">
+                    <!-- Лайки -->
                     <button class="btn btn-sm btn-outline-primary me-2"
+                            th:classappend="${post.isLikedByCurrentUser ? 'active' : ''}"
                             th:attr="onclick='likePost(' + ${post.id} + ')'">
                         <i class="fas fa-heart"></i>
-                        <!--                        <span th:text="${post.likesCount}">0</span>-->
+                        <span th:text="${post.likesCount}">0</span>
                     </button>
-                    <!-- Изменим кнопку комментариев на ссылку -->
+                    <!-- Комментарии -->
                     <a th:href="@{'/posts/' + ${post.id}}"
                        class="btn btn-sm btn-outline-secondary me-2">
                         <i class="fas fa-comment"></i>
-                        <!--                        <span th:text="${post.commentsCount}">0</span>-->
+                        <span th:text="${post.commentsCount}">0</span>
                     </a>
-                    <!-- Добавим кнопку для просмотра деталей -->
-                    <a th:href="@{'/posts/' + ${post.id}}"
-                       class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-eye"></i> Подробнее
-                    </a>
+                    <!-- Просмотры -->
+                    <span class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="fas fa-eye"></i>
+                    <span th:text="${post.views}">0</span>
+                </span>
+                    <!-- Репосты -->
+                    <span th:if="${post.repostsCount > 0}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-retweet"></i>
+                    <span th:text="${post.repostsCount}">0</span>
+                </span>
+                </div>
+
+                <!-- Информация о репосте -->
+                <div th:if="${post.repostedBy}" class="repost-info mt-2 text-muted small">
+                    <i class="fas fa-retweet"></i>
+                    Reposted by <span th:text="${post.repostedBy}"></span>
+                    <span th:text="${#temporals.format(post.repostedAt, 'dd.MM.yyyy HH:mm')}"></span>
                 </div>
             </div>
+
         </div>
+
         <!-- Пагинация -->
         <div th:if="${totalPages > 1}" class="pagination-section mt-4">
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
-                    <!-- Кнопка "Назад" -->
                     <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
                         <a class="page-link"
                            th:href="@{/home(page=${currentPage - 1})}"
@@ -953,7 +1073,6 @@
                         <span class="page-link" th:if="${currentPage == 0}">Назад</span>
                     </li>
 
-                    <!-- Номера страниц -->
                     <li class="page-item"
                         th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
                         th:classappend="${pageNumber == currentPage ? 'active' : ''}">
@@ -962,7 +1081,6 @@
                            th:text="${pageNumber + 1}">1</a>
                     </li>
 
-                    <!-- Кнопка "Вперед" -->
                     <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
                         <a class="page-link"
                            th:href="@{/home(page=${currentPage + 1})}"
@@ -974,9 +1092,9 @@
                 </ul>
             </nav>
         </div>
+    </div>
 
 </div>
-
 
 
 <script>

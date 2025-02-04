@@ -8,6 +8,7 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.SubscriptionRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -65,26 +66,6 @@ public class SubscriptionService {
         subscriptionRepository.deleteBySubscriberAndSubscribedTo(subscriber, subscribedTo);
     }
 
-//    public List<SubscriptionDTO> getSubscriptions(String username) {
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
-//
-//        return subscriptionRepository.findBySubscriber(user)
-//                .stream()
-//                .map(this::convertToDTO)
-//                .collect(Collectors.toList());
-//    }
-
-//    public List<SubscriptionDTO> getSubscribers(String username) {
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
-//
-//        return subscriptionRepository.findBySubscribedTo(user)
-//                .stream()
-//                .map(this::convertToDTO)
-//                .collect(Collectors.toList());
-//    }
-
     public boolean isFollowing(String subscriberUsername, String subscribedToUsername) {
         User subscriber = userRepository.findByUsername(subscriberUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
@@ -95,6 +76,9 @@ public class SubscriptionService {
         return subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo);
     }
 
+
+//
+//    @Cacheable(value = "followers", key = "'subscribers_count:' + #username")
     public long getSubscribersCount(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
@@ -102,6 +86,13 @@ public class SubscriptionService {
         return subscriptionRepository.countBySubscribedTo(user);
     }
 
+//    @Cacheable(value = "followers", key = "'subscriptions_count:' + #username")
+    public long getSubscriptionsCount(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
+
+        return subscriptionRepository.countBySubscriber(user);
+    }
     public List<UserSearchDTO> getFollowingUsers(String username, String currentUsername) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));

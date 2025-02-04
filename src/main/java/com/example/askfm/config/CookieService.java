@@ -1,6 +1,7 @@
 package com.example.askfm.config;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +28,31 @@ public class CookieService {
         response.addCookie(userPrefs);
     }
 
-    public void deleteAllUserCookies(HttpServletResponse response) {
-        deleteCookies(response, "SESSIONID", "user_prefs");
+    public void deleteAllUserCookies(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                String cookieName = cookie.getName();
+                if (cookieName.equals("SESSIONID") || cookieName.equals("user_prefs") || cookieName.equals("JSESSIONID")) {
+                    Cookie deletedCookie = new Cookie(cookieName, null);
+                    deletedCookie.setMaxAge(0);
+                    deletedCookie.setPath("/");
+//                    deletedCookie.setDomain("yourdomain.com"); // Укажите домен, если необходимо
+                    response.addCookie(deletedCookie);
+                }
+            }
+        }
     }
 
     private void deleteCookies(HttpServletResponse response, String... cookieNames) {
         for (String cookieName : cookieNames) {
             Cookie cookie = new Cookie(cookieName, null);
-            cookie.setMaxAge(0);
-            cookie.setPath("/");
+            cookie.setMaxAge(0); // Устанавливаем срок жизни куки в 0 (удаление)
+            cookie.setPath("/"); // Путь должен совпадать с путем создания куки
+            cookie.setDomain("yourdomain.com"); // Укажите домен, если куки создавались для конкретного домена
             response.addCookie(cookie);
         }
     }
+
+
 }

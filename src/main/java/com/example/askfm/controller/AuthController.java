@@ -5,6 +5,7 @@ import com.example.askfm.dto.UserRegistrationDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,8 +137,17 @@ public class AuthController {
         if (auth != null) {
             String username = auth.getName();
             new SecurityContextLogoutHandler().logout(request, response, auth);
-            cookieService.deleteAllUserCookies(response);
+            cookieService.deleteAllUserCookies(request, response);
+
+            // Уничтожение сессии
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+
             log.info("User {} logged out successfully", username);
+        } else {
+            log.warn("No authenticated user found during logout");
         }
 
         redirectAttributes.addFlashAttribute("message", "Вы успешно вышли из системы");
