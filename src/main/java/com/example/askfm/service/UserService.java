@@ -104,26 +104,45 @@ public class UserService implements UserDetailsService {
     }
 
 
+
+
+    @Cacheable(
+            value = "userSearch",
+            key = "'search:' + #query.toLowerCase().trim()",
+            unless = "#result == null"
+    )
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+        long startTime = System.currentTimeMillis();
         if (!StringUtils.hasText(query)) {
             return Collections.emptyList();
         }
 
-        String trimmedQuery = query.trim().toLowerCase();
-        List<UserSearchDTO> results = userRepository.searchByUsername(trimmedQuery)
+        String normalizedQuery = query.toLowerCase().trim();
+        log.debug("Выполняется поиск в базе данных по запросу: '{}'", normalizedQuery);
+
+        List<UserSearchDTO> results = userRepository.searchByUsername(normalizedQuery)
                 .stream()
-                .map(user -> UserSearchDTO.builder()
-                        .username(user.getUsername())
-                        .avatar(user.getAvatar() != null ?
-                                "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
-                                null)
-                        .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
-                        .isFollowing(currentUsername != null &&
-                                subscriptionService.isFollowing(currentUsername, user.getUsername()))
-                        .build())
+                .map(user -> mapToUserSearchDTO(user, currentUsername))
                 .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis();
+        log.debug("Найдено {} результатов по запросу: '{}' за {} мс", results.size(), normalizedQuery, endTime - startTime);
         return results;
     }
+
+    // Выносим маппинг в отдельный метод
+    private UserSearchDTO mapToUserSearchDTO(User user, String currentUsername) {
+        return UserSearchDTO.builder()
+                .username(user.getUsername())
+                .avatar(user.getAvatar() != null ?
+                        "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+                        null)
+                .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+                .isFollowing(currentUsername != null &&
+                        subscriptionService.isFollowing(currentUsername, user.getUsername()))
+                .build();
+    }
+
 
 
     public User findByUsername(String username) {

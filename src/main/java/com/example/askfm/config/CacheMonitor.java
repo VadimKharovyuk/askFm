@@ -8,7 +8,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -16,23 +15,24 @@ public class CacheMonitor {
     private final CacheManager cacheManager;
     private static final long TWO_MINUTES_IN_MS = 2 * 60 * 1000;
 
-//    public void showCacheStats(String cacheName) {
-//        CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
-//        if (cache != null) {
-//            CacheStats stats = cache.getNativeCache().stats();
-//            log.debug("Cache '{}' statistics:", cacheName);
-//            log.debug("Hit count: {}", stats.hitCount());
-//            log.debug("Miss count: {}", stats.missCount());
-//            log.debug("Load success count: {}", stats.loadSuccessCount());
-//            log.debug("Load failure count: {}", stats.loadFailureCount());
-//            log.debug("Total load time: {}ms", stats.totalLoadTime() / 1_000_000);
-//            log.debug("Eviction count: {}", stats.evictionCount());
-//            log.debug("Eviction weight: {}", stats.evictionWeight());
-//        }
-//    }
-//
-//    @Scheduled(fixedRate = TWO_MINUTES_IN_MS)
-//    public void logCacheStatistics() {
-//        cacheManager.getCacheNames().forEach(this::showCacheStats);
-//    }
+    @Scheduled(fixedRate = TWO_MINUTES_IN_MS)
+    public void logCacheStatistics() {
+        log.info("=== Звіт статистики кешу ===");
+        cacheManager.getCacheNames().forEach(cacheName -> {
+            CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
+            if (cache != null) {
+                CacheStats stats = cache.getNativeCache().stats();
+                log.info("Статистика кешу '{}':", cacheName);
+                log.info("  Відсоток попадань: {}%", String.format("%.2f", stats.hitRate() * 100));
+                log.info("  Розмір: {}", cache.getNativeCache().estimatedSize());
+                log.info("  Попадання: {}", stats.hitCount());
+                log.info("  Промахи: {}", stats.missCount());
+                log.info("  Вилучення: {}", stats.evictionCount());
+                log.info("  Успішні завантаження: {}", stats.loadSuccessCount());
+                log.info("  Помилки завантаження: {}", stats.loadFailureCount());
+                log.info("  Загальний час завантаження: {} мс", stats.totalLoadTime() / 1_000_000);
+                log.info("-----------------------------");
+            }
+        });
+    }
 }

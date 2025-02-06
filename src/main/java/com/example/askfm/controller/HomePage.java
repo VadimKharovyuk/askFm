@@ -31,6 +31,7 @@ public String contact(Model model) {
         return "contact";
 }
 
+
     @GetMapping("/users/search")
     public String searchUsers(@RequestParam String query,
                               Model model,

@@ -34,8 +34,6 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public Page<PostDTO> getFeedPosts(String username, Pageable pageable) {
-        log.debug("Getting feed posts for user: {}", username);
-
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
@@ -45,7 +43,7 @@ public class FeedService {
                 .collect(Collectors.toList());
 
         if (followingIds.isEmpty()) {
-            log.debug("User {} has no subscriptions", username);
+
             return Page.empty(pageable);
         }
 
@@ -73,41 +71,4 @@ public class FeedService {
         );
     }
 
-//    @Transactional(readOnly = true)
-//    public Page<PostDTO> getFeedPosts(String username, Pageable pageable) {
-//        log.debug("Getting feed posts for user: {}", username);
-//
-//        User currentUser = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-//
-//        List<Long> followingIds = subscriptionRepository.findBySubscriber(currentUser)
-//                .stream()
-//                .map(subscription -> subscription.getSubscribedTo().getId())
-//                .collect(Collectors.toList());
-//
-//        if (followingIds.isEmpty()) {
-//            log.debug("User {} has no subscriptions", username);
-//            return Page.empty(pageable);
-//        }
-//
-//        Page<Post> posts = postRepository.findByAuthorIdInOrderByPublishedAtDesc(followingIds, pageable);
-//
-//        return posts.map(post -> PostDTO.builder()
-//                .id(post.getId())
-//                .authorUsername(post.getAuthor().getUsername())
-//                .authorAvatar(post.getAuthor().getAvatar() != null ?
-//                        "data:image/jpeg;base64," + imageService.getBase64Avatar(post.getAuthor().getAvatar()) :
-//                        null)
-//                .content(post.getContent())
-//                .base64Media(post.getMedia() != null ?
-//                        "data:image/jpeg;base64," + imageService.getBase64Avatar(post.getMedia()) :
-//                        null)
-//                .publishedAt(post.getPublishedAt())
-//                .views((long) post.getViews().size())
-//                .likesCount(post.getLikedBy().size())
-//                .commentsCount((long) post.getComments().size())  // Преобразование в Long
-//                .repostsCount(post.getReposts().size())
-//                .build()
-//        );
-//    }
 }
