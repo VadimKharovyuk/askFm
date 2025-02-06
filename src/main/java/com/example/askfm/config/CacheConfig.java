@@ -1,7 +1,7 @@
 package com.example.askfm.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.tools.cache.CacheStatistics;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -36,13 +36,35 @@ public class CacheConfig {
                 .maximumSize(2000)
                 .recordStats();
 
-        // Создаем кэши с разными конфигурациями
-        cacheManager.setCacheNames(Arrays.asList( "userSearch", "followers"));
-        cacheManager.setCaffeine(defaultCacheBuilder);
+
+        // Конфигурация для userSearch
+        Caffeine<Object, Object> userSearchCacheBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .expireAfterAccess(45, TimeUnit.MINUTES)
+                .initialCapacity(200)
+                .maximumSize(2000)
+                .recordStats();
+
+
+        // Конфигурация для suggestions
+        Caffeine<Object, Object> suggestionsBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(60, TimeUnit.MINUTES)  // Кэш живет дольше т.к. данные меняются редко
+                .expireAfterAccess(90, TimeUnit.MINUTES)
+                .initialCapacity(100)
+                .maximumSize(1000)
+                .recordStats();
+
 
         // Устанавливаем специальную конфигурацию для followers
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
+        cacheManager.registerCustomCache("userSearch", userSearchCacheBuilder.build());
+        cacheManager.registerCustomCache("suggestions", suggestionsBuilder.build());
 
+
+
+
+        cacheManager.setCacheNames(Arrays.asList("userSearch", "followers", "suggestions"));
+        cacheManager.setCaffeine(defaultCacheBuilder);
         return cacheManager;
     }
 }

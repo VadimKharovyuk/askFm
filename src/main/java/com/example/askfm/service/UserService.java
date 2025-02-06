@@ -10,6 +10,8 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,7 +45,7 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionService subscriptionService ;
     private final ImageService imageService;
-    private final CacheMonitor cacheMonitor;
+    private  final CacheManager cacheManager;
 
 
 
@@ -105,44 +107,77 @@ public class UserService implements UserDetailsService {
 
 
 
-
-    @Cacheable(
-            value = "userSearch",
-            key = "'search:' + #query.toLowerCase().trim()",
-            unless = "#result == null"
-    )
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
-        long startTime = System.currentTimeMillis();
+        Cache cache = cacheManager.getCache("userSearch");
+        String cacheKey = "search:" + query.toLowerCase().trim();
+
+        List<UserSearchDTO> cachedResults = cache != null ?
+                (List<UserSearchDTO>) cache.get(cacheKey, List.class) : null;
+
+        if (cachedResults != null) {
+            log.debug("✅ Взято з кешу {} результатів для запиту: '{}'",
+                    cachedResults.size(), query);
+            return cachedResults;
+        }
+
         if (!StringUtils.hasText(query)) {
             return Collections.emptyList();
         }
 
+        long startTime = System.currentTimeMillis();
         String normalizedQuery = query.toLowerCase().trim();
-        log.debug("Выполняется поиск в базе данных по запросу: '{}'", normalizedQuery);
+        log.debug("⛔ Пошук в БД за запитом: '{}'", normalizedQuery);
 
         List<UserSearchDTO> results = userRepository.searchByUsername(normalizedQuery)
                 .stream()
-                .map(user -> mapToUserSearchDTO(user, currentUsername))
+                .map(user -> mapToUserSearchDTO(user, currentUsername, cache))
                 .collect(Collectors.toList());
 
+        cache.put(cacheKey, results);
         long endTime = System.currentTimeMillis();
-        log.debug("Найдено {} результатов по запросу: '{}' за {} мс", results.size(), normalizedQuery, endTime - startTime);
+        log.debug("🔹 Знайдено в БД {} результатів за запитом: '{}' за {} мс",
+                results.size(), normalizedQuery, endTime - startTime);
         return results;
     }
 
-    // Выносим маппинг в отдельный метод
-    private UserSearchDTO mapToUserSearchDTO(User user, String currentUsername) {
+    private UserSearchDTO mapToUserSearchDTO(User user, String currentUsername, Cache cache) {
+        String username = user.getUsername();
+
+        Cache followersCache = cacheManager.getCache("followers");
+
+        // Получаем количество подписчиков
+        Long followersCount;
+        String followersKey = "subscribers_count:" + username;
+        Cache.ValueWrapper followersWrapper = followersCache.get(followersKey);
+        if (followersWrapper != null) {
+            followersCount = (Long) followersWrapper.get();
+        } else {
+            followersCount = subscriptionService.getSubscribersCount(username);
+            followersCache.put(followersKey, followersCount);
+        }
+
+        // Проверяем подписку
+        boolean isFollowing = false;
+        if (currentUsername != null) {
+            String followingKey = "is_following:" + currentUsername + "_" + username;
+            Cache.ValueWrapper followingWrapper = followersCache.get(followingKey);
+            if (followingWrapper != null) {
+                isFollowing = (Boolean) followingWrapper.get();
+            } else {
+                isFollowing = subscriptionService.isFollowing(currentUsername, username);
+                followersCache.put(followingKey, isFollowing);
+            }
+        }
+
         return UserSearchDTO.builder()
-                .username(user.getUsername())
+                .username(username)
                 .avatar(user.getAvatar() != null ?
                         "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
                         null)
-                .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
-                .isFollowing(currentUsername != null &&
-                        subscriptionService.isFollowing(currentUsername, user.getUsername()))
+                .followersCount(followersCount)
+                .isFollowing(isFollowing)
                 .build();
     }
-
 
 
     public User findByUsername(String username) {
@@ -334,10 +369,6 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username)
                 .map(User::isLocked)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    }
-
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
     }
 
     public User findByEmail(String email) {

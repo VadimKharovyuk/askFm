@@ -4,12 +4,16 @@ import com.example.askfm.dto.UserSuggestionDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+@Slf4j
 
 @Service
 @RequiredArgsConstructor
@@ -17,15 +21,31 @@ public class SuggestedUsersService {
     private final UserRepository userRepository;
     private final ImageService imageService;
     private final static int SUGGESTIONS_LIMIT = 3;
+    private final CacheManager cacheManager;
 
     public List<UserSuggestionDTO> getSuggestedUsers(String currentUsername) {
-        // Получаем пользователей из базы данных
+        Cache cache = cacheManager.getCache("suggestions");
+        String cacheKey = "suggestions:" + currentUsername;
+
+        List<UserSuggestionDTO> cachedResults = cache != null ?
+                (List<UserSuggestionDTO>) cache.get(cacheKey, List.class) : null;
+
+        if (cachedResults != null) {
+            log.debug("✅ Взято з кешу рекомендації для: {}, кількість: {}",
+                    currentUsername, cachedResults.size());
+            return cachedResults;
+        }
+
+        log.debug("⛔ Пошук в БД: Отримання рекомендацій для: {}", currentUsername);
         List<User> suggestedUsers = userRepository.findSuggestedUsers(currentUsername, SUGGESTIONS_LIMIT);
 
-        // Преобразуем в DTO
-        return suggestedUsers.stream()
+        List<UserSuggestionDTO> results = suggestedUsers.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        cache.put(cacheKey, results);
+        log.debug("🔹 Знайдено в БД {} рекомендацій для: {}", results.size(), currentUsername);
+        return results;
     }
     // Новый метод с пагинацией
     public Page<UserSuggestionDTO> getPaginatedSuggestedUsers(String currentUsername, Pageable pageable) {

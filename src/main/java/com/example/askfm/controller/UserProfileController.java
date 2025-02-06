@@ -77,6 +77,7 @@ public class UserProfileController {
 //        model.addAttribute("posts", userPostsViews);
 
 
+
         // Получение рекомендуемых пользователей
         List<UserSuggestionDTO> suggestedUsers = Collections.emptyList();
         if (currentUser != null) {
