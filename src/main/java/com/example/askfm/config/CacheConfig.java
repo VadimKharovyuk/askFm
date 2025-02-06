@@ -32,8 +32,8 @@ public class CacheConfig {
         Caffeine<Object, Object> followersCacheBuilder = Caffeine.newBuilder()
                 .expireAfterWrite(30, TimeUnit.MINUTES)
                 .expireAfterAccess(45, TimeUnit.MINUTES)
-                .initialCapacity(200)
-                .maximumSize(2000)
+                .initialCapacity(200)//начальное
+                .maximumSize(2000) //максимальное
                 .recordStats();
 
 
@@ -54,17 +54,45 @@ public class CacheConfig {
                 .maximumSize(1000)
                 .recordStats();
 
+//посты
+        Caffeine<Object, Object> postsBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(120, TimeUnit.MINUTES) // 2 часа,
+                .expireAfterAccess(180, TimeUnit.MINUTES)
+                .initialCapacity(200)
+                .maximumSize(3000) // Больше места для постов
+                .recordStats();
 
-        // Устанавливаем специальную конфигурацию для followers
+
+        //просмотры
+        Caffeine<Object, Object> viewsBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(60, TimeUnit.MINUTES)
+                .expireAfterAccess(90, TimeUnit.MINUTES)
+                .initialCapacity(500)
+                .maximumSize(5000)
+                .recordStats();
+
+
+        // Для лайков
+        Caffeine<Object, Object> likesBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(60, TimeUnit.MINUTES)
+                .expireAfterAccess(90, TimeUnit.MINUTES)
+                .initialCapacity(500)
+                .maximumSize(5000)
+                .recordStats();
+
+        // Устанавливаем специальную конфигурацию
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
         cacheManager.registerCustomCache("userSearch", userSearchCacheBuilder.build());
         cacheManager.registerCustomCache("suggestions", suggestionsBuilder.build());
+        cacheManager.registerCustomCache("posts", postsBuilder.build());
+        cacheManager.registerCustomCache("views", viewsBuilder.build());
+        cacheManager.registerCustomCache("likes", likesBuilder.build());
 
 
 
 
-        cacheManager.setCacheNames(Arrays.asList("userSearch", "followers", "suggestions"));
         cacheManager.setCaffeine(defaultCacheBuilder);
+//        cacheManager.setCacheNames(Arrays.asList("userSearch", "followers", "suggestions", "posts","likes","views"));
         return cacheManager;
     }
 }

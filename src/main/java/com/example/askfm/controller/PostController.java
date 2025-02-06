@@ -76,33 +76,6 @@ public class PostController {
         return "posts/post-details";
     }
 
-//    @GetMapping("/{postId}")
-//    public String getPostDetails(@PathVariable Long postId,
-//                                 @AuthenticationPrincipal UserDetails userDetails, @PageableDefault(size = 10) Pageable pageable,
-//                                 Model model) {
-//        String currentUsername = userDetails != null ? userDetails.getUsername() : null;
-//        postService.incrementViews(postId, currentUsername);
-//
-//        long postViews = postService.getPostViews(postId);
-//        model.addAttribute("postViews", postViews);
-//        model.addAttribute("currentUser", currentUsername);
-//
-//        model.addAttribute("reportForm", new PostReportCreateDTO());
-//        model.addAttribute("categories", ReportCategory.values());
-//
-//        Page<ListCommentDTO> comments = commentService.getPostCommentsList(postId, pageable);
-//        model.addAttribute("comments", comments);
-//
-//        // Для отображения формы добавления комментария
-//        model.addAttribute("newComment", new CommentDTO());
-//        //форма для репоста
-//        model.addAttribute("repostForm", new CreateRepostRequest());
-//
-//
-//        PostDTO post = postService.getPostDTO(postService.getPost(postId), currentUsername);
-//        model.addAttribute("post", post);
-//        return "posts/post-details";
-//    }
 
     @PostMapping("/{postId}/repost")
     public String repost(@PathVariable Long postId,

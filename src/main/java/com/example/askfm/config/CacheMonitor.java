@@ -15,24 +15,24 @@ public class CacheMonitor {
     private final CacheManager cacheManager;
     private static final long TWO_MINUTES_IN_MS = 2 * 60 * 1000;
 
-    @Scheduled(fixedRate = TWO_MINUTES_IN_MS)
-    public void logCacheStatistics() {
-        log.info("=== Звіт статистики кешу ===");
-        cacheManager.getCacheNames().forEach(cacheName -> {
-            CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
-            if (cache != null) {
-                CacheStats stats = cache.getNativeCache().stats();
-                log.info("Статистика кешу '{}':", cacheName);
-                log.info("  Відсоток попадань: {}%", String.format("%.2f", stats.hitRate() * 100));
-                log.info("  Розмір: {}", cache.getNativeCache().estimatedSize());
-                log.info("  Попадання: {}", stats.hitCount());
-                log.info("  Промахи: {}", stats.missCount());
-                log.info("  Вилучення: {}", stats.evictionCount());
-                log.info("  Успішні завантаження: {}", stats.loadSuccessCount());
-                log.info("  Помилки завантаження: {}", stats.loadFailureCount());
-                log.info("  Загальний час завантаження: {} мс", stats.totalLoadTime() / 1_000_000);
-                log.info("-----------------------------");
-            }
-        });
-    }
+//    @Scheduled(fixedRate = TWO_MINUTES_IN_MS)
+//    public void logCacheStatistics() {
+//        log.info("=== Звіт статистики кешу ===");
+//        cacheManager.getCacheNames().forEach(cacheName -> {
+//            CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
+//            if (cache != null) {
+//                CacheStats stats = cache.getNativeCache().stats();
+//                log.info("Статистика кешу '{}':", cacheName);
+//                log.info("  Відсоток попадань: {}%", String.format("%.2f", stats.hitRate() * 100));
+//                log.info("  Розмір: {}", cache.getNativeCache().estimatedSize());
+//                log.info("  Попадання: {}", stats.hitCount());
+//                log.info("  Промахи: {}", stats.missCount());
+//                log.info("  Вилучення: {}", stats.evictionCount());
+//                log.info("  Успішні завантаження: {}", stats.loadSuccessCount());
+//                log.info("  Помилки завантаження: {}", stats.loadFailureCount());
+//                log.info("  Загальний час завантаження: {} мс", stats.totalLoadTime() / 1_000_000);
+//                log.info("-----------------------------");
+//            }
+//        });
+//    }
 }

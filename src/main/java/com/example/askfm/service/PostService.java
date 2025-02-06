@@ -11,6 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,20 +38,38 @@ public class PostService {
     private final PostReportRepository postReportRepository;
     private final RepostRepository repostRepository;
     private final PostMapper postMapper;
+    private final CacheManager cacheManager;
+
 
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
+        Cache cache = cacheManager.getCache("posts");
+        String cacheKey = "posts:" + username + ":" + currentUsername;
+
+        List<PostDTO> cachedPosts = cache != null ?
+                (List<PostDTO>) cache.get(cacheKey, List.class) : null;
+
+        if (cachedPosts != null) {
+            log.debug("✅ Получены посты из кеша для пользователя: {}, запрошено пользователем: {}, количество: {}",
+                    username, currentUsername, cachedPosts.size());
+            return cachedPosts;
+        }
+
+        log.debug("⛔ Поиск в БД: Получение постов для пользователя: {}", username);
 
         List<Post> originalPosts = postRepository.findByAuthorUsernameOrderByPublishedAtDesc(username);
+        log.debug("🔹 Найдено {} оригинальных постов", originalPosts.size());
+
         List<Repost> reposts = repostRepository.findByUserUsernameOrderByRepostedAtDesc(username);
+        log.debug("🔹 Найдено {} репостов", reposts.size());
 
         List<PostDTO> allPosts = new ArrayList<>();
 
-        // Add original posts
+        // Добавляем оригинальные посты
         allPosts.addAll(originalPosts.stream()
                 .map(post -> postMapper.toDto(post, currentUsername))
                 .toList());
 
-        // Add reposts
+        // Добавляем репосты
         allPosts.addAll(reposts.stream()
                 .map(repost -> postMapper.toDtoWithRepost(
                         repost.getOriginalPost(),
@@ -58,34 +78,62 @@ public class PostService {
                         repost.getRepostedAt()))
                 .toList());
 
-        // Sort all posts by published/reposted date
-        return allPosts.stream()
+        // Сортируем все посты по дате
+        List<PostDTO> sortedPosts = allPosts.stream()
                 .sorted(Comparator.comparing(post ->
                                 post.getRepostedAt() != null ? post.getRepostedAt() : post.getPublishedAt(),
                         Comparator.reverseOrder()))
                 .collect(Collectors.toList());
+
+        cache.put(cacheKey, sortedPosts);
+        log.debug("💾 Сохранено в кеш {} постов для пользователя: {} (ключ: {})",
+                sortedPosts.size(), username, cacheKey);
+
+        return sortedPosts;
     }
 
-    public Post createPost(String username, PostCreateDTO postDTO) {
 
-        User author = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+public Post createPost(String username, PostCreateDTO postDTO) {
+    log.debug("📝 Создание нового поста для пользователя: {}", username);
 
-        byte[] mediaBytes = processMedia(postDTO);
-        Set<Tag> tags = processTags(postDTO.getTags());
+    User author = userRepository.findByUsername(username)
+            .orElseThrow(() -> {
+                log.error("❌ Пользователь не найден при создании поста: {}", username);
+                return new UsernameNotFoundException("User not found: " + username);
+            });
 
-        Post post = Post.builder()
-                .author(author)
-                .content(postDTO.getContent())
-                .media(mediaBytes)
-                .publishedAt(LocalDateTime.now())
-                .tags(tags)
-                .build();
+    byte[] mediaBytes = processMedia(postDTO);
+    log.debug("🖼️ Обработаны медиа файлы для поста");
 
-        post.setMentionedUsers(mentionService.extractMentions(postDTO.getContent()));
+    Set<Tag> tags = processTags(postDTO.getTags());
+    log.debug("🏷️ Обработано {} тегов для поста", tags.size());
 
-        return postRepository.save(post);
+    Post post = Post.builder()
+            .author(author)
+            .content(postDTO.getContent())
+            .media(mediaBytes)
+            .publishedAt(LocalDateTime.now())
+            .tags(tags)
+            .build();
+
+    Set<User> mentionedUsers = mentionService.extractMentions(postDTO.getContent());
+    post.setMentionedUsers(mentionedUsers);
+    log.debug("👥 Извлечено {} упоминаний из контента поста", mentionedUsers.size());
+
+    Post savedPost = postRepository.save(post);
+    log.debug("✨ Успешно создан пост с ID: {}", savedPost.getId());
+
+    // Очищаем кеш постов после создания нового поста
+    Cache cache = cacheManager.getCache("posts");
+    if (cache != null) {
+        cache.clear();
+        log.debug("🧹 Кеш постов очищен после создания нового поста");
     }
+
+    return savedPost;
+}
+
+
 
     private byte[] processMedia(PostCreateDTO postDTO) {
         if (postDTO.getMedia() != null && !postDTO.getMedia().isEmpty()) {
@@ -141,12 +189,36 @@ public class PostService {
 
     @Transactional
     public void deletePost(Long postId) {
-        log.debug("Deleting post: {}", postId);
+        log.debug("📝 Начало удаления поста: {}", postId);
+
         Post post = findById(postId);
+        String authorUsername = post.getAuthor().getUsername();
+
         postViewRepository.deleteByPostId(postId);
+        log.debug("👁️ Удалены связанные просмотры для поста: {}", postId);
+
         tagRepository.deleteByPostId(postId);
+        log.debug("🏷️ Удалены связанные теги для поста: {}", postId);
+
         postRepository.delete(post);
+        log.debug("✨ Пост удален из БД: {}", postId);
+
+        // Очистка кеша
+        Cache cache = cacheManager.getCache("posts");
+        if (cache != null) {
+            // Очищаем кеш постов автора
+            String authorCacheKey = "posts:" + authorUsername + ":*";
+            cache.evict(authorCacheKey);
+            log.debug("🧹 Очищен кеш постов автора: {}", authorUsername);
+
+            // Очищаем общий кеш
+            cache.clear();
+            log.debug("🧹 Очищен общий кеш постов");
+        }
+
+        log.info("✅ Пост {} пользователя {} успешно удален", postId, authorUsername);
     }
+
 
     @Transactional
     public void incrementViews(Long postId, String username) {
@@ -164,10 +236,27 @@ public class PostService {
 
         }
     }
-
     public long getPostViews(Long postId) {
-        return postViewRepository.countByPostId(postId);
+        Cache viewsCache = cacheManager.getCache("views");
+        String cacheKey = "post_views_count:" + postId;
+
+        Long viewsCount = viewsCache.get(cacheKey, Long.class);
+        if (viewsCount != null) {
+            log.debug("✅ Взято з кешу кількість переглядів для поста {}: {}", postId, viewsCount);
+            return viewsCount;
+        }
+
+        log.debug("⛔ Підрахунок переглядів в БД для поста {}", postId);
+        viewsCount = postViewRepository.countByPostId(postId);
+
+        viewsCache.put(cacheKey, viewsCount);
+        log.debug("🔹 Знайдено в БД {} переглядів для поста {}", viewsCount, postId);
+        return viewsCount;
     }
+//
+//    public long getPostViews(Long postId) {
+//        return postViewRepository.countByPostId(postId);
+//    }
 
 
     public Post getPost(Long postId) {

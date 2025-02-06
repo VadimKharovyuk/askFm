@@ -49,6 +49,7 @@ public class UserProfileController {
 
         String currentUsername = currentUser != null ? currentUser.getUsername() : null;
         List<PostDTO> userPosts = postService.getUserPosts(username, currentUsername);
+        //посты
         model.addAttribute("posts", userPosts);
 
         String joinDate = user.getCreatedAt()
@@ -90,6 +91,7 @@ public class UserProfileController {
         // Создаем DTO с уже установленным recipientId
         QuestionRequestDto questionRequest = new QuestionRequestDto();
         questionRequest.setRecipientId(recipient.getId());
+
 
         boolean isFollowing = false;
         if (currentUser != null) {

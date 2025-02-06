@@ -13,6 +13,8 @@ import com.example.askfm.repository.RepostRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,45 +29,81 @@ public class RepostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final RepostMapper repostMapper;
+    private final CacheManager cacheManager;
 
+    @Transactional
     public RepostDTO createRepost(Long userId, CreateRepostRequest request) {
+        log.debug("📝 Начало создания репоста для пользователя: {}, пост: {}", userId, request.getPostId());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> {
+                    log.error("❌ Пользователь не найден: {}", userId);
+                    return new UserNotFoundException("User not found with id: " + userId);
+                });
 
         Post originalPost = postRepository.findById(request.getPostId())
-                .orElseThrow(() -> new PostNotFoundException(request.getPostId()));
+                .orElseThrow(() -> {
+                    log.error("❌ Оригинальный пост не найден: {}", request.getPostId());
+                    return new PostNotFoundException(request.getPostId());
+                });
 
         validateRepostCreation(user, originalPost);
 
         Repost repost = buildRepost(user, originalPost);
         Repost savedRepost = repostRepository.save(repost);
-        return repostMapper.toDto(savedRepost, user.getUsername());
+        log.debug("✨ Репост успешно сохранен в БД");
+
+        RepostDTO repostDTO = repostMapper.toDto(savedRepost, user.getUsername());
+
+        // Очищаем кеш
+        Cache cache = cacheManager.getCache("posts");
+        if (cache != null) {
+            cache.clear();
+            log.debug("🧹 Кеш постов полностью очищен после создания репоста");
+        }
+
+        log.info("✅ Создан репост {} пользователем {}", request.getPostId(), user.getUsername());
+        return repostDTO;
     }
 
+    @Transactional
     public void deleteRepost(Long userId, Long postId) {
+        log.debug("📝 Начало удаления репоста для пользователя: {}, пост: {}", userId, postId);
 
         Repost repost = repostRepository.findByUserIdAndOriginalPostId(userId, postId)
-                .orElseThrow(() -> new RepostNotFoundException("Repost not found"));
+                .orElseThrow(() -> {
+                    log.error("❌ Репост не найден для пользователя: {}, пост: {}", userId, postId);
+                    return new RepostNotFoundException("Repost not found");
+                });
 
         validateRepostDeletion(repost, userId);
 
+        String username = repost.getUser().getUsername();
         repostRepository.delete(repost);
-        log.debug("Successfully deleted repost");
-    }
+        log.debug("✨ Репост удален из БД");
 
+        // Очищаем кеш
+        Cache cache = cacheManager.getCache("posts");
+        if (cache != null) {
+            cache.clear();
+            log.debug("🧹 Кеш постов полностью очищен после удаления репоста");
+        }
+
+        log.info("✅ Репост успешно удален пользователем: {}", username);
+    }
     private void validateRepostCreation(User user, Post originalPost) {
-        boolean alreadyReposted = repostRepository.existsByUserAndOriginalPost(user, originalPost);
-        if (alreadyReposted) {
-            throw new AlreadyRepostedException("You have already reposted this post");
+        if (repostRepository.existsByUserAndOriginalPost(user, originalPost)) {
+            log.error("❌ Репост уже существует для пользователя: {}, пост: {}",
+                    user.getId(), originalPost.getId());
+            throw new UnauthorizedException("Repost already exists");
         }
     }
 
     private void validateRepostDeletion(Repost repost, Long userId) {
         if (!repost.getUser().getId().equals(userId)) {
-            log.warn("Unauthorized delete attempt. Repost user: {}, Request user: {}",
-                    repost.getUser().getId(), userId);
-            throw new UnauthorizedException("Not authorized to delete this repost");
+            log.error("❌ Попытка удаления чужого репоста. UserId: {}, RepostUserId: {}",
+                    userId, repost.getUser().getId());
+            throw new UnauthorizedException("Cannot delete another user's repost");
         }
     }
 
@@ -76,4 +114,5 @@ public class RepostService {
                 .repostedAt(LocalDateTime.now())
                 .build();
     }
+
 }
