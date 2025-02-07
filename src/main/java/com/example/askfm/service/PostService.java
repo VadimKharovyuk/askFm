@@ -40,6 +40,8 @@ public class PostService {
     private final PostMapper postMapper;
     private final CacheManager cacheManager;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+
 
 
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
@@ -237,13 +239,23 @@ public class PostService {
         Post post = findById(postId);
         String authorUsername = post.getAuthor().getUsername();
 
+
         postViewRepository.deleteByPostId(postId);
-        log.debug("👁️ Удалены связанные просмотры для поста: {}", postId);
-
         tagRepository.deleteByPostId(postId);
-        log.debug("🏷️ Удалены связанные теги для поста: {}", postId);
 
+        // Удаляем уведомления связанные с постом
+        notificationRepository.deleteByPostId(postId);
+
+        // Удаляем уведомления репостов
+        List<Repost> reposts = repostRepository.findByOriginalPostId(postId, Pageable.unpaged());
+        for (Repost repost : reposts) {
+            notificationRepository.deleteByRepostId(repost.getId());
+        }
+
+        repostRepository.deleteByOriginalPostId(postId);
         postRepository.delete(post);
+        postRepository.delete(post);
+
         log.debug("✨ Пост удален из БД: {}", postId);
 
         // Очистка кеша

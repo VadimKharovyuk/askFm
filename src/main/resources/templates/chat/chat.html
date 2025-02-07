@@ -1,20 +1,564 @@
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html xmlns:th="http://www.thymeleaf.org">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;  <title>Чат</title>&ndash;&gt;-->
+<!--&lt;!&ndash;  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">&ndash;&gt;-->
+<!--&lt;!&ndash;  <style>&ndash;&gt;-->
+<!--&lt;!&ndash;    .chat-container {&ndash;&gt;-->
+<!--&lt;!&ndash;      max-width: 800px;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 80vh;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 2rem auto;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .message-container {&ndash;&gt;-->
+<!--&lt;!&ndash;      height: calc(80vh - 160px); /* Высота контейнера минус header и форма */&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow-y: auto;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .chat-header {&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-bottom: 1px solid #e5e7eb;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 60px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .chat-form {&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-top: 1px solid #e5e7eb;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 80px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Стилизация скроллбара */&ndash;&gt;-->
+<!--&lt;!&ndash;    .message-container::-webkit-scrollbar {&ndash;&gt;-->
+<!--&lt;!&ndash;      width: 6px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .message-container::-webkit-scrollbar-track {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #f1f1f1;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .message-container::-webkit-scrollbar-thumb {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #888;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 3px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .message-container::-webkit-scrollbar-thumb:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #555;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body class="bg-gray-100">&ndash;&gt;-->
+<!--&lt;!&ndash;<div class="chat-container">&ndash;&gt;-->
+<!--&lt;!&ndash;  &lt;!&ndash; Шапка чата &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <div class="chat-header flex justify-between items-center">&ndash;&gt;-->
+<!--&lt;!&ndash;    <a href="/messages" class="text-blue-600 hover:underline">← Назад к чатам</a>&ndash;&gt;-->
+<!--&lt;!&ndash;    <h2 class="text-xl font-bold" th:text="'Чат с ' + ${recipientName}"></h2>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="w-20"></div> &lt;!&ndash; Для центрирования заголовка &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Контейнер сообщений &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <div id="messageContainer" class="message-container space-y-4">&ndash;&gt;-->
+<!--&lt;!&ndash;    <div th:each="message : ${messageHistory}"&ndash;&gt;-->
+<!--&lt;!&ndash;         th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div th:class="${message.senderId == userId ?&ndash;&gt;-->
+<!--&lt;!&ndash;                             'bg-blue-500 text-white' : 'bg-gray-200'} +&ndash;&gt;-->
+<!--&lt;!&ndash;                             ' rounded-lg p-3 max-w-[70%] break-words'">&ndash;&gt;-->
+<!--&lt;!&ndash;        <p th:text="${message.content}"></p>&ndash;&gt;-->
+<!--&lt;!&ndash;        <time class="text-xs block mt-1"&ndash;&gt;-->
+<!--&lt;!&ndash;              th:text="${#temporals.format(message.timestamp, 'HH:mm')}">&ndash;&gt;-->
+<!--&lt;!&ndash;        </time>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Форма отправки &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <div class="chat-form">&ndash;&gt;-->
+<!--&lt;!&ndash;    <form id="messageForm" class="flex gap-3">&ndash;&gt;-->
+<!--&lt;!&ndash;      <input type="hidden" id="recipientId" th:value="${recipientId}">&ndash;&gt;-->
+<!--&lt;!&ndash;      <input type="text" id="content"&ndash;&gt;-->
+<!--&lt;!&ndash;             class="flex-1 border rounded-lg px-4 py-2"&ndash;&gt;-->
+<!--&lt;!&ndash;             placeholder="Введите сообщение...">&ndash;&gt;-->
+<!--&lt;!&ndash;      <button type="submit"&ndash;&gt;-->
+<!--&lt;!&ndash;              class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">&ndash;&gt;-->
+<!--&lt;!&ndash;        Отправить&ndash;&gt;-->
+<!--&lt;!&ndash;      </button>&ndash;&gt;-->
+<!--&lt;!&ndash;    </form>&ndash;&gt;-->
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;<script th:inline="javascript">&ndash;&gt;-->
+<!--&lt;!&ndash;  const userId = [[${userId}]];&ndash;&gt;-->
+<!--&lt;!&ndash;  const recipientId = [[${recipientId}]];&ndash;&gt;-->
+<!--&lt;!&ndash;  let stompClient = null;&ndash;&gt;-->
+
+<!--&lt;!&ndash;  // Улучшенная функция прокрутки&ndash;&gt;-->
+<!--&lt;!&ndash;  function scrollToBottom(smooth = false) {&ndash;&gt;-->
+<!--&lt;!&ndash;    const container = document.getElementById('messageContainer');&ndash;&gt;-->
+<!--&lt;!&ndash;    const scrollOptions = smooth ? { behavior: 'smooth' } : { behavior: 'auto' };&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Принудительная прокрутка с таймаутом для гарантии&ndash;&gt;-->
+<!--&lt;!&ndash;    setTimeout(() => {&ndash;&gt;-->
+<!--&lt;!&ndash;      container.scrollTo({&ndash;&gt;-->
+<!--&lt;!&ndash;        top: container.scrollHeight,&ndash;&gt;-->
+<!--&lt;!&ndash;        ...scrollOptions&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+<!--&lt;!&ndash;    }, 100);&ndash;&gt;-->
+<!--&lt;!&ndash;  }&ndash;&gt;-->
+
+<!--&lt;!&ndash;  // Прокрутка при загрузке страницы&ndash;&gt;-->
+<!--&lt;!&ndash;  document.addEventListener('DOMContentLoaded', () => {&ndash;&gt;-->
+<!--&lt;!&ndash;    scrollToBottom();&ndash;&gt;-->
+<!--&lt;!&ndash;    // Дополнительная прокрутка через секунду для надежности&ndash;&gt;-->
+<!--&lt;!&ndash;    setTimeout(scrollToBottom, 1000);&ndash;&gt;-->
+<!--&lt;!&ndash;  });&ndash;&gt;-->
+
+<!--&lt;!&ndash;  function connect() {&ndash;&gt;-->
+<!--&lt;!&ndash;    const socket = new SockJS('/ws');&ndash;&gt;-->
+<!--&lt;!&ndash;    stompClient = Stomp.over(socket);&ndash;&gt;-->
+<!--&lt;!&ndash;    stompClient.connect({}, frame => {&ndash;&gt;-->
+<!--&lt;!&ndash;      console.log('Connected: ' + frame);&ndash;&gt;-->
+<!--&lt;!&ndash;      stompClient.subscribe('/user/' + userId + '/queue/messages', message => {&ndash;&gt;-->
+<!--&lt;!&ndash;        addMessage(JSON.parse(message.body));&ndash;&gt;-->
+<!--&lt;!&ndash;        scrollToBottom(true); // Плавная прокрутка для новых сообщений&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+<!--&lt;!&ndash;    });&ndash;&gt;-->
+<!--&lt;!&ndash;  }&ndash;&gt;-->
+
+<!--&lt;!&ndash;  function sendMessage(event) {&ndash;&gt;-->
+<!--&lt;!&ndash;    event.preventDefault();&ndash;&gt;-->
+<!--&lt;!&ndash;    const contentInput = document.getElementById('content');&ndash;&gt;-->
+<!--&lt;!&ndash;    if (!contentInput.value.trim()) return; // Не отправляем пустые сообщения&ndash;&gt;-->
+
+<!--&lt;!&ndash;    const message = {&ndash;&gt;-->
+<!--&lt;!&ndash;      senderId: userId,&ndash;&gt;-->
+<!--&lt;!&ndash;      recipientId: recipientId,&ndash;&gt;-->
+<!--&lt;!&ndash;      content: contentInput.value,&ndash;&gt;-->
+<!--&lt;!&ndash;      timestamp: new Date()&ndash;&gt;-->
+<!--&lt;!&ndash;    };&ndash;&gt;-->
+
+<!--&lt;!&ndash;    stompClient.send("/app/send", {}, JSON.stringify(message));&ndash;&gt;-->
+<!--&lt;!&ndash;    addMessage(message);&ndash;&gt;-->
+<!--&lt;!&ndash;    contentInput.value = '';&ndash;&gt;-->
+<!--&lt;!&ndash;    scrollToBottom(true); // Плавная прокрутка после отправки&ndash;&gt;-->
+<!--&lt;!&ndash;  }&ndash;&gt;-->
+
+<!--&lt;!&ndash;  function addMessage(message) {&ndash;&gt;-->
+<!--&lt;!&ndash;    const container = document.getElementById('messageContainer');&ndash;&gt;-->
+<!--&lt;!&ndash;    const messageDiv = document.createElement('div');&ndash;&gt;-->
+<!--&lt;!&ndash;    messageDiv.className = message.senderId === userId ?&ndash;&gt;-->
+<!--&lt;!&ndash;            'flex justify-end' : 'flex justify-start';&ndash;&gt;-->
+
+<!--&lt;!&ndash;    const innerDiv = document.createElement('div');&ndash;&gt;-->
+<!--&lt;!&ndash;    innerDiv.className = `${message.senderId === userId ?&ndash;&gt;-->
+<!--&lt;!&ndash;            'bg-blue-500 text-white' : 'bg-gray-200'} rounded-lg p-3 max-w-[70%] break-words`;&ndash;&gt;-->
+
+<!--&lt;!&ndash;    const content = document.createElement('p');&ndash;&gt;-->
+<!--&lt;!&ndash;    content.textContent = message.content;&ndash;&gt;-->
+
+<!--&lt;!&ndash;    const time = document.createElement('time');&ndash;&gt;-->
+<!--&lt;!&ndash;    time.className = 'text-xs block mt-1';&ndash;&gt;-->
+<!--&lt;!&ndash;    time.textContent = new Date(message.timestamp).toLocaleTimeString([],&ndash;&gt;-->
+<!--&lt;!&ndash;            {hour: '2-digit', minute:'2-digit'});&ndash;&gt;-->
+
+<!--&lt;!&ndash;    innerDiv.appendChild(content);&ndash;&gt;-->
+<!--&lt;!&ndash;    innerDiv.appendChild(time);&ndash;&gt;-->
+<!--&lt;!&ndash;    messageDiv.appendChild(innerDiv);&ndash;&gt;-->
+<!--&lt;!&ndash;    container.appendChild(messageDiv);&ndash;&gt;-->
+<!--&lt;!&ndash;  }&ndash;&gt;-->
+
+<!--&lt;!&ndash;  // Фокус на поле ввода при загрузке&ndash;&gt;-->
+<!--&lt;!&ndash;  document.addEventListener('DOMContentLoaded', () => {&ndash;&gt;-->
+<!--&lt;!&ndash;    document.getElementById('content').focus();&ndash;&gt;-->
+<!--&lt;!&ndash;  });&ndash;&gt;-->
+
+<!--&lt;!&ndash;  document.getElementById('messageForm').addEventListener('submit', sendMessage);&ndash;&gt;-->
+<!--&lt;!&ndash;  connect();&ndash;&gt;-->
+<!--&lt;!&ndash;</script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Чат</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    .left-sidebar {-->
+<!--      width: 275px;-->
+<!--      position: fixed;-->
+<!--      left: 0;-->
+<!--      top: 0;-->
+<!--      height: 100vh;-->
+<!--      border-right: 1px solid #e5e7eb;-->
+<!--      padding: 1rem;-->
+<!--      background: white;-->
+<!--    }-->
+
+<!--    .logo-link {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: bold;-->
+<!--      padding: 0.75rem;-->
+<!--      margin-bottom: 1rem;-->
+<!--      color: #1d9bf0;-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .logo-link i {-->
+<!--      margin-right: 0.75rem;-->
+<!--    }-->
+
+<!--    .side-nav {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .side-link {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      padding: 0.75rem;-->
+<!--      border-radius: 9999px;-->
+<!--      color: #0f1419;-->
+<!--      text-decoration: none;-->
+<!--      transition: background-color 0.2s;-->
+<!--    }-->
+
+<!--    .side-link:hover {-->
+<!--      background-color: #e8f5fd;-->
+<!--      color: #1d9bf0;-->
+<!--    }-->
+
+<!--    .side-link i {-->
+<!--      margin-right: 1.25rem;-->
+<!--      font-size: 1.25rem;-->
+<!--    }-->
+
+<!--    .notification-badge {-->
+<!--      background: #1d9bf0;-->
+<!--      color: white;-->
+<!--      border-radius: 9999px;-->
+<!--      padding: 0.25rem 0.5rem;-->
+<!--      font-size: 0.75rem;-->
+<!--      margin-left: auto;-->
+<!--    }-->
+
+<!--    .chat-container {-->
+<!--      margin-left: auto;-->
+<!--      margin-right: auto;-->
+<!--      max-width: 800px;-->
+<!--      height: 100vh;-->
+<!--      background: white;-->
+<!--      margin-left: calc(275px + ((100% - 1350px) / 2));-->
+<!--      margin-right: calc(275px + ((100% - 1350px) / 2));-->
+<!--    }-->
+
+<!--    .message-container {-->
+<!--      height: calc(100vh - 140px);-->
+<!--      overflow-y: auto;-->
+<!--      padding: 1rem;-->
+<!--    }-->
+
+<!--    .chat-header {-->
+<!--      padding: 1rem;-->
+<!--      border-bottom: 1px solid #e5e7eb;-->
+<!--      height: 60px;-->
+<!--    }-->
+
+<!--    .chat-form {-->
+<!--      padding: 1rem;-->
+<!--      border-top: 1px solid #e5e7eb;-->
+<!--      background: white;-->
+<!--      height: 80px;-->
+<!--    }-->
+
+<!--    .message-container::-webkit-scrollbar {-->
+<!--      width: 6px;-->
+<!--    }-->
+
+<!--    .message-container::-webkit-scrollbar-track {-->
+<!--      background: #f1f1f1;-->
+<!--    }-->
+
+<!--    .message-container::-webkit-scrollbar-thumb {-->
+<!--      background: #888;-->
+<!--      border-radius: 3px;-->
+<!--    }-->
+
+<!--    .message-container::-webkit-scrollbar-thumb:hover {-->
+<!--      background: #555;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body class="bg-gray-100">-->
+<!--<aside class="left-sidebar">-->
+<!--  <a href="/" class="logo-link">-->
+<!--    <i class="fas fa-comment-dots"></i>-->
+<!--    <span>AskFM</span>-->
+<!--  </a>-->
+
+<!--  <nav class="side-nav">-->
+<!--    <a href="/home" class="side-link">-->
+<!--      <i class="fas fa-home"></i>-->
+<!--      <span>Главная</span>-->
+<!--    </a>-->
+<!--    <a href="/explore" class="side-link">-->
+<!--      <i class="fas fa-hashtag"></i>-->
+<!--      <span>Поиск</span>-->
+<!--    </a>-->
+<!--    <a href="/notifications" class="side-link">-->
+<!--      <i class="fas fa-bell"></i>-->
+<!--      <span>Уведомления</span>-->
+<!--      <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>-->
+<!--    </a>-->
+<!--    <a href="/messages" class="side-link">-->
+<!--      <i class="fas fa-envelope"></i>-->
+<!--      <span>Сообщения</span>-->
+<!--    </a>-->
+<!--    <a href="/saved" class="side-link">-->
+<!--      <i class="fas fa-bookmark"></i>-->
+<!--      <span>Закладки</span>-->
+<!--    </a>-->
+<!--    <a href="/visits/my" class="side-link">-->
+<!--      <i class="fas fa-eye"></i>-->
+<!--      <span>Истории</span>-->
+<!--    </a>-->
+<!--    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">-->
+<!--      <i class="fas fa-user"></i>-->
+<!--      <span>Профиль</span>-->
+<!--    </a>-->
+<!--    <a href="/ads" class="side-link">-->
+<!--      <i class="fas fa-ad"></i>-->
+<!--      <span>Мои рекламы</span>-->
+<!--    </a>-->
+<!--    <a href="/settings" class="side-link">-->
+<!--      <i class="fas fa-cog"></i>-->
+<!--      <span>Налаштування</span>-->
+<!--    </a>-->
+<!--    <form th:action="@{/logout}" method="post" class="m-0">-->
+<!--      <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">-->
+<!--        <i class="fas fa-sign-out-alt"></i>-->
+<!--        <span>Вийти</span>-->
+<!--      </button>-->
+<!--    </form>-->
+<!--  </nav>-->
+<!--</aside>-->
+
+<!--<div class="chat-container">-->
+<!--  <div class="chat-header flex justify-between items-center">-->
+<!--    <a href="/messages" class="text-blue-600 hover:underline">← Назад к чатам</a>-->
+<!--    <h2 class="text-xl font-bold" th:text="'Чат с ' + ${recipientName}"></h2>-->
+<!--    <div class="w-20"></div>-->
+<!--  </div>-->
+
+<!--  <div id="messageContainer" class="message-container space-y-4">-->
+<!--    <div th:each="message : ${messageHistory}"-->
+<!--         th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">-->
+<!--      <div th:class="${message.senderId == userId ?-->
+<!--                               'bg-blue-500 text-white' : 'bg-gray-200'} +-->
+<!--                               ' rounded-lg p-3 max-w-[70%] break-words'">-->
+<!--        <p th:text="${message.content}"></p>-->
+<!--        <time class="text-xs block mt-1"-->
+<!--              th:text="${#temporals.format(message.timestamp, 'HH:mm')}">-->
+<!--        </time>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  <div class="chat-form">-->
+<!--    <form id="messageForm" class="flex gap-3">-->
+<!--      <input type="hidden" id="recipientId" th:value="${recipientId}">-->
+<!--      <input type="text" id="content"-->
+<!--             class="flex-1 border rounded-lg px-4 py-2"-->
+<!--             placeholder="Введите сообщение...">-->
+<!--      <button type="submit"-->
+<!--              class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">-->
+<!--        Отправить-->
+<!--      </button>-->
+<!--    </form>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
+<!--<script th:inline="javascript">-->
+<!--  // Existing JavaScript remains the same-->
+<!--  const userId = [[${userId}]];-->
+<!--  const recipientId = [[${recipientId}]];-->
+<!--  let stompClient = null;-->
+
+<!--  function scrollToBottom(smooth = false) {-->
+<!--    const container = document.getElementById('messageContainer');-->
+<!--    const scrollOptions = smooth ? { behavior: 'smooth' } : { behavior: 'auto' };-->
+
+<!--    setTimeout(() => {-->
+<!--      container.scrollTo({-->
+<!--        top: container.scrollHeight,-->
+<!--        ...scrollOptions-->
+<!--      });-->
+<!--    }, 100);-->
+<!--  }-->
+
+<!--  document.addEventListener('DOMContentLoaded', () => {-->
+<!--    scrollToBottom();-->
+<!--    setTimeout(scrollToBottom, 1000);-->
+<!--  });-->
+
+<!--  function connect() {-->
+<!--    const socket = new SockJS('/ws');-->
+<!--    stompClient = Stomp.over(socket);-->
+<!--    stompClient.connect({}, frame => {-->
+<!--      console.log('Connected: ' + frame);-->
+<!--      stompClient.subscribe('/user/' + userId + '/queue/messages', message => {-->
+<!--        addMessage(JSON.parse(message.body));-->
+<!--        scrollToBottom(true);-->
+<!--      });-->
+<!--    });-->
+<!--  }-->
+
+<!--  function sendMessage(event) {-->
+<!--    event.preventDefault();-->
+<!--    const contentInput = document.getElementById('content');-->
+<!--    if (!contentInput.value.trim()) return;-->
+
+<!--    const message = {-->
+<!--      senderId: userId,-->
+<!--      recipientId: recipientId,-->
+<!--      content: contentInput.value,-->
+<!--      timestamp: new Date()-->
+<!--    };-->
+
+<!--    stompClient.send("/app/send", {}, JSON.stringify(message));-->
+<!--    addMessage(message);-->
+<!--    contentInput.value = '';-->
+<!--    scrollToBottom(true);-->
+<!--  }-->
+
+<!--  function addMessage(message) {-->
+<!--    const container = document.getElementById('messageContainer');-->
+<!--    const messageDiv = document.createElement('div');-->
+<!--    messageDiv.className = message.senderId === userId ?-->
+<!--            'flex justify-end' : 'flex justify-start';-->
+
+<!--    const innerDiv = document.createElement('div');-->
+<!--    innerDiv.className = `${message.senderId === userId ?-->
+<!--            'bg-blue-500 text-white' : 'bg-gray-200'} rounded-lg p-3 max-w-[70%] break-words`;-->
+
+<!--    const content = document.createElement('p');-->
+<!--    content.textContent = message.content;-->
+
+<!--    const time = document.createElement('time');-->
+<!--    time.className = 'text-xs block mt-1';-->
+<!--    time.textContent = new Date(message.timestamp).toLocaleTimeString([],-->
+<!--            {hour: '2-digit', minute:'2-digit'});-->
+
+<!--    innerDiv.appendChild(content);-->
+<!--    innerDiv.appendChild(time);-->
+<!--    messageDiv.appendChild(innerDiv);-->
+<!--    container.appendChild(messageDiv);-->
+<!--  }-->
+
+<!--  document.addEventListener('DOMContentLoaded', () => {-->
+<!--    document.getElementById('content').focus();-->
+<!--  });-->
+
+<!--  document.getElementById('messageForm').addEventListener('submit', sendMessage);-->
+<!--  connect();-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Чат</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
-    .chat-container {
-      max-width: 800px;
-      height: 80vh;
-      margin: 2rem auto;
+    .left-sidebar {
+      width: 275px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid #e5e7eb;
+      padding: 1rem;
       background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      color: #1d9bf0;
+      text-decoration: none;
+    }
+
+    .logo-link i {
+      margin-right: 0.75rem;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 9999px;
+      color: #0f1419;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+
+    .side-link:hover {
+      background-color: #e8f5fd;
+      color: #1d9bf0;
+    }
+
+    .side-link i {
+      margin-right: 1.25rem;
+      font-size: 1.25rem;
+    }
+
+    .notification-badge {
+      background: #1d9bf0;
+      color: white;
+      border-radius: 9999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+
+    .chat-container {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 800px;
+      height: 100vh;
+      background: white;
+      margin-left: calc(275px + ((100% - 1350px) / 2));
+      margin-right: calc(275px + ((100% - 1350px) / 2));
     }
 
     .message-container {
-      height: calc(80vh - 160px); /* Высота контейнера минус header и форма */
+      height: calc(100vh - 140px);
       overflow-y: auto;
       padding: 1rem;
     }
@@ -32,7 +576,6 @@
       height: 80px;
     }
 
-    /* Стилизация скроллбара */
     .message-container::-webkit-scrollbar {
       width: 6px;
     }
@@ -52,21 +595,72 @@
   </style>
 </head>
 <body class="bg-gray-100">
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-eye"></i>
+      <span>Истории</span>
+    </a>
+    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/ads" class="side-link">
+      <i class="fas fa-ad"></i>
+      <span>Мои рекламы</span>
+    </a>
+    <a href="/settings" class="side-link">
+      <i class="fas fa-cog"></i>
+      <span>Налаштування</span>
+    </a>
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Вийти</span>
+      </button>
+    </form>
+  </nav>
+</aside>
+
 <div class="chat-container">
-  <!-- Шапка чата -->
   <div class="chat-header flex justify-between items-center">
     <a href="/messages" class="text-blue-600 hover:underline">← Назад к чатам</a>
     <h2 class="text-xl font-bold" th:text="'Чат с ' + ${recipientName}"></h2>
-    <div class="w-20"></div> <!-- Для центрирования заголовка -->
+    <div class="w-20"></div>
   </div>
 
-  <!-- Контейнер сообщений -->
   <div id="messageContainer" class="message-container space-y-4">
     <div th:each="message : ${messageHistory}"
          th:class="${message.senderId == userId ? 'flex justify-end' : 'flex justify-start'}">
       <div th:class="${message.senderId == userId ?
-                             'bg-blue-500 text-white' : 'bg-gray-200'} +
-                             ' rounded-lg p-3 max-w-[70%] break-words'">
+                               'bg-blue-500 text-white' : 'bg-gray-200'} +
+                               ' rounded-lg p-3 max-w-[70%] break-words'">
         <p th:text="${message.content}"></p>
         <time class="text-xs block mt-1"
               th:text="${#temporals.format(message.timestamp, 'HH:mm')}">
@@ -75,7 +669,6 @@
     </div>
   </div>
 
-  <!-- Форма отправки -->
   <div class="chat-form">
     <form id="messageForm" class="flex gap-3">
       <input type="hidden" id="recipientId" th:value="${recipientId}">
@@ -96,13 +689,15 @@
   const userId = [[${userId}]];
   const recipientId = [[${recipientId}]];
   let stompClient = null;
+  let currentPage = 0;
+  let isLoading = false;
+  let hasMoreMessages = true;
 
-  // Улучшенная функция прокрутки
+  // Функция прокрутки вниз
   function scrollToBottom(smooth = false) {
     const container = document.getElementById('messageContainer');
     const scrollOptions = smooth ? { behavior: 'smooth' } : { behavior: 'auto' };
 
-    // Принудительная прокрутка с таймаутом для гарантии
     setTimeout(() => {
       container.scrollTo({
         top: container.scrollHeight,
@@ -111,13 +706,73 @@
     }, 100);
   }
 
-  // Прокрутка при загрузке страницы
-  document.addEventListener('DOMContentLoaded', () => {
-    scrollToBottom();
-    // Дополнительная прокрутка через секунду для надежности
-    setTimeout(scrollToBottom, 1000);
-  });
+  // Настройка бесконечной прокрутки
+  function setupInfiniteScroll() {
+    const container = document.getElementById('messageContainer');
 
+    container.addEventListener('scroll', () => {
+      if (container.scrollTop <= 100 && !isLoading && hasMoreMessages) {
+        loadMoreMessages();
+      }
+    });
+  }
+
+  // Загрузка старых сообщений
+  async function loadMoreMessages() {
+    isLoading = true;
+    currentPage++;
+
+    try {
+      const response = await fetch(`/messages/api/messages/history?recipientId=${recipientId}&page=${currentPage}&size=50`);
+      const messages = await response.json();
+
+      if (messages.length < 50) {
+        hasMoreMessages = false;
+      }
+
+      if (messages.length > 0) {
+        const oldHeight = document.getElementById('messageContainer').scrollHeight;
+
+        messages.forEach(message => {
+          prependMessage(message);
+        });
+
+        const newHeight = document.getElementById('messageContainer').scrollHeight;
+        document.getElementById('messageContainer').scrollTop = newHeight - oldHeight;
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  // Добавление старого сообщения в начало
+  function prependMessage(message) {
+    const container = document.getElementById('messageContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = message.senderId === userId ?
+            'flex justify-end' : 'flex justify-start';
+
+    const innerDiv = document.createElement('div');
+    innerDiv.className = `${message.senderId === userId ?
+            'bg-blue-500 text-white' : 'bg-gray-200'} rounded-lg p-3 max-w-[70%] break-words`;
+
+    const content = document.createElement('p');
+    content.textContent = message.content;
+
+    const time = document.createElement('time');
+    time.className = 'text-xs block mt-1';
+    time.textContent = new Date(message.timestamp).toLocaleTimeString([],
+            {hour: '2-digit', minute:'2-digit'});
+
+    innerDiv.appendChild(content);
+    innerDiv.appendChild(time);
+    messageDiv.appendChild(innerDiv);
+    container.insertBefore(messageDiv, container.firstChild);
+  }
+
+  // Подключение к WebSocket
   function connect() {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
@@ -125,29 +780,39 @@
       console.log('Connected: ' + frame);
       stompClient.subscribe('/user/' + userId + '/queue/messages', message => {
         addMessage(JSON.parse(message.body));
-        scrollToBottom(true); // Плавная прокрутка для новых сообщений
+        scrollToBottom(true);
       });
     });
   }
 
+  // Отправка нового сообщения
   function sendMessage(event) {
     event.preventDefault();
     const contentInput = document.getElementById('content');
-    if (!contentInput.value.trim()) return; // Не отправляем пустые сообщения
+    const recipientIdInput = document.getElementById('recipientId');
+
+    if (!contentInput.value.trim()) return;
+    if (!recipientIdInput.value) {
+      console.error('Recipient ID is missing');
+      return;
+    }
 
     const message = {
       senderId: userId,
-      recipientId: recipientId,
-      content: contentInput.value,
+      recipientId: parseInt(recipientIdInput.value),
+      content: contentInput.value.trim(),
       timestamp: new Date()
     };
 
+    console.log('Sending message:', message);
+
     stompClient.send("/app/send", {}, JSON.stringify(message));
-    addMessage(message);
+    addMessage(message); // Добавляем сообщение локально
     contentInput.value = '';
-    scrollToBottom(true); // Плавная прокрутка после отправки
+    scrollToBottom(true);
   }
 
+  // Добавление нового сообщения в конец
   function addMessage(message) {
     const container = document.getElementById('messageContainer');
     const messageDiv = document.createElement('div');
@@ -172,12 +837,18 @@
     container.appendChild(messageDiv);
   }
 
-  // Фокус на поле ввода при загрузке
+  // Инициализация при загрузке страницы
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('content').focus();
+    setupInfiniteScroll();
+    scrollToBottom();
+    setTimeout(scrollToBottom, 1000);
   });
 
+  // Обработчик формы
   document.getElementById('messageForm').addEventListener('submit', sendMessage);
+
+  // Подключаемся к WebSocket
   connect();
 </script>
 </body>

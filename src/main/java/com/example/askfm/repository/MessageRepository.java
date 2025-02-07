@@ -62,11 +62,18 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     """)
     List<Message> findConversations(@Param("userId") Long userId);
 
+
     @Query("""
-        SELECT m FROM Message m 
-        WHERE (m.sender.id = :userId AND m.recipient.id = :recipientId) 
-        OR (m.sender.id = :recipientId AND m.recipient.id = :userId) 
-        ORDER BY m.timestamp ASC
-    """)
-    List<Message> findConversationHistory(@Param("userId") Long userId, @Param("recipientId") Long recipientId);
+    SELECT m FROM Message m 
+    WHERE (m.sender.id = :userId AND m.recipient.id = :recipientId)
+    OR (m.sender.id = :recipientId AND m.recipient.id = :userId)
+    ORDER BY m.timestamp DESC
+""")
+    Page<Message> findConversationHistory(
+            @Param("userId") Long userId,
+            @Param("recipientId") Long recipientId,
+            Pageable pageable
+    );
+
+
 }

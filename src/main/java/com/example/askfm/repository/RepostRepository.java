@@ -34,4 +34,7 @@ public interface RepostRepository extends JpaRepository<Repost, Long> {
     List<Repost> findByOriginalPostId(@Param("postId") Long postId, Pageable pageable);
 
     Optional<Repost> findByUserIdAndOriginalPostId(Long userId, Long originalPostId);
+
+    void deleteByOriginalPostId(Long postId);
+
 }

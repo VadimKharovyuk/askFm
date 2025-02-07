@@ -22,6 +22,7 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
 
+
     @GetMapping
     public String getNotifications(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         log.debug("📨 Получение страницы уведомлений для пользователя: {}", userDetails.getUsername());

@@ -36,4 +36,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     void deleteByUserUsername(String username);
 
+    void deleteByRepostId(Long postId);
+
+
+    void deleteByPostId(Long postId);
 }
