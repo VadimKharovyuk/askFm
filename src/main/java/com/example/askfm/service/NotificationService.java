@@ -2,6 +2,7 @@ package com.example.askfm.service;
 
 import com.example.askfm.EventListener.CommentEvent;
 import com.example.askfm.EventListener.LikeEvent;
+import com.example.askfm.EventListener.RepostEvent;
 import com.example.askfm.EventListener.SubscriptionEvent;
 import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.exception.NotificationNotFoundException;
@@ -9,6 +10,7 @@ import com.example.askfm.exception.UnauthorizedException;
 import com.example.askfm.maper.NotificationMapper;
 import com.example.askfm.model.Notification;
 import com.example.askfm.model.Post;
+import com.example.askfm.model.Repost;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -79,6 +81,15 @@ public class NotificationService {
             log.error("❌ Ошибка при публикации события подписки {} на {}: {}",
                     subscriber.getUsername(), targetUser.getUsername(), e.getMessage());
             throw e;
+        }
+    }
+
+    public void notifyAboutRepost(User user, Repost repost) {
+        try {
+            eventPublisher.publishEvent(new RepostEvent(user, repost));
+        } catch (Exception e) {
+            log.error("Failed to publish repost event: user={}, repost={}", user.getUsername(), repost.getId(), e);
+            throw new NotificationNotFoundException(repost.getId());
         }
     }
 

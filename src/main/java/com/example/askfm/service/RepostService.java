@@ -30,6 +30,7 @@ public class RepostService {
     private final UserRepository userRepository;
     private final RepostMapper repostMapper;
     private final CacheManager cacheManager;
+    private final NotificationService notificationService;
 
     @Transactional
     public RepostDTO createRepost(Long userId, CreateRepostRequest request) {
@@ -54,6 +55,8 @@ public class RepostService {
         log.debug("✨ Репост успешно сохранен в БД");
 
         RepostDTO repostDTO = repostMapper.toDto(savedRepost, user.getUsername());
+
+        notificationService.notifyAboutRepost(user,savedRepost);
 
         // Очищаем кеш
         Cache cache = cacheManager.getCache("posts");

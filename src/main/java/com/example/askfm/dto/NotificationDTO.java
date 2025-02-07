@@ -28,4 +28,6 @@ public class NotificationDTO {
     private LocalDateTime postCreatedAt;
     private String postAuthorUsername;
     private String postMedia;
+
+    private PostDTO post;
 }

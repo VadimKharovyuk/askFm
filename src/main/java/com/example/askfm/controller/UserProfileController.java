@@ -35,6 +35,7 @@ public class UserProfileController {
     private final PostService postService;
     private final CommentService commentService;
     private final VisitService visitService;
+    private final NotificationService notificationService;
 
 
 
@@ -46,6 +47,9 @@ public class UserProfileController {
         User user = userService.findByUsername(username);
         User recipient = userService.findByUsername(username);
 
+
+        long unreadCount = notificationService.getUnreadCount(currentUser.getUsername());
+        model.addAttribute("unreadCount", unreadCount);
 
         String currentUsername = currentUser != null ? currentUser.getUsername() : null;
         List<PostDTO> userPosts = postService.getUserPosts(username, currentUsername);
@@ -121,6 +125,7 @@ public class UserProfileController {
 
         // Добавляем рекомендуемых пользователей
         model.addAttribute("suggestedUsers", suggestedUsers);
+
 
         return "user/profile-view";
     }

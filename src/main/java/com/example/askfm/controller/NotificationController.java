@@ -32,6 +32,7 @@ public class NotificationController {
         List<NotificationDTO> notifications = notificationService.getUserNotifications(userDetails.getUsername());
         long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
 
+
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("currentUser", currentUser);

@@ -18,6 +18,12 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+    @ManyToOne
+    @JoinColumn(name = "reposts_id")
+    private Repost repost;
+
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

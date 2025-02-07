@@ -33,6 +33,7 @@ public class ProfileController {
     private final BirthdayService birthdayService;
     private final FeedService feedService;
     private final AdService adService;
+    private final NotificationService notificationService;
 
 
 
@@ -46,6 +47,7 @@ public class ProfileController {
     ) {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
+
 
         // Получаем опциональную рекламу
         Optional<AdPublicDto> adOptional = adService.getRandomAd();
@@ -94,6 +96,9 @@ public class ProfileController {
         model.addAttribute("hasNext", feedPosts.hasNext());
         model.addAttribute("hasPrevious", feedPosts.hasPrevious());
 
+        //количество  новыйх увидомлений
+        long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
+        model.addAttribute("unreadCount", unreadCount);
         return "user/profile";
     }
 

@@ -4,6 +4,9 @@ import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.enums.NotificationType;
 import com.example.askfm.maper.NotificationMapper;
 import com.example.askfm.model.Notification;
+import com.example.askfm.model.Post;
+import com.example.askfm.model.Repost;
+import com.example.askfm.model.User;
 import com.example.askfm.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,5 +111,23 @@ public class NotificationListener {
             log.error("❌ Ошибка при создании уведомления о подписке: {}", e.getMessage());
             throw e;
         }
+    }
+    @EventListener
+    @Async
+    public void handleRepostEvent(RepostEvent repostEvent) {
+        Repost repost = repostEvent.getRepost();
+
+        Notification notification = Notification.builder()
+                .user(repost.getOriginalPost().getAuthor())
+                .initiator(repost.getUser())
+                .post(repost.getOriginalPost())
+                .repost(repost)
+                .type(NotificationType.REPOST)
+                .message(NotificationType.REPOST.getActionMessage())
+                .createdAt(LocalDateTime.now())
+                .isRead(false)
+                .build();
+
+        notificationRepository.save(notification);
     }
 }

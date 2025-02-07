@@ -309,6 +309,19 @@
       color: var(--blue-accent);
       font-size: 0.9rem;
     }
+
+
+.notification-badge {
+  background-color: #ff4444;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+}
   </style>
 </head>
 <body>
@@ -329,9 +342,10 @@
         <i class="fas fa-hashtag"></i>
         <span>Поиск</span>
       </a>
-      <a href="/notifications" class="side-link active">
+      <a href="/notifications" class="side-link">
         <i class="fas fa-bell"></i>
         <span>Уведомления</span>
+        <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
       </a>
       <a href="/messages" class="side-link">
         <i class="fas fa-envelope"></i>
@@ -387,6 +401,7 @@
             <i th:if="${notification.type.name() == 'LIKE'}" class="fas fa-heart text-danger"></i>
             <i th:if="${notification.type.name() == 'COMMENT'}" class="fas fa-comment text-primary"></i>
             <i th:if="${notification.type.name() == 'SUBSCRIPTION'}" class="fas fa-user-plus text-success"></i>
+            <i th:if="${notification.type.name() == 'REPOST'}" class="fas fa-retweet text-success"></i>
           </div>
 
           <!-- Содержимое уведомления с ссылками -->
@@ -456,6 +471,37 @@
               </a>
               <span th:text="${notification.message}"></span>
             </p>
+
+
+
+            <p class="m-0" th:if="${notification.type.name() == 'REPOST'}">
+              <a th:href="@{'/users/' + ${notification.initiatorUsername}}" class="notification-link">
+                <img th:if="${notification.initiatorAvatar != null}"
+                     th:src="@{'data:image/jpeg;base64,' + ${notification.initiatorAvatar}}"
+                     class="rounded-circle me-2"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     alt="avatar"/>
+                <img th:if="${notification.initiatorAvatar == null}"
+                     src="/default-avatar.jpg"
+                     class="rounded-circle me-2"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     alt="default avatar"/>
+                <span th:text="${notification.initiatorUsername}"></span>
+              </a>
+              <span th:text="${notification.message}"></span>
+
+            <div class="referenced-post mt-2">
+              <a th:href="@{'/posts/' + ${notification.postId}}" class="notification-link" style="text-decoration: none;">
+                <div class="post-content" th:text="${notification.postContent}"></div>
+                <img th:if="${notification.postMedia != null}"
+                     th:src="@{'data:image/jpeg;base64,' + ${notification.postMedia}}"
+                     class="post-media"/>
+              </a>
+            </div>
+            </p>
+
+
+
 
             <div class="notification-time"
                  th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}">
