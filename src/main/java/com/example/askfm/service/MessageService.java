@@ -42,6 +42,7 @@ public class MessageService {
     private final SimpMessageSendingOperations messagingTemplate;
     private final ExecutorService messageProcessor;
     private static final int BATCH_SIZE = 10;
+    private final ImageService imageService;
 
     private final TransactionTemplate transactionTemplate;
 
@@ -52,6 +53,7 @@ public class MessageService {
     public void init() {
         messageProcessor.submit(this::processMessageQueue);
     }
+
 
     // Создаем внутренний класс в начале файла
     @Data
@@ -197,6 +199,11 @@ public class MessageService {
 
 
     private MessageDTO convertToDTO(Message message) {
+        String senderAvatar = message.getSender().getAvatar() != null ?
+                "data:image/jpeg;base64," + imageService.getBase64Avatar(message.getSender().getAvatar()) : null;
+        String recipientAvatar = message.getRecipient().getAvatar() != null ?
+                "data:image/jpeg;base64," + imageService.getBase64Avatar(message.getRecipient().getAvatar()) : null;
+
         return MessageDTO.builder()
                 .id(message.getId())
                 .senderId(message.getSender().getId())
@@ -204,6 +211,10 @@ public class MessageService {
                 .content(message.getContent())
                 .timestamp(message.getTimestamp())
                 .read(message.isRead())
+                .senderName(message.getSender().getUsername())
+                .recipientName(message.getRecipient().getUsername())
+                .senderAvatar(senderAvatar)
+                .recipientAvatar(recipientAvatar)
                 .build();
     }
 }

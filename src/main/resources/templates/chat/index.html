@@ -5,92 +5,227 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    .side-link:hover {
-      background-color: rgba(239, 243, 244, 1);
+    .left-sidebar {
+      width: 275px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid #e5e7eb;
+      padding: 1rem;
+      background: white;
     }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      color: #1d9bf0;
+      text-decoration: none;
+    }
+
+    .logo-link i {
+      margin-right: 0.75rem;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 9999px;
+      color: #0f1419;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+
+    .side-link:hover {
+      background-color: #e8f5fd;
+      color: #1d9bf0;
+    }
+
+    .side-link i {
+      margin-right: 1.25rem;
+      font-size: 1.25rem;
+    }
+
+    .notification-badge {
+      background: #1d9bf0;
+      color: white;
+      border-radius: 9999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+
+    .chat-preview {
+      transition: background-color 0.2s;
+    }
+
     .chat-preview:hover {
       background-color: rgba(247, 249, 249, 1);
+    }
+
+    .main-content {
+      margin-left: 275px;
+      margin-right: 275px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+
+    .chat-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .chat-preview .avatar-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chat-preview .avatar-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+    }
+
+    .chat-preview .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f3f4f6;
     }
   </style>
 </head>
 <body class="bg-gray-50">
 <div class="flex min-h-screen">
   <!-- Left Sidebar -->
-  <aside class="w-64 border-r border-gray-200 fixed h-full bg-white">
-    <div class="p-4">
-      <a href="/" class="flex items-center space-x-3 text-xl font-bold text-blue-500">
-        <i class="fas fa-comment-dots"></i>
-        <span>AskFM</span>
-      </a>
-    </div>
+  <aside class="left-sidebar">
+    <a href="/" class="logo-link">
+      <i class="fas fa-comment-dots"></i>
+      <span>AskFM</span>
+    </a>
 
-    <nav class="mt-4">
-      <a href="/home" class="side-link flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-blue-500">
-        <i class="fas fa-home w-6"></i>
+    <nav class="side-nav">
+      <a href="/home" class="side-link">
+        <i class="fas fa-home"></i>
         <span>Главная</span>
       </a>
-      <a href="/explore" class="side-link flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-blue-500">
-        <i class="fas fa-hashtag w-6"></i>
+      <a href="/explore" class="side-link">
+        <i class="fas fa-hashtag"></i>
         <span>Поиск</span>
       </a>
-      <a href="/notifications" class="side-link flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-blue-500">
-        <i class="fas fa-bell w-6"></i>
+      <a href="/notifications" class="side-link">
+        <i class="fas fa-bell"></i>
         <span>Уведомления</span>
+        <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
       </a>
-      <a href="/messages" class="side-link flex items-center space-x-3 px-4 py-3 text-blue-500 font-bold bg-blue-50">
-        <i class="fas fa-envelope w-6"></i>
+      <a href="/messages" class="side-link">
+        <i class="fas fa-envelope"></i>
         <span>Сообщения</span>
       </a>
-      <a href="/saved" class="side-link flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-blue-500">
-        <i class="fas fa-bookmark w-6"></i>
+      <a href="/saved" class="side-link">
+        <i class="fas fa-bookmark"></i>
         <span>Закладки</span>
       </a>
-      <a th:href="@{'/users/' + ${userId}}" class="side-link flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-blue-500">
-        <i class="fas fa-user w-6"></i>
+      <a href="/visits/my" class="side-link">
+        <i class="fas fa-eye"></i>
+        <span>Истории</span>
+      </a>
+      <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+        <i class="fas fa-user"></i>
         <span>Профиль</span>
       </a>
+      <a href="/ads" class="side-link">
+        <i class="fas fa-ad"></i>
+        <span>Мои рекламы</span>
+      </a>
+      <a href="/settings" class="side-link">
+        <i class="fas fa-cog"></i>
+        <span>Налаштування</span>
+      </a>
+      <form th:action="@{/logout}" method="post" class="m-0">
+        <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Вийти</span>
+        </button>
+      </form>
     </nav>
   </aside>
 
   <!-- Main Content -->
-  <main class="ml-64 flex-1 min-w-0">
-    <div class="max-w-3xl mx-auto p-4">
-      <div class="bg-white rounded-xl shadow">
-        <div class="p-4 border-b flex justify-between items-center">
+  <main class="flex-1 min-w-0" style="margin-left: calc(275px + ((100% - 1350px) / 2)); margin-right: calc(275px + ((100% - 1350px) / 2));">
+    <div class="max-w-3xl w-full">
+      <div class="bg-white shadow-sm border border-gray-100">
+        <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white bg-opacity-90 backdrop-blur">
           <h1 class="text-xl font-bold">Сообщения</h1>
-          <button onclick="startNewChat()"
-                  class="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>Новое сообщение</span>
-          </button>
         </div>
 
         <div class="divide-y">
           <div th:each="conversation : ${conversations}"
                th:onclick="'window.location.href=\'/messages/chat?recipientId=' + ${conversation.senderId == userId ? conversation.recipientId : conversation.senderId} + '\''"
-               class="chat-preview p-4 cursor-pointer">
+               class="chat-preview p-4 cursor-pointer hover:bg-gray-50">
             <div class="flex items-center space-x-3">
               <div class="flex-shrink-0">
-                <i class="fas fa-user-circle text-3xl text-gray-400"></i>
+                <!-- Аватар пользователя -->
+                <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
+                  <!-- Если есть аватар -->
+                  <img th:if="${conversation.senderId == userId ? conversation.recipientAvatar : conversation.senderAvatar}"
+                       th:src="${conversation.senderId == userId ? conversation.recipientAvatar : conversation.senderAvatar}"
+                       class="w-full h-full object-cover"
+                       alt="Profile photo">
+                  <!-- Если аватара нет -->
+                  <div th:unless="${conversation.senderId == userId ? conversation.recipientAvatar : conversation.senderAvatar}"
+                       class="w-full h-full flex items-center justify-center bg-gray-200">
+                    <i class="fas fa-user text-gray-400 text-2xl"></i>
+                  </div>
+                </div>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start">
-                  <h2 class="font-medium text-gray-900"
-                      th:text="${conversation.senderId == userId ? 'Вы' : 'Пользователь ' + conversation.senderId}">
-                  </h2>
+                  <div class="flex flex-col">
+                    <h2 class="font-medium text-gray-900"
+                        th:text="${conversation.senderId == userId ? conversation.recipientName : conversation.senderName}">
+                    </h2>
+                    <span class="text-sm text-gray-500">@[[${conversation.senderId == userId ? conversation.recipientName : conversation.senderName}]]</span>
+                  </div>
                   <span class="text-sm text-gray-500"
                         th:text="${#temporals.format(conversation.timestamp, 'HH:mm')}">
-                                        </span>
+          </span>
                 </div>
-                <p class="text-gray-600 truncate" th:text="${conversation.content}"></p>
+                <p class="text-gray-600 truncate mt-1" th:text="${conversation.content}"></p>
               </div>
             </div>
           </div>
 
+          <!-- Пустое состояние -->
           <div th:if="${conversations.isEmpty()}" class="p-8 text-center text-gray-500">
-            Нет сообщений
+            <div class="text-center">
+              <i class="fas fa-inbox text-4xl mb-4 text-gray-300"></i>
+              <p>Нет сообщений</p>
+              <p class="text-sm mt-2">Начните новый разговор</p>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </main>

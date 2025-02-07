@@ -37,8 +37,12 @@ public class ChatController {
                                @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.findByUsername(userDetails.getUsername()).getId();
         model.addAttribute("userId", userId);
-        model.addAttribute("currentUser", userId);
+        model.addAttribute("currentUser", userDetails.getUsername());
         model.addAttribute("conversations", messageService.getUserConversations(userId));
+
+
+        long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
+        model.addAttribute("unreadCount", unreadCount);
 
         return "chat/index";
     }

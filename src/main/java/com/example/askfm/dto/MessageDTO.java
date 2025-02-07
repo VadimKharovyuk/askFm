@@ -15,12 +15,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MessageDTO {
     private Long id;
-    @NotNull(message = "Sender ID cannot be null")
     private Long senderId;
-    @NotNull(message = "Recipient ID cannot be null")
     private Long recipientId;
-    @NotBlank(message = "Content cannot be empty")
     private String content;
     private LocalDateTime timestamp;
     private boolean read;
+    private String senderName;
+    private String recipientName;
+    private String senderAvatar;    // будет хранить base64 строку
+    private String recipientAvatar; // будет хранить base64 строку
 }
