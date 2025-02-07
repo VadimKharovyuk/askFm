@@ -1,9 +1,11 @@
 package com.example.askfm.service;//package com.example.askfm.service;
+
 import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.model.Subscription;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.SubscriptionRepository;
-import com.example.askfm.repository.UserRepository;import com.github.benmanes.caffeine.cache.stats.CacheStats;
+import com.example.askfm.repository.UserRepository;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @Transactional
@@ -24,42 +27,110 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final ImageService imageService;
     private final CacheManager cacheManager;
+    private final NotificationService notificationService;
 
+    @Transactional
     public void follow(String subscriberUsername, String subscribedToUsername) {
-        log.debug("⛔ Створення підписки: {} -> {}", subscriberUsername, subscribedToUsername);
+        log.debug("⛔ Создание подписки: {} -> {}", subscriberUsername, subscribedToUsername);
 
+        // Проверка на подписку на себя
         if (subscriberUsername.equals(subscribedToUsername)) {
-            throw new IllegalArgumentException("Ви не можете підписатися на себе");
+            log.warn("❌ Попытка подписаться на себя: {}", subscriberUsername);
+            throw new IllegalArgumentException("Вы не можете подписаться на себя");
         }
 
+        // Поиск пользователей
         User subscriber = userRepository.findByUsername(subscriberUsername)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
+                .orElseThrow(() -> {
+                    log.error("❌ Пользователь-подписчик не найден: {}", subscriberUsername);
+                    return new UsernameNotFoundException("Пользователь не найден: " + subscriberUsername);
+                });
 
         User subscribedTo = userRepository.findByUsername(subscribedToUsername)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
+                .orElseThrow(() -> {
+                    log.error("❌ Целевой пользователь не найден: {}", subscribedToUsername);
+                    return new UsernameNotFoundException("Пользователь не найден: " + subscribedToUsername);
+                });
 
+        // Проверка существующей подписки
         if (subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo)) {
-            throw new IllegalArgumentException("Ви вже підписані на цього користувача");
+            log.warn("❌ Попытка повторной подписки: {} -> {}", subscriberUsername, subscribedToUsername);
+            throw new IllegalArgumentException("Вы уже подписаны на этого пользователя");
         }
 
-        Subscription subscription = Subscription.builder()
-                .subscriber(subscriber)
-                .subscribedTo(subscribedTo)
-                .createdAt(LocalDateTime.now())
-                .build();
+        try {
+            // Создание подписки
+            Subscription subscription = Subscription.builder()
+                    .subscriber(subscriber)
+                    .subscribedTo(subscribedTo)
+                    .createdAt(LocalDateTime.now())
+                    .build();
 
-        subscriptionRepository.save(subscription);
+            // Сохранение подписки
+            subscriptionRepository.save(subscription);
+            log.debug("💾 Подписка сохранена в БД: {} -> {}", subscriberUsername, subscribedToUsername);
 
-        // Очистка кэша
-        Cache cache = cacheManager.getCache("followers");
-        cache.evict("subscribers_count:" + subscribedToUsername);
-        cache.evict("subscriptions_count:" + subscriberUsername);
-        cache.evict("is_following:" + subscriberUsername + "_" + subscribedToUsername);
-        cache.evict("following_users:" + subscriberUsername);
-        cache.evict("followers_list:" + subscribedToUsername);
+            // Отправка уведомления
+            notificationService.notifyAboutSubscription(subscriber, subscribedTo);
+            log.debug("📨 Отправлено уведомление о подписке: {} -> {}", subscriberUsername, subscribedToUsername);
 
-        log.debug("✅ Успішно створено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
+            // Очистка кэша
+            Cache cache = cacheManager.getCache("followers");
+            if (cache != null) {
+                cache.evict("subscribers_count:" + subscribedToUsername);
+                cache.evict("subscriptions_count:" + subscriberUsername);
+                cache.evict("is_following:" + subscriberUsername + "_" + subscribedToUsername);
+                cache.evict("following_users:" + subscriberUsername);
+                cache.evict("followers_list:" + subscribedToUsername);
+                log.debug("🧹 Кэш подписок очищен для пользователей {} и {}",
+                        subscriberUsername, subscribedToUsername);
+            }
+
+            log.info("✅ Успешно создана подписка: {} -> {}", subscriberUsername, subscribedToUsername);
+        } catch (Exception e) {
+            log.error("❌ Ошибка при создании подписки {} -> {}: {}",
+                    subscriberUsername, subscribedToUsername, e.getMessage());
+            throw e;
+        }
     }
+
+//    public void follow(String subscriberUsername, String subscribedToUsername) {
+//        log.debug("⛔ Створення підписки: {} -> {}", subscriberUsername, subscribedToUsername);
+//
+//        if (subscriberUsername.equals(subscribedToUsername)) {
+//            throw new IllegalArgumentException("Ви не можете підписатися на себе");
+//        }
+//
+//        User subscriber = userRepository.findByUsername(subscriberUsername)
+//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
+//
+//        User subscribedTo = userRepository.findByUsername(subscribedToUsername)
+//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
+//
+//        if (subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo)) {
+//            throw new IllegalArgumentException("Ви вже підписані на цього користувача");
+//        }
+//
+//        Subscription subscription = Subscription.builder()
+//                .subscriber(subscriber)
+//                .subscribedTo(subscribedTo)
+//                .createdAt(LocalDateTime.now())
+//                .build();
+//
+//
+//
+//        subscriptionRepository.save(subscription);
+//        notificationService.notifyAboutSubscription(subscriber,subscribedTo);
+//        // Очистка кэша
+//        Cache cache = cacheManager.getCache("followers");
+//        cache.evict("subscribers_count:" + subscribedToUsername);
+//        cache.evict("subscriptions_count:" + subscriberUsername);
+//        cache.evict("is_following:" + subscriberUsername + "_" + subscribedToUsername);
+//        cache.evict("following_users:" + subscriberUsername);
+//        cache.evict("followers_list:" + subscribedToUsername);
+//
+//        log.debug("✅ Успішно створено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
+//    }
 
     public void unfollow(String subscriberUsername, String subscribedToUsername) {
         log.debug("⛔ Видалення підписки: {} -> {}", subscriberUsername, subscribedToUsername);
@@ -86,64 +157,6 @@ public class SubscriptionService {
 
         log.debug("✅ Успішно видалено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
     }
-
-//    @Caching(evict = {
-//            @CacheEvict(value = "followers", key = "'subscribers_count:' + #subscribedToUsername"),
-//            @CacheEvict(value = "followers", key = "'subscriptions_count:' + #subscriberUsername"),
-//            @CacheEvict(value = "followers", key = "'is_following:' + #subscriberUsername + '_' + #subscribedToUsername"),
-//            @CacheEvict(value = "followers", key = "'following_users:' + #subscriberUsername"),
-//            @CacheEvict(value = "followers", key = "'followers_list:' + #subscribedToUsername")
-//    })
-//    public void follow(String subscriberUsername, String subscribedToUsername) {
-//        log.debug("Створення підписки та очищення кешу: {} -> {}", subscriberUsername, subscribedToUsername);
-//
-//        if (subscriberUsername.equals(subscribedToUsername)) {
-//            throw new IllegalArgumentException("Ви не можете підписатися на себе");
-//        }
-//
-//        User subscriber = userRepository.findByUsername(subscriberUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
-//
-//        User subscribedTo = userRepository.findByUsername(subscribedToUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
-//
-//        if (subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo)) {
-//            throw new IllegalArgumentException("Ви вже підписані на цього користувача");
-//        }
-//
-//        Subscription subscription = Subscription.builder()
-//                .subscriber(subscriber)
-//                .subscribedTo(subscribedTo)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//        subscriptionRepository.save(subscription);
-//        log.debug("Успішно створено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
-//    }
-//
-//    @Caching(evict = {
-//            @CacheEvict(value = "followers", key = "'subscribers_count:' + #subscribedToUsername"),
-//            @CacheEvict(value = "followers", key = "'subscriptions_count:' + #subscriberUsername"),
-//            @CacheEvict(value = "followers", key = "'is_following:' + #subscriberUsername + '_' + #subscribedToUsername"),
-//            @CacheEvict(value = "followers", key = "'following_users:' + #subscriberUsername"),
-//            @CacheEvict(value = "followers", key = "'followers_list:' + #subscribedToUsername")
-//    })
-//    public void unfollow(String subscriberUsername, String subscribedToUsername) {
-//        log.debug("Видалення підписки та очищення кешу: {} -> {}", subscriberUsername, subscribedToUsername);
-//
-//        User subscriber = userRepository.findByUsername(subscriberUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
-//
-//        User subscribedTo = userRepository.findByUsername(subscribedToUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
-//
-//        if (!subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo)) {
-//            throw new IllegalArgumentException("Ви не підписані на цього користувача: " + subscribedToUsername);
-//        }
-//
-//        subscriptionRepository.deleteBySubscriberAndSubscribedTo(subscriber, subscribedTo);
-//        log.debug("Успішно видалено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
-//    }
 
 
     public boolean isFollowing(String subscriberUsername, String subscribedToUsername) {
@@ -181,7 +194,6 @@ public class SubscriptionService {
     }
 
 
-
     public long getSubscribersCount(String username) {
         Cache cache = cacheManager.getCache("followers");
         String cacheKey = "subscribers_count:" + username;
@@ -205,27 +217,26 @@ public class SubscriptionService {
     }
 
 
-public long getSubscriptionsCount(String username) {
-    Cache cache = cacheManager.getCache("followers");
-    String cacheKey = "subscriptions_count:" + username;
+    public long getSubscriptionsCount(String username) {
+        Cache cache = cacheManager.getCache("followers");
+        String cacheKey = "subscriptions_count:" + username;
 
-    Long cachedCount = cache != null ?
-            cache.get(cacheKey, Long.class) : null;
+        Long cachedCount = cache != null ?
+                cache.get(cacheKey, Long.class) : null;
 
-    if (cachedCount != null) {
-        log.debug("✅ Взято з кешу кількість підписок для: {}: {}", username, cachedCount);
-        return cachedCount;
+        if (cachedCount != null) {
+            log.debug("✅ Взято з кешу кількість підписок для: {}: {}", username, cachedCount);
+            return cachedCount;
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
+        long count = subscriptionRepository.countBySubscriber(user);
+
+        cache.put(cacheKey, count);
+        log.debug("🔹 Знайдено в БД кількість підписок для {}: {}", username, count);
+        return count;
     }
-
-    User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + username));
-    long count = subscriptionRepository.countBySubscriber(user);
-
-    cache.put(cacheKey, count);
-    log.debug("🔹 Знайдено в БД кількість підписок для {}: {}", username, count);
-    return count;
-}
-
 
 
     public List<UserSearchDTO> getFollowingUsers(String username, String currentUsername) {

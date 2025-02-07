@@ -20,11 +20,12 @@ public class NotificationDTO {
     private LocalDateTime createdAt;
     private boolean isRead;
     private String initiatorUsername;
+    private String initiatorAvatar;
     private Long postId;
 
     // Информация о посте
     private String postContent;
     private LocalDateTime postCreatedAt;
     private String postAuthorUsername;
-    private String postMedia;  // теперь это строка в формате base64
+    private String postMedia;
 }

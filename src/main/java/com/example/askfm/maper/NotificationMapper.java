@@ -27,9 +27,11 @@ public class NotificationMapper {
                 .isRead(notification.isRead())
                 .initiatorUsername(notification.getInitiator().getUsername())
                 .postId(post != null ? post.getId() : null)
+                .initiatorAvatar(notification.getInitiator().getAvatar() != null ?
+                        imageService.getBase64Avatar(notification.getInitiator().getAvatar()) : null)
                 // Информация о посте
                 .postContent(post != null ? post.getContent() : null)
-//                .postCreatedAt(post != null ? post.getCreatedAt() : null)
+                .postCreatedAt(post != null ? post.getPublishedAt() : null)
                 .postAuthorUsername(post != null ? post.getAuthor().getUsername() : null)
                 .postMedia(post != null && post.getMedia() != null ?
                         imageService.getBase64Avatar(post.getMedia()) : null)

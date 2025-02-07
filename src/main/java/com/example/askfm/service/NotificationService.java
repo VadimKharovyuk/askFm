@@ -55,8 +55,9 @@ public class NotificationService {
         return notificationRepository.countByUserUsernameAndIsReadFalse(username);
     }
 
-    // Методы для публикации событий
+
     public void notifyAboutLike(User liker, Post post) {
+
         eventPublisher.publishEvent(new LikeEvent(liker, post));
     }
 
@@ -67,7 +68,18 @@ public class NotificationService {
     }
 
     public void notifyAboutSubscription(User subscriber, User targetUser) {
-        eventPublisher.publishEvent(new SubscriptionEvent(subscriber, targetUser));
+        log.debug("🚀 Публикация события подписки: {} подписался на {}",
+                subscriber.getUsername(), targetUser.getUsername());
+
+        try {
+            eventPublisher.publishEvent(new SubscriptionEvent(subscriber, targetUser));
+            log.info("✅ Успешно опубликовано событие подписки: {} → {}",
+                    subscriber.getUsername(), targetUser.getUsername());
+        } catch (Exception e) {
+            log.error("❌ Ошибка при публикации события подписки {} на {}: {}",
+                    subscriber.getUsername(), targetUser.getUsername(), e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional

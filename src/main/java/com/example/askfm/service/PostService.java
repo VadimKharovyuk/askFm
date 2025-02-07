@@ -39,6 +39,7 @@ public class PostService {
     private final RepostRepository repostRepository;
     private final PostMapper postMapper;
     private final CacheManager cacheManager;
+    private final NotificationService notificationService;
 
 
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
@@ -93,46 +94,45 @@ public class PostService {
     }
 
 
-public Post createPost(String username, PostCreateDTO postDTO) {
-    log.debug("📝 Создание нового поста для пользователя: {}", username);
+    public Post createPost(String username, PostCreateDTO postDTO) {
+        log.debug("📝 Создание нового поста для пользователя: {}", username);
 
-    User author = userRepository.findByUsername(username)
-            .orElseThrow(() -> {
-                log.error("❌ Пользователь не найден при создании поста: {}", username);
-                return new UsernameNotFoundException("User not found: " + username);
-            });
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.error("❌ Пользователь не найден при создании поста: {}", username);
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
 
-    byte[] mediaBytes = processMedia(postDTO);
-    log.debug("🖼️ Обработаны медиа файлы для поста");
+        byte[] mediaBytes = processMedia(postDTO);
+        log.debug("🖼️ Обработаны медиа файлы для поста");
 
-    Set<Tag> tags = processTags(postDTO.getTags());
-    log.debug("🏷️ Обработано {} тегов для поста", tags.size());
+        Set<Tag> tags = processTags(postDTO.getTags());
+        log.debug("🏷️ Обработано {} тегов для поста", tags.size());
 
-    Post post = Post.builder()
-            .author(author)
-            .content(postDTO.getContent())
-            .media(mediaBytes)
-            .publishedAt(LocalDateTime.now())
-            .tags(tags)
-            .build();
+        Post post = Post.builder()
+                .author(author)
+                .content(postDTO.getContent())
+                .media(mediaBytes)
+                .publishedAt(LocalDateTime.now())
+                .tags(tags)
+                .build();
 
-    Set<User> mentionedUsers = mentionService.extractMentions(postDTO.getContent());
-    post.setMentionedUsers(mentionedUsers);
-    log.debug("👥 Извлечено {} упоминаний из контента поста", mentionedUsers.size());
+        Set<User> mentionedUsers = mentionService.extractMentions(postDTO.getContent());
+        post.setMentionedUsers(mentionedUsers);
+        log.debug("👥 Извлечено {} упоминаний из контента поста", mentionedUsers.size());
 
-    Post savedPost = postRepository.save(post);
-    log.debug("✨ Успешно создан пост с ID: {}", savedPost.getId());
+        Post savedPost = postRepository.save(post);
+        log.debug("✨ Успешно создан пост с ID: {}", savedPost.getId());
 
-    // Очищаем кеш постов после создания нового поста
-    Cache cache = cacheManager.getCache("posts");
-    if (cache != null) {
-        cache.clear();
-        log.debug("🧹 Кеш постов очищен после создания нового поста");
+        // Очищаем кеш постов после создания нового поста
+        Cache cache = cacheManager.getCache("posts");
+        if (cache != null) {
+            cache.clear();
+            log.debug("🧹 Кеш постов очищен после создания нового поста");
+        }
+
+        return savedPost;
     }
-
-    return savedPost;
-}
-
 
 
     private byte[] processMedia(PostCreateDTO postDTO) {
@@ -155,15 +155,58 @@ public Post createPost(String username, PostCreateDTO postDTO) {
                 .collect(Collectors.toSet());
     }
 
+    //    @Transactional
+//    public void likePost(Long postId, String username) {
+//        log.debug("📝 Начало процесса лайка поста: {} пользователем: {}", postId, username);
+//
+//        Post post = findById(postId);
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> {
+//                    log.error("❌ Пользователь не найден: {}", username);
+//                    return new UsernameNotFoundException("User not found: " + username);
+//                });
+//
+//        try {
+//            // Проверяем, что пользователь не лайкает свой собственный пост
+//            if (!post.getAuthor().equals(user)) {
+//                notificationService.notifyAboutLike(user, post);
+//                log.debug("📨 Отправлено уведомление о лайке автору поста: {}",
+//                        post.getAuthor().getUsername());
+//            }
+//
+//            // Добавляем лайк
+//            if (post.getLikedBy().add(user)) {
+//                postRepository.save(post);
+//                log.debug("✅ Лайк успешно добавлен к посту: {}", postId);
+//            } else {
+//                log.debug("ℹ️ Пользователь уже лайкнул этот пост");
+//            }
+//
+//        } catch (Exception e) {
+//            log.error("❌ Ошибка при добавлении лайка к посту {}: {}",
+//                    postId, e.getMessage());
+//            throw e;
+//        }
+//    }
+//
+//    private Post findById(Long postId) {
+//        return postRepository.findById(postId)
+//                .orElseThrow(() -> {
+//                    log.error("❌ Пост не найден: {}", postId);
+//                    return new PostNotFoundException("Post not found with id: " + postId);
+//                });
+//    }
     @Transactional
     public void likePost(Long postId, String username) {
+
         Post post = findById(postId);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+        notificationService.notifyAboutLike(user, post);
         if (post.getLikedBy().add(user)) {
             postRepository.save(post);
         }
+
     }
 
     @Transactional
@@ -236,6 +279,7 @@ public Post createPost(String username, PostCreateDTO postDTO) {
 
         }
     }
+
     public long getPostViews(Long postId) {
         Cache viewsCache = cacheManager.getCache("views");
         String cacheKey = "post_views_count:" + postId;
@@ -292,6 +336,7 @@ public Post createPost(String username, PostCreateDTO postDTO) {
 
         return postDTO;
     }
+
     public Post findById(@NotNull(message = "ID поста обязателен") Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
