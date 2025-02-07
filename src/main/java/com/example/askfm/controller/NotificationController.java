@@ -29,6 +29,7 @@ public class NotificationController {
         String username = userDetails.getUsername();
         User currentUser = userService.findByUsername(username);
         model.addAttribute("currentUser", currentUser);
+
         List<NotificationDTO> notifications = notificationService.getUserNotifications(userDetails.getUsername());
         long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
 

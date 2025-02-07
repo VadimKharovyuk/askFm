@@ -2,6 +2,7 @@ package com.example.askfm.controller;
 
 import com.example.askfm.dto.UserSuggestionDTO;
 import com.example.askfm.model.User;
+import com.example.askfm.service.NotificationService;
 import com.example.askfm.service.SuggestedUsersService;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UserSuggestionsController {
     private final SuggestedUsersService suggestedUsersService;
     private final UserService userService;
+    private final NotificationService notificationService;
     private static final int PAGE_SIZE = 20;
 
     @GetMapping("/users/suggestions")
@@ -40,6 +42,9 @@ public class UserSuggestionsController {
 
         Page<UserSuggestionDTO> users = suggestedUsersService
                 .getPaginatedSuggestedUsers(currentUser.getUsername(), PageRequest.of(page, PAGE_SIZE));
+        //не прочитывыне новости
+        long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
+
 
 
         model.addAttribute("users", users.getContent());
@@ -47,6 +52,7 @@ public class UserSuggestionsController {
         model.addAttribute("totalPages", users.getTotalPages());
         model.addAttribute("hasNext", users.hasNext());
         model.addAttribute("hasPrevious", users.hasPrevious());
+        model.addAttribute("unreadCount", unreadCount);
 
         return "user/suggestions";
     }
