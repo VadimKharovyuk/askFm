@@ -32,6 +32,7 @@ public class ChatController {
     private final UserService userService;
     private final NotificationService notificationService;
 
+
     @GetMapping
     public String messagesPage(Model model,
                                @AuthenticationPrincipal UserDetails userDetails) {
