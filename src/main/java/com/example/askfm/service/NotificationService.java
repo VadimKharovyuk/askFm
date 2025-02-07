@@ -69,4 +69,18 @@ public class NotificationService {
     public void notifyAboutSubscription(User subscriber, User targetUser) {
         eventPublisher.publishEvent(new SubscriptionEvent(subscriber, targetUser));
     }
+
+    @Transactional
+    public void deleteNotification(Long notificationId, String username) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotificationNotFoundException(notificationId));
+
+        // Проверяем, что уведомление принадлежит пользователю
+        if (!notification.getUser().getUsername().equals(username)) {
+            throw new UnauthorizedException("Cannot delete another user's notification");
+        }
+
+        notificationRepository.delete(notification);
+        log.debug("✅ Уведомление {} удалено", notificationId);
+    }
 }

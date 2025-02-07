@@ -169,6 +169,63 @@
     .notification-item.read .unread-badge {
       display: none;
     }
+
+    .notification-content {
+      position: relative;
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      padding: 1rem;
+      transition: background-color 0.2s;
+    }
+
+    .notification-content:hover {
+      background-color: var(--secondary-bg);
+    }
+
+    .notification-link {
+      color: var(--blue-accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .notification-link:hover {
+      text-decoration: underline;
+      color: var(--blue-hover);
+    }
+
+    .notification-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .btn-mark-read,
+    .btn-delete {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .btn-mark-read {
+      color: var(--blue-accent);
+    }
+
+    .btn-delete {
+      color: var(--text-gray);
+    }
+
+    .btn-mark-read:hover,
+    .btn-delete:hover {
+      background-color: var(--secondary-bg);
+    }
+
+    .btn-delete:hover {
+      color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -239,35 +296,72 @@
       <div th:if="${notifications.empty}" class="p-4 text-center text-gray">
         У вас нет уведомлений
       </div>
-
       <div th:each="notification : ${notifications}"
            class="notification-item">
         <div class="notification-content">
+          <!-- Иконка уведомления -->
           <div class="notification-icon">
-            <i th:if="${notification.type.name() == 'LIKE'}" class="fas fa-heart"></i>
-            <i th:if="${notification.type.name() == 'COMMENT'}" class="fas fa-comment"></i>
-            <i th:if="${notification.type.name() == 'SUBSCRIPTION'}" class="fas fa-user-plus"></i>
+            <i th:if="${notification.type.name() == 'LIKE'}" class="fas fa-heart text-danger"></i>
+            <i th:if="${notification.type.name() == 'COMMENT'}" class="fas fa-comment text-primary"></i>
+            <i th:if="${notification.type.name() == 'SUBSCRIPTION'}" class="fas fa-user-plus text-success"></i>
           </div>
+
+          <!-- Содержимое уведомления с ссылками -->
           <div class="notification-message">
-            <p class="m-0" th:text="${notification.message}"></p>
+            <!-- Для LIKE и COMMENT показываем ссылку на пост -->
+            <p class="m-0" th:if="${notification.type.name() == 'LIKE' || notification.type.name() == 'COMMENT'}">
+              <a th:href="@{'/users/' + ${notification.initiatorUsername}}"
+                 class="notification-link">
+                <span th:text="${notification.initiatorUsername}"></span>
+              </a>
+              <span th:text="${notification.message}"></span>
+              <a th:href="@{'/posts/' + ${notification.postId}}"
+                 class="notification-link">
+                перейти к посту
+              </a>
+            </p>
+
+            <!-- Для SUBSCRIPTION показываем ссылку на профиль -->
+            <p class="m-0" th:if="${notification.type.name() == 'SUBSCRIPTION'}">
+              <a th:href="@{'/users/' + ${notification.initiatorUsername}}"
+                 class="notification-link">
+                <span th:text="${notification.initiatorUsername}"></span>
+              </a>
+              <span th:text="${notification.message}"></span>
+            </p>
+
             <div class="notification-time"
                  th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}">
             </div>
           </div>
 
-          <!-- Простая форма для отметки о прочтении -->
-          <form th:if="${!notification.isRead}"
-                th:action="@{/notifications/{id}/read(id=${notification.id})}"
-                method="post"
-                class="mark-as-read-form">
-            <button type="submit" class="btn-mark-read">
-              <i class="fas fa-check"></i>
-            </button>
-          </form>
+          <!-- Кнопки действий -->
+          <div class="notification-actions">
+            <!-- Кнопка "Прочитано" -->
+            <form th:if="${!notification.isRead}"
+                  th:action="@{/notifications/{id}/read(id=${notification.id})}"
+                  method="post"
+                  class="mark-as-read-form d-inline">
+              <button type="submit" class="btn-mark-read" title="Отметить как прочитанное">
+                <i class="fas fa-check"></i>
+              </button>
+            </form>
+
+            <!-- Кнопка удаления -->
+            <form th:action="@{/notifications/{id}/delete(id=${notification.id})}"
+                  method="post"
+                  class="delete-notification-form d-inline">
+              <button type="submit" class="btn-delete" title="Удалить уведомление">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
 
           <div th:if="${!notification.isRead}" class="unread-badge"></div>
         </div>
       </div>
+
+
     </div>
 
     <!-- Простое обновление страницы каждые 30 секунд -->

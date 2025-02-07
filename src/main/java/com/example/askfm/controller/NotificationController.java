@@ -46,4 +46,12 @@ public class NotificationController {
         notificationService.markAsRead(id, userDetails.getUsername());
         return "redirect:/notifications";
     }
+    @PostMapping("/{id}/delete")
+    public String deleteNotification(@PathVariable Long id,
+                                     @AuthenticationPrincipal UserDetails userDetails) {
+        log.debug("🗑️ Удаление уведомления {} пользователем {}",
+                id, userDetails.getUsername());
+        notificationService.deleteNotification(id, userDetails.getUsername());
+        return "redirect:/notifications";
+    }
 }
