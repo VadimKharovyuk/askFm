@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,8 +19,12 @@ public class NotificationDTO {
     private String message;
     private LocalDateTime createdAt;
     private boolean isRead;
-    private String initiatorUsername; // имя пользователя, который вызвал уведомление
-    private Long postId; // опционально, для лайков и комментариев
-    private String postContent; // опционально, краткое содержание поста
-    // можно добавить initiatorAvatar, если нужно отображать аватар пользователя
+    private String initiatorUsername;
+    private Long postId;
+
+    // Информация о посте
+    private String postContent;
+    private LocalDateTime postCreatedAt;
+    private String postAuthorUsername;
+    private String postMedia;  // теперь это строка в формате base64
 }
