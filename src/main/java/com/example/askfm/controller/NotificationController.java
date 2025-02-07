@@ -55,4 +55,10 @@ public class NotificationController {
         notificationService.deleteNotification(id, userDetails.getUsername());
         return "redirect:/notifications";
     }
+
+    @PostMapping("/deleteNotifications")
+    public String deleteNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+        notificationService.deleteAllUserNotifications(userDetails.getUsername());
+        return "redirect:/notifications";
+    }
 }

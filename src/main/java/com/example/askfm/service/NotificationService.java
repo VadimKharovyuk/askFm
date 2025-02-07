@@ -35,6 +35,12 @@ public class NotificationService {
                 .findByUserUsernameOrderByCreatedAtDesc(username);
         return notificationMapper.toDtoList(notifications);
     }
+    @Transactional
+    public void deleteAllUserNotifications(String username) {
+        log.debug("Удаление всех уведомлений пользователя: {}", username);
+        notificationRepository.deleteByUserUsername(username);
+        log.info("Все уведомления пользователя {} удалены", username);
+    }
 
     @Transactional
     public void markAsRead(Long notificationId, String username) {

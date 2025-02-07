@@ -27,7 +27,7 @@ public class NotificationListener {
 
 
     @EventListener
-    @Transactional
+    @Async("notificationExecutor")
     public void handleCommentEvent(CommentEvent event) {
         try {
             log.debug("📝 Обработка события комментария от {} для поста {}",
@@ -48,14 +48,14 @@ public class NotificationListener {
             log.debug("✅ Уведомление о комментарии сохранено в БД");
         } catch (Exception e) {
             log.error("❌ Ошибка при создании уведомления о комментарии: {}", e.getMessage());
-            throw e; // пробрасываем ошибку дальше
+            throw e;
         }
     }
 
 
 
     @EventListener
-    @Async
+    @Async("notificationExecutor")
     public void handleLikeEvent(LikeEvent event) {
         try {
             log.debug("📝 Обработка события лайка от {} для поста {}",
@@ -83,7 +83,7 @@ public class NotificationListener {
         }
     }
     @EventListener
-    @Async
+    @Async("notificationExecutor")
     public void handleSubscriptionEvent(SubscriptionEvent event) {
         try {
             log.debug("📝 Обработка события подписки от {} на пользователя {}",
@@ -112,22 +112,35 @@ public class NotificationListener {
             throw e;
         }
     }
+
+
     @EventListener
-    @Async
+    @Async("notificationExecutor")
     public void handleRepostEvent(RepostEvent repostEvent) {
-        Repost repost = repostEvent.getRepost();
+        try {
+            log.debug("📝 Обработка репоста от {} поста {}",
+                    repostEvent.getRepostUser().getUsername(),
+                    repostEvent.getRepost().getOriginalPost().getId());
 
-        Notification notification = Notification.builder()
-                .user(repost.getOriginalPost().getAuthor())
-                .initiator(repost.getUser())
-                .post(repost.getOriginalPost())
-                .repost(repost)
-                .type(NotificationType.REPOST)
-                .message(NotificationType.REPOST.getActionMessage())
-                .createdAt(LocalDateTime.now())
-                .isRead(false)
-                .build();
+            Repost repost = repostEvent.getRepost();
+            Notification notification = Notification.builder()
+                    .user(repost.getOriginalPost().getAuthor())
+                    .initiator(repost.getUser())
+                    .post(repost.getOriginalPost())
+                    .repost(repost)
+                    .type(NotificationType.REPOST)
+                    .message(NotificationType.REPOST.getActionMessage())
+                    .createdAt(LocalDateTime.now())
+                    .isRead(false)
+                    .build();
 
-        notificationRepository.save(notification);
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("✅ Создано уведомление о репосте для {}",
+                    repost.getOriginalPost().getAuthor().getUsername());
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка при создании уведомления о репосте: {}", e.getMessage());
+            throw e;
+        }
     }
 }
