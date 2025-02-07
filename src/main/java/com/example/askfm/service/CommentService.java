@@ -14,6 +14,7 @@ import com.example.askfm.repository.CommentRepository;
 import com.example.askfm.repository.PostRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -29,8 +30,12 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final NotificationService notificationService;
 
+    @Transactional
     public CommentDTO createComment(Long postId, String content, String username) {
+        log.debug("📝 Создание комментария к посту {} пользователем {}", postId, username);
+
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
 
@@ -44,7 +49,16 @@ public class CommentService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return convertToDTO(commentRepository.save(comment));
+        Comment savedComment = commentRepository.save(comment);
+        log.debug("✨ Комментарий сохранен в БД");
+
+        // Отправляем уведомление только если автор комментария не является автором поста
+        if (!author.equals(post.getAuthor())) {
+            notificationService.notifyAboutComment(author, post);
+            log.debug("📨 Отправлено уведомление автору поста о новом комментарии");
+        }
+
+        return convertToDTO(savedComment);
     }
 
 
