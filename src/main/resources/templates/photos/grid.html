@@ -1,3 +1,217 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Photo Grid</title>-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    .photo-card {-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .lock-overlay {-->
+<!--      position: absolute;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      bottom: 0;-->
+<!--      background: rgba(0, 0, 0, 0.7);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .price-badge {-->
+<!--      position: absolute;-->
+<!--      top: 10px;-->
+<!--      right: 10px;-->
+<!--      background: rgba(0, 0, 0, 0.8);-->
+<!--      color: white;-->
+<!--      padding: 5px 10px;-->
+<!--      border-radius: 20px;-->
+<!--    }-->
+
+<!--    .unlock-button {-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .unlock-button:hover {-->
+<!--      transform: scale(1.05);-->
+<!--    }-->
+
+<!--    .pagination {-->
+<!--      margin-top: 2rem;-->
+<!--    }-->
+<!--    .photo-card {-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--      transition: transform 0.2s;-->
+<!--    }-->
+
+<!--    .photo-card:hover {-->
+<!--      transform: translateY(-5px);-->
+<!--    }-->
+
+<!--    .lock-overlay {-->
+<!--      position: absolute;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      bottom: 0;-->
+<!--      background: rgba(0, 0, 0, 0.7);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      color: white;-->
+<!--      pointer-events: none;-->
+<!--    }-->
+
+<!--    .price-badge {-->
+<!--      position: absolute;-->
+<!--      top: 10px;-->
+<!--      right: 10px;-->
+<!--      background: rgba(0, 0, 0, 0.8);-->
+<!--      color: white;-->
+<!--      padding: 5px 10px;-->
+<!--      border-radius: 20px;-->
+<!--      z-index: 2;-->
+<!--    }-->
+
+<!--    .unlock-button {-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .unlock-button:hover {-->
+<!--      transform: scale(1.05);-->
+<!--      background-color: #0056b3;-->
+<!--    }-->
+
+<!--    /* Стили для ссылки на фото */-->
+<!--    .photo-card a {-->
+<!--      display: block;-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .photo-card a:hover img {-->
+<!--      transform: scale(1.05);-->
+<!--      transition: transform 0.3s ease;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container py-4">-->
+<!--  &lt;!&ndash; Header &ndash;&gt;-->
+<!--  <div class="d-flex justify-content-between align-items-center mb-4">-->
+<!--&lt;!&ndash;    <h2 th:text="${photoOwner.username + '\'s Photos'}">User's Photos</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="user-balance" th:if="${currentUser != null}">&ndash;&gt;-->
+<!--      Balance: <i class="fas fa-coins"></i>-->
+<!--&lt;!&ndash;      <span th:text="${#numbers.formatDecimal(currentUser.balance, 1, 2)}">0.00</span>&ndash;&gt;-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Alert Messages &ndash;&gt;-->
+<!--  <div th:if="${success}" class="alert alert-success" role="alert">-->
+<!--    <span th:text="${success}"></span>-->
+<!--  </div>-->
+<!--  <div th:if="${error}" class="alert alert-danger" role="alert">-->
+<!--    <span th:text="${error}"></span>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Photo Grid &ndash;&gt;-->
+<!--<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">-->
+<!--  <div class="col" th:each="photo : ${photos}">-->
+<!--    <div class="card photo-card h-100">-->
+<!--      &lt;!&ndash; Контейнер для фото с оверлеем &ndash;&gt;-->
+<!--      <div class="position-relative">-->
+<!--        &lt;!&ndash; Фото с ссылкой &ndash;&gt;-->
+<!--        <a th:href="@{/photos/{id}(id=${photo.id})}" class="text-decoration-none">-->
+<!--          <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"-->
+<!--               class="card-img-top"-->
+<!--               style="height: 300px; object-fit: cover;"-->
+<!--               th:alt="${photo.description}">-->
+<!--        </a>-->
+
+<!--        &lt;!&ndash; Оверлей только для заблокированных и неразблокированных фото &ndash;&gt;-->
+<!--        <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"-->
+<!--             class="lock-overlay">-->
+<!--          <i class="fas fa-lock fa-2x"></i>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Бейдж с ценой только для заблокированных и неразблокированных фото &ndash;&gt;-->
+<!--        <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"-->
+<!--             class="price-badge">-->
+<!--          <i class="fas fa-coins"></i>-->
+<!--          <span th:text="${photo.price}"></span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="card-body">-->
+<!--        <p class="card-text" th:text="${photo.description}"></p>-->
+<!--        <span th:if="${photo.isNSFW}"-->
+<!--              class="badge bg-danger mb-2">NSFW</span>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Форма разблокировки только если фото заблокировано и ещё не разблокировано &ndash;&gt;-->
+<!--      <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != null && currentUsername != photoOwner.username}"-->
+<!--           class="card-footer bg-transparent border-0 p-3">-->
+<!--        <form th:action="@{/photos/{id}/unlock(id=${photo.id})}"-->
+<!--              method="post"-->
+<!--              class="unlock-form">-->
+<!--          <button type="submit"-->
+<!--                  class="btn btn-primary w-100 unlock-button">-->
+<!--            <i class="fas fa-unlock me-2"></i>-->
+<!--            Unlock for <span th:text="${photo.price}"></span> coins-->
+<!--          </button>-->
+<!--        </form>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Бейдж для разблокированных фото &ndash;&gt;-->
+<!--      <div th:if="${isPhotoUnlocked.apply(photo)}"-->
+<!--           class="card-footer bg-transparent border-0 text-center">-->
+<!--        <span class="badge bg-success">-->
+<!--          <i class="fas fa-check me-1"></i> Unlocked-->
+<!--        </span>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+
+<!--  &lt;!&ndash; Pagination &ndash;&gt;-->
+<!--  <nav th:if="${totalPages > 1}" class="mt-4">-->
+<!--    <ul class="pagination justify-content-center">-->
+<!--      <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">-->
+<!--        <a class="page-link"-->
+<!--           th:href="@{/photos/user/{username}/photos(username=${photoOwner.username},page=${currentPage - 1})}">-->
+<!--          Previous-->
+<!--        </a>-->
+<!--      </li>-->
+
+<!--      <li class="page-item"-->
+<!--          th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"-->
+<!--          th:classappend="${pageNum == currentPage ? 'active' : ''}">-->
+<!--        <a class="page-link"-->
+<!--           th:href="@{/photos/user/{username}/photos(username=${photoOwner.username},page=${pageNum})}"-->
+<!--           th:text="${pageNum + 1}">1</a>-->
+<!--      </li>-->
+
+<!--      <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">-->
+<!--        <a class="page-link"-->
+<!--           th:href="@{/photos/user/{username}/photos(username=${photoOwner.username},page=${currentPage + 1})}">-->
+<!--          Next-->
+<!--        </a>-->
+<!--      </li>-->
+<!--    </ul>-->
+<!--  </nav>-->
+<!--</div>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -5,47 +219,86 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    .photo-card {
-      position: relative;
-      overflow: hidden;
+    :root {
+      --main-bg: #000000;
+      --card-bg: #1a1a1a;
+      --text-color: #ffffff;
+      --hover-color: #20B2AA;
+      --sidebar-width: 280px;
     }
 
-    .lock-overlay {
-      position: absolute;
-      top: 0;
+    body {
+      background-color: var(--main-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    .left-sidebar {
+      position: fixed;
       left: 0;
-      right: 0;
+      top: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      width: var(--sidebar-width);
+      padding: 1rem;
+      background-color: var(--main-bg);
+      border-right: 1px solid #2f2f2f;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    .logo-link {
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: white;
+      font-size: 1.5rem;
+      color: var(--text-color);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      padding: 0.5rem;
     }
 
-    .price-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 20px;
+    .logo-link:hover {
+      color: var(--hover-color);
     }
 
-    .unlock-button {
-      transition: all 0.3s ease;
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .unlock-button:hover {
-      transform: scale(1.05);
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 9999px;
+      transition: all 0.2s;
     }
 
-    .pagination {
-      margin-top: 2rem;
+    .side-link:hover {
+      background-color: #2f2f2f;
+      color: var(--hover-color);
     }
+
+    .side-link i {
+      margin-right: 1rem;
+      font-size: 1.25rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+
     .photo-card {
-      position: relative;
+      background-color: var(--card-bg);
+      border: none;
+      border-radius: 16px;
       overflow: hidden;
       transition: transform 0.2s;
     }
@@ -54,41 +307,10 @@
       transform: translateY(-5px);
     }
 
-    .lock-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      pointer-events: none;
+    .photo-card .card-body {
+      color: var(--text-color);
     }
 
-    .price-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 20px;
-      z-index: 2;
-    }
-
-    .unlock-button {
-      transition: all 0.3s ease;
-    }
-
-    .unlock-button:hover {
-      transform: scale(1.05);
-      background-color: #0056b3;
-    }
-
-    /* Стили для ссылки на фото */
     .photo-card a {
       display: block;
       position: relative;
@@ -99,20 +321,133 @@
       transform: scale(1.05);
       transition: transform 0.3s ease;
     }
+
+    .unlock-button {
+      background-color: var(--hover-color);
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .unlock-button:hover {
+      transform: scale(1.05);
+      background-color: #1a8a84;
+    }
+
+    .notification-badge {
+      background-color: var(--hover-color);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+
+    .pagination .page-link {
+      background-color: var(--card-bg);
+      border-color: #2f2f2f;
+      color: var(--text-color);
+    }
+
+    .pagination .page-link:hover {
+      background-color: var(--hover-color);
+      color: white;
+    }
+
+    .pagination .active .page-link {
+      background-color: var(--hover-color);
+      border-color: var(--hover-color);
+    }
+
+    .lock-overlay {
+      background: rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+    }
+
+    .price-badge {
+      background: var(--hover-color);
+    }
+
+    .card-footer {
+      background-color: var(--card-bg);
+      border-top: 1px solid #2f2f2f;
+    }
+
+    .alert {
+      background-color: var(--card-bg);
+      border: 1px solid #2f2f2f;
+      color: var(--text-color);
+    }
   </style>
 </head>
-<body>
-<div class="container py-4">
-  <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-<!--    <h2 th:text="${photoOwner.username + '\'s Photos'}">User's Photos</h2>-->
-<!--    <div class="user-balance" th:if="${currentUser != null}">-->
-      Balance: <i class="fas fa-coins"></i>
-<!--      <span th:text="${#numbers.formatDecimal(currentUser.balance, 1, 2)}">0.00</span>-->
-    </div>
-  </div>
 
-  <!-- Alert Messages -->
+<body>
+<!-- Sidebar -->
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span th:if="${unreadCount > 0}"
+            class="notification-badge"
+            th:text="${unreadCount}"></span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+      <span th:if="${unreadMessagesCount > 0}"
+            class="notification-badge"
+            th:text="${unreadMessagesCount}"></span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a href="/photos/upload" class="side-link">
+      <i class="fas fa-camera"></i>
+      <span>Фото</span>
+    </a>
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-eye"></i>
+      <span>Истории</span>
+    </a>
+    <a th:href="@{'/users/' + ${currentUsername}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/ads" class="side-link">
+      <i class="fas fa-ad"></i>
+      <span>Мои рекламы</span>
+    </a>
+    <a href="/settings" class="side-link">
+      <i class="fas fa-cog"></i>
+      <span>Налаштування</span>
+    </a>
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Вийти</span>
+      </button>
+    </form>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <!-- Alerts -->
   <div th:if="${success}" class="alert alert-success" role="alert">
     <span th:text="${success}"></span>
   </div>
@@ -121,64 +456,57 @@
   </div>
 
   <!-- Photo Grid -->
-<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-  <div class="col" th:each="photo : ${photos}">
-    <div class="card photo-card h-100">
-      <!-- Контейнер для фото с оверлеем -->
-      <div class="position-relative">
-        <!-- Фото с ссылкой -->
-        <a th:href="@{/photos/{id}(id=${photo.id})}" class="text-decoration-none">
-          <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"
-               class="card-img-top"
-               style="height: 300px; object-fit: cover;"
-               th:alt="${photo.description}">
-        </a>
+  <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    <div class="col" th:each="photo : ${photos}">
+      <div class="card photo-card h-100">
+        <div class="position-relative">
+          <a th:href="@{/photos/{id}(id=${photo.id})}" class="text-decoration-none">
+            <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"
+                 class="card-img-top"
+                 style="height: 300px; object-fit: cover;"
+                 th:alt="${photo.description}">
+          </a>
 
-        <!-- Оверлей только для заблокированных и неразблокированных фото -->
-        <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"
-             class="lock-overlay">
-          <i class="fas fa-lock fa-2x"></i>
+          <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"
+               class="lock-overlay">
+            <i class="fas fa-lock fa-2x"></i>
+          </div>
+
+          <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"
+               class="price-badge">
+            <i class="fas fa-coins"></i>
+            <span th:text="${photo.price}"></span>
+          </div>
         </div>
 
-        <!-- Бейдж с ценой только для заблокированных и неразблокированных фото -->
-        <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != photoOwner.username}"
-             class="price-badge">
-          <i class="fas fa-coins"></i>
-          <span th:text="${photo.price}"></span>
+        <div class="card-body">
+          <p class="card-text" th:text="${photo.description}"></p>
+          <span th:if="${photo.isNSFW}"
+                class="badge bg-danger mb-2">NSFW</span>
         </div>
-      </div>
 
-      <div class="card-body">
-        <p class="card-text" th:text="${photo.description}"></p>
-        <span th:if="${photo.isNSFW}"
-              class="badge bg-danger mb-2">NSFW</span>
-      </div>
+        <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != null && currentUsername != photoOwner.username}"
+             class="card-footer bg-transparent border-0 p-3">
+          <form th:action="@{/photos/{id}/unlock(id=${photo.id})}"
+                method="post"
+                class="unlock-form">
+            <button type="submit"
+                    class="btn btn-primary w-100 unlock-button">
+              <i class="fas fa-unlock me-2"></i>
+              Unlock for <span th:text="${photo.price}"></span> coins
+            </button>
+          </form>
+        </div>
 
-      <!-- Форма разблокировки только если фото заблокировано и ещё не разблокировано -->
-      <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != null && currentUsername != photoOwner.username}"
-           class="card-footer bg-transparent border-0 p-3">
-        <form th:action="@{/photos/{id}/unlock(id=${photo.id})}"
-              method="post"
-              class="unlock-form">
-          <button type="submit"
-                  class="btn btn-primary w-100 unlock-button">
-            <i class="fas fa-unlock me-2"></i>
-            Unlock for <span th:text="${photo.price}"></span> coins
-          </button>
-        </form>
-      </div>
-
-      <!-- Бейдж для разблокированных фото -->
-      <div th:if="${isPhotoUnlocked.apply(photo)}"
-           class="card-footer bg-transparent border-0 text-center">
-        <span class="badge bg-success">
-          <i class="fas fa-check me-1"></i> Unlocked
-        </span>
+        <div th:if="${isPhotoUnlocked.apply(photo)}"
+             class="card-footer bg-transparent border-0 text-center">
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i> Unlocked
+                        </span>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
 
   <!-- Pagination -->
   <nav th:if="${totalPages > 1}" class="mt-4">

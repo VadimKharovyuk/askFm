@@ -62,6 +62,7 @@ public class PhotoController {
 
 
 
+
     @ModelAttribute("isPhotoUnlocked")
     public Function<PhotoDTO, Boolean> isPhotoUnlocked(@AuthenticationPrincipal UserDetails currentUser) {
         String username = currentUser != null ? currentUser.getUsername() : null;
@@ -150,6 +151,7 @@ public class PhotoController {
         // Передаем username текущего пользователя
         String currentUsername = currentUser != null ? currentUser.getUsername() : null;
         Page<PhotoDTO> photos = photoService.getUserPhotosByUsername(username, currentUsername, pageable);
+
 
         User photoOwner = userService.findByUsername(username);
 

@@ -3,11 +3,15 @@ package com.example.askfm.service;
 
 import com.example.askfm.dto.CreatePhotoRequest;
 import com.example.askfm.dto.PhotoDTO;
+import com.example.askfm.dto.TransactionDTO;
+import com.example.askfm.enums.TransactionStatus;
+import com.example.askfm.enums.TransactionType;
 import com.example.askfm.maper.PhotoMapper;
 import com.example.askfm.model.Photo;
 import com.example.askfm.model.UnlockedPhoto;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.PhotoRepository;
+import com.example.askfm.repository.TransactionRepository;
 import com.example.askfm.repository.UnlockedPhotoRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ public class PhotoService {
     private final UserRepository userRepository;
     private final PhotoMapper photoMapper;
     private final UnlockedPhotoRepository unlockedPhotoRepository;
+    private final TransactionService transactionService;
 
 
     public PhotoDTO createPhoto(CreatePhotoRequest request, String username, byte[] imageData) throws IOException {
@@ -41,15 +46,6 @@ public class PhotoService {
         return photoMapper.toDTO(savedPhoto, owner); // Передаем владельца
     }
 
-//    public PhotoDTO createPhoto(CreatePhotoRequest request, String username, byte[] imageData) throws IOException {
-//        User owner = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        Photo photo = photoMapper.toEntity(request, owner, imageData);
-//        Photo savedPhoto = photoRepository.save(photo);
-//
-//        return photoMapper.toDTO(savedPhoto);
-//    }
 
     @Transactional(readOnly = true)
     public PhotoDTO getPhoto(Long photoId, String username) {
@@ -61,31 +57,6 @@ public class PhotoService {
 
         return photoMapper.toDTO(photo, user); // Маппер сам решит, блюрить фото или нет
     }
-//    @Transactional(readOnly = true)
-//    public PhotoDTO getPhoto(Long photoId, String username) {
-//        Photo photo = photoRepository.findById(photoId)
-//                .orElseThrow(() -> new RuntimeException("Photo not found"));
-//
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        // Проверяем условия доступа:
-//        // 1. Пользователь является владельцем фото
-//        // 2. Фото не заблокировано
-//        // 3. Пользователь разблокировал это фото
-//        boolean hasAccess = photo.getOwner().getUsername().equals(username) ||
-//                !photo.getIsLocked() ||
-//                unlockedPhotoRepository.existsByUserAndPhoto(user, photo);
-//
-//        if (!hasAccess) {
-//            // Если нет доступа - возвращаем DTO без изображения
-//            return photoMapper.toDTOWithoutImage(photo);
-//        }
-//
-//        // Если есть доступ - возвращаем полное DTO с изображением
-//        return photoMapper.toDTO(photo);
-//    }
-
 
 
     @Transactional
@@ -93,47 +64,111 @@ public class PhotoService {
         Photo photo = photoRepository.findById(photoId)
                 .orElseThrow(() -> new RuntimeException("Photo not found"));
 
-        User user = userRepository.findByUsername(username)
+        User buyer = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверяем, не является ли пользователь владельцем
-        if (photo.getOwner().getUsername().equals(username)) {
+        User seller = photo.getOwner();
+
+        if (seller.getUsername().equals(username)) {
             throw new RuntimeException("You cannot unlock your own photo");
         }
 
-        // Проверяем, не разблокировано ли уже фото для этого пользователя
-        if (unlockedPhotoRepository.existsByUserAndPhoto(user, photo)) {
+        if (unlockedPhotoRepository.existsByUserAndPhoto(buyer, photo)) {
             throw new RuntimeException("You have already unlocked this photo");
         }
 
-        // Проверяем баланс
-        if (user.getBalance().compareTo(photo.getPrice()) < 0) {
+        if (buyer.getBalance().compareTo(photo.getPrice()) < 0) {
             throw new RuntimeException("Insufficient balance to unlock photo");
         }
 
-        // Выполняем транзакцию
-        try {
-            // Списываем монеты
-            user.setBalance(user.getBalance().subtract(photo.getPrice()));
-            userRepository.save(user);
+        // Объявляем переменную до try-catch блока
+        TransactionDTO transactionDTO = null;
 
-            // Начисляем монеты владельцу
-            User owner = photo.getOwner();
-            owner.setBalance(owner.getBalance().add(photo.getPrice()));
-            userRepository.save(owner);
+        try {
+            // Создаем транзакцию через сервис
+            transactionDTO = transactionService.createTransaction(
+                    buyer,
+                    seller,
+                    photo,
+                    photo.getPrice(),
+                    TransactionType.PHOTO_PURCHASE
+            );
+
+            // Обновляем балансы
+            buyer.setBalance(buyer.getBalance().subtract(photo.getPrice()));
+            seller.setBalance(seller.getBalance().add(photo.getPrice()));
+            userRepository.save(buyer);
+            userRepository.save(seller);
 
             // Создаем запись о разблокировке
             UnlockedPhoto unlockedPhoto = new UnlockedPhoto();
-            unlockedPhoto.setUser(user);
+            unlockedPhoto.setUser(buyer);
             unlockedPhoto.setPhoto(photo);
             unlockedPhoto.setUnlockedAt(LocalDateTime.now());
             unlockedPhotoRepository.save(unlockedPhoto);
 
-            return photoMapper.toDTO(photo, user);
+            // Обновляем статус транзакции
+            transactionService.updateTransactionStatus(transactionDTO.getId(), TransactionStatus.COMPLETED);
+
+            return photoMapper.toDTO(photo, buyer);
+
         } catch (Exception e) {
+            // Проверяем, была ли создана транзакция
+            if (transactionDTO != null) {
+                // В случае ошибки помечаем транзакцию как неудачную
+                transactionService.updateTransactionStatus(transactionDTO.getId(), TransactionStatus.FAILED);
+            }
             throw new RuntimeException("Failed to process transaction: " + e.getMessage());
         }
     }
+
+//    @Transactional
+//    public PhotoDTO unlockPhoto(Long photoId, String username) {
+//        Photo photo = photoRepository.findById(photoId)
+//                .orElseThrow(() -> new RuntimeException("Photo not found"));
+//
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        // Проверяем, не является ли пользователь владельцем
+//        if (photo.getOwner().getUsername().equals(username)) {
+//            throw new RuntimeException("You cannot unlock your own photo");
+//        }
+//
+//        // Проверяем, не разблокировано ли уже фото для этого пользователя
+//        if (unlockedPhotoRepository.existsByUserAndPhoto(user, photo)) {
+//            throw new RuntimeException("You have already unlocked this photo");
+//        }
+//
+//        // Проверяем баланс
+//        if (user.getBalance().compareTo(photo.getPrice()) < 0) {
+//            throw new RuntimeException("Insufficient balance to unlock photo");
+//        }
+//
+//        // Выполняем транзакцию
+//        try {
+//            // Списываем монеты
+//            user.setBalance(user.getBalance().subtract(photo.getPrice()));
+//            userRepository.save(user);
+//
+//            // Начисляем монеты владельцу
+//            User owner = photo.getOwner();
+//            owner.setBalance(owner.getBalance().add(photo.getPrice()));
+//            userRepository.save(owner);
+//
+//            // Создаем запись о разблокировке
+//            UnlockedPhoto unlockedPhoto = new UnlockedPhoto();
+//            unlockedPhoto.setUser(user);
+//            unlockedPhoto.setPhoto(photo);
+//            unlockedPhoto.setUnlockedAt(LocalDateTime.now());
+//            unlockedPhotoRepository.save(unlockedPhoto);
+//
+//            return photoMapper.toDTO(photo, user);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to process transaction: " + e.getMessage());
+//        }
+//    }
+
     public Function<PhotoDTO, Boolean> createPhotoUnlockChecker(String username) {
         return photoDTO -> {
             if (username == null) return false;
@@ -161,32 +196,7 @@ public class PhotoService {
         return photoPage.map(photo -> photoMapper.toDTO(photo, finalCurrentUser));
     }
 
-//    public Page<PhotoDTO> getUserPhotosByUsername(String username, Pageable pageable) {
-//        // Получаем страницу фотографий пользователя по username
-//        Page<Photo> photoPage = photoRepository.findByOwnerUsername(username, pageable);
-//
-//        // Преобразуем каждое фото в DTO
-//        return photoPage.map(photoMapper::toDTO);
-//    }
 
-    
-    
-
-    private void validatePhotoUnlock(Photo photo, User user) {
-        if (!photo.getIsLocked()) {
-            throw new RuntimeException("Photo is already unlocked");
-        }
-        if (user.getBalance().compareTo(photo.getPrice()) < 0) {
-            throw new RuntimeException("Insufficient balance");
-        }
-    }
-
-    private void processPayment(User buyer, User seller, BigDecimal amount) {
-        buyer.setBalance(buyer.getBalance().subtract(amount));
-        seller.setBalance(seller.getBalance().add(amount));
-        userRepository.save(buyer);
-        userRepository.save(seller);
-    }
 
     @Transactional(readOnly = true)
     public Photo getPhotoEntity(Long photoId) {

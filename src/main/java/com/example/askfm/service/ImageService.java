@@ -20,76 +20,54 @@ import java.util.Iterator;
 @RequiredArgsConstructor
 public class ImageService {
 
-
     public byte[] blurImage(byte[] imageData) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
             BufferedImage originalImage = ImageIO.read(bis);
 
-            // Создаем сильно размытое изображение
-            BufferedImage blurredImage = new BufferedImage(
-                    originalImage.getWidth(),
-                    originalImage.getHeight(),
-                    BufferedImage.TYPE_INT_RGB
-            );
+            // Сразу уменьшаем размер
+            int newWidth = originalImage.getWidth() / 4;
+            int newHeight = originalImage.getHeight() / 4;
 
-            Graphics2D g2d = blurredImage.createGraphics();
-            g2d.drawImage(originalImage, 0, 0, null);
-            g2d.dispose();
-
-            // Сильное размытие по Гауссу
-            float[] matrix = {
-                    1f / 256, 4f / 256, 6f / 256, 4f / 256, 1f / 256,
-                    4f / 256, 16f / 256, 24f / 256, 16f / 256, 4f / 256,
-                    6f / 256, 24f / 256, 36f / 256, 24f / 256, 6f / 256,
-                    4f / 256, 16f / 256, 24f / 256, 16f / 256, 4f / 256,
-                    1f / 256, 4f / 256, 6f / 256, 4f / 256, 1f / 256
-            };
-            BufferedImageOp blurOp = new ConvolveOp(new Kernel(5, 5, matrix), ConvolveOp.EDGE_NO_OP, null);
-
-
-
-            // Многократное применение размытия
-            for (int i = 0; i < 25; i++) {
-                blurredImage = blurOp.filter(blurredImage, null);
-            }
-
-            // Сильное уменьшение разрешения
-            int newWidth = originalImage.getWidth() / 8;
-            int newHeight = originalImage.getHeight() / 8;
-
-            // Уменьшаем
             BufferedImage smallImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = smallImage.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(blurredImage, 0, 0, newWidth, newHeight, null);
+            g.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
             g.dispose();
+
+            // Применяем размытие с большим радиусом (15x15 матрица)
+            float[] matrix = new float[225]; // 15 x 15 = 225
+            float weight = 1.0f / 225.0f;
+            for (int i = 0; i < 225; i++) {
+                matrix[i] = weight;
+            }
+            BufferedImageOp blurOp = new ConvolveOp(new Kernel(15, 15, matrix));
+            BufferedImage blurredImage = blurOp.filter(smallImage, null);
+
+// Применяем размытие второй раз для усиления эффекта
+            blurredImage = blurOp.filter(blurredImage, null);
 
             // Увеличиваем обратно
-            blurredImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-            g = blurredImage.createGraphics();
+            BufferedImage finalImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            g = finalImage.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(smallImage, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
+            g.drawImage(blurredImage, 0, 0, originalImage.getWidth(), originalImage.getHeight(), null);
 
             // Добавляем затемнение
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
             g.setColor(new Color(0, 0, 0, 128));
-            g.fillRect(0, 0, blurredImage.getWidth(), blurredImage.getHeight());
+            g.fillRect(0, 0, finalImage.getWidth(), finalImage.getHeight());
             g.dispose();
 
-            // Увеличиваем контраст
-            RescaleOp rescaleOp = new RescaleOp(1.2f, -10.0f, null);
-            blurredImage = rescaleOp.filter(blurredImage, null);
-
-            // Сохраняем с очень низким качеством
+            // Сохраняем с низким качеством
             Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
             ImageWriter writer = writers.next();
             ImageWriteParam param = writer.getDefaultWriteParam();
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-            param.setCompressionQuality(0.1f);
+            param.setCompressionQuality(0.2f);
 
-            IIOImage iioImage = new IIOImage(blurredImage, null, null);
+            IIOImage iioImage = new IIOImage(finalImage, null, null);
             try (ImageOutputStream ios = ImageIO.createImageOutputStream(bos)) {
                 writer.setOutput(ios);
                 writer.write(null, iioImage, param);
@@ -98,6 +76,7 @@ public class ImageService {
             return bos.toByteArray();
         }
     }
+
 
     public byte[] resizeImage(byte[] imageData, int targetWidth) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
