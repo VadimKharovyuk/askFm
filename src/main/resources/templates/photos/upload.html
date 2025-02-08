@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Upload Photos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+  <!-- Сообщения об успехе/ошибке -->
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Форма загрузки -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4>Upload New Photo</h4>
+    </div>
+    <div class="card-body">
+      <form th:action="@{/photos/upload}" method="post" enctype="multipart/form-data" th:object="${photoRequest}">
+        <div class="mb-3">
+          <label class="form-label">Select Photo</label>
+          <input type="file" name="image" class="form-control" accept="image/*" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Price (coins)</label>
+          <input type="number" th:field="*{price}" class="form-control" min="0" step="0.01" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" th:field="*{isNSFW}" class="form-check-input" id="nsfwCheck">
+          <label class="form-check-label" for="nsfwCheck">NSFW Content</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload Photo</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Сетка моих фото -->
+  <h4 class="mb-3">My Photos</h4>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    <div class="col" th:each="photo : ${userPhotos}">
+      <div class="card h-100">
+        <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"
+             class="card-img-top" style="height: 200px; object-fit: cover;">
+        <div class="card-body">
+          <p class="card-text" th:text="${photo.description}"></p>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary" th:text="${photo.price + ' coins'}"></span>
+            <span th:if="${photo.isLocked}" class="badge bg-warning">Locked</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <nav th:if="${totalPages > 1}" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+        <a class="page-link" th:href="@{/photos/upload(page=${currentPage - 1})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+          th:classappend="${pageNum == currentPage ? 'active' : ''}">
+        <a class="page-link" th:href="@{/photos/upload(page=${pageNum})}" th:text="${pageNum + 1}"></a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+        <a class="page-link" th:href="@{/photos/upload(page=${currentPage + 1})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

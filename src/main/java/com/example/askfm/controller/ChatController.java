@@ -75,24 +75,7 @@ public class ChatController {
 
         return "chat/chat";
     }
-//    @GetMapping("/chat")
-//    public String chatPage(Model model,
-//                           @AuthenticationPrincipal UserDetails userDetails,
-//                           @RequestParam Long recipientId) {
-//        User currentUser = userService.findByUsername(userDetails.getUsername());
-//        User recipient = userService.findById(recipientId);
-//
-//        model.addAttribute("userId", currentUser.getId());
-//        long unreadCount = notificationService.getUnreadCount(currentUser.getUsername());
-//        model.addAttribute("unreadCount", unreadCount);
-//        model.addAttribute("currentUser", currentUser.getUsername());
-//        model.addAttribute("recipientId", recipientId);
-//        model.addAttribute("recipientName", recipient.getUsername());
-//        model.addAttribute("messageHistory",
-//                messageService.getConversationHistory(currentUser.getId(), recipientId, 0, 50));
-//
-//        return "chat/chat";
-//    }
+
 
     @GetMapping("/api/messages/history")
     @ResponseBody

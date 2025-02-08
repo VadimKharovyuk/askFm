@@ -192,10 +192,6 @@ public class MessageService {
         return messageRepository.countByRecipientUsernameAndReadFalse(username);
     }
 
-    @Transactional(readOnly = true)
-    public long getUnreadCountFromSender(String username, Long senderId) {
-        return messageRepository.countByRecipientUsernameAndSenderIdAndReadFalse(username, senderId);
-    }
 
     @Transactional
     public void markConversationAsRead(Long userId, Long senderId) {
