@@ -41,6 +41,7 @@ public class PostService {
     private final CacheManager cacheManager;
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
+    private final SavedPostRepository savedPostRepository;
 
 
 
@@ -157,47 +158,6 @@ public class PostService {
                 .collect(Collectors.toSet());
     }
 
-    //    @Transactional
-//    public void likePost(Long postId, String username) {
-//        log.debug("📝 Начало процесса лайка поста: {} пользователем: {}", postId, username);
-//
-//        Post post = findById(postId);
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> {
-//                    log.error("❌ Пользователь не найден: {}", username);
-//                    return new UsernameNotFoundException("User not found: " + username);
-//                });
-//
-//        try {
-//            // Проверяем, что пользователь не лайкает свой собственный пост
-//            if (!post.getAuthor().equals(user)) {
-//                notificationService.notifyAboutLike(user, post);
-//                log.debug("📨 Отправлено уведомление о лайке автору поста: {}",
-//                        post.getAuthor().getUsername());
-//            }
-//
-//            // Добавляем лайк
-//            if (post.getLikedBy().add(user)) {
-//                postRepository.save(post);
-//                log.debug("✅ Лайк успешно добавлен к посту: {}", postId);
-//            } else {
-//                log.debug("ℹ️ Пользователь уже лайкнул этот пост");
-//            }
-//
-//        } catch (Exception e) {
-//            log.error("❌ Ошибка при добавлении лайка к посту {}: {}",
-//                    postId, e.getMessage());
-//            throw e;
-//        }
-//    }
-//
-//    private Post findById(Long postId) {
-//        return postRepository.findById(postId)
-//                .orElseThrow(() -> {
-//                    log.error("❌ Пост не найден: {}", postId);
-//                    return new PostNotFoundException("Post not found with id: " + postId);
-//                });
-//    }
     @Transactional
     public void likePost(Long postId, String username) {
 
@@ -239,7 +199,10 @@ public class PostService {
         Post post = findById(postId);
         String authorUsername = post.getAuthor().getUsername();
 
+        // Удаляем все сохраненные записи этого поста
+        savedPostRepository.deleteByPostId(postId);
 
+        // Удаляем связанные данные
         postViewRepository.deleteByPostId(postId);
         tagRepository.deleteByPostId(postId);
 
@@ -253,8 +216,6 @@ public class PostService {
         }
 
         repostRepository.deleteByOriginalPostId(postId);
-        postRepository.delete(post);
-        postRepository.delete(post);
 
         log.debug("✨ Пост удален из БД: {}", postId);
 
