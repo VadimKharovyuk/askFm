@@ -34,6 +34,7 @@ public class ProfileController {
     private final FeedService feedService;
     private final AdService adService;
     private final NotificationService notificationService;
+    private final MessageService messageService;
 
 
 
@@ -47,6 +48,10 @@ public class ProfileController {
     ) {
         User user = userService.findByUsername(userDetails.getUsername());
         String username = userDetails.getUsername();
+
+        //новые сообщения
+        long unreadMessages = messageService.getUnreadCount(username);
+        model.addAttribute("unreadMessagesCount", unreadMessages);
 
 
         // Получаем опциональную рекламу

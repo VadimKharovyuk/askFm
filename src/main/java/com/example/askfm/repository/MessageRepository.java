@@ -35,6 +35,7 @@ import com.example.askfm.model.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -78,7 +79,19 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
 
 
+    Long countByRecipientUsernameAndReadFalse(String username);
 
+    // Если нужно для конкретного отправителя:
+    Long countByRecipientUsernameAndSenderIdAndReadFalse(String username, Long senderId);
 
+    @Modifying
+    @Query("""
+    UPDATE Message m 
+    SET m.read = true 
+    WHERE m.recipient.id = :userId 
+    AND m.sender.id = :senderId 
+    AND m.read = false
+""")
+    void markMessagesAsRead(@Param("userId") Long userId, @Param("senderId") Long senderId);
 
 }

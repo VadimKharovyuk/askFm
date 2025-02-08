@@ -554,6 +554,7 @@
             margin-left: 8px;
             vertical-align: middle;
         }
+
     </style>
 </head>
 <body>
@@ -607,6 +608,10 @@
         <a href="/messages" class="side-link">
             <i class="fas fa-envelope"></i>
             <span>Сообщения</span>
+            <span th:if="${unreadMessagesCount > 0}"
+                  class="notification-badge"
+                  th:text="${unreadMessagesCount}">
+    </span>
         </a>
         <a href="/saved" class="side-link">
             <i class="fas fa-bookmark"></i>

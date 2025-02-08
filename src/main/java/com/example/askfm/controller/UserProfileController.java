@@ -36,6 +36,7 @@ public class UserProfileController {
     private final CommentService commentService;
     private final VisitService visitService;
     private final NotificationService notificationService;
+    private final MessageService messageService;
 
 
 
@@ -48,6 +49,11 @@ public class UserProfileController {
         User recipient = userService.findByUsername(username);
 
 
+        //новые сообщения
+        long unreadMessages = messageService.getUnreadCount(username);
+        model.addAttribute("unreadMessagesCount", unreadMessages);
+
+        //увидомление
         long unreadCount = notificationService.getUnreadCount(currentUser.getUsername());
         model.addAttribute("unreadCount", unreadCount);
 
