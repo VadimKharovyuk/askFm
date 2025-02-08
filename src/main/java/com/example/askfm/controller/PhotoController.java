@@ -211,4 +211,9 @@ public class PhotoController {
             }
         }
     }
+
+    @GetMapping("/about")
+    public String showAboutPage() {
+        return "photos/about";
+    }
 }

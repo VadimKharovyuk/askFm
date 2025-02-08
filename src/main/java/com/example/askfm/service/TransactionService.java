@@ -1,5 +1,6 @@
 package com.example.askfm.service;
 
+import com.example.askfm.dto.DepositRequestDTO;
 import com.example.askfm.dto.TransactionDTO;
 import com.example.askfm.enums.TransactionStatus;
 import com.example.askfm.enums.TransactionType;
@@ -87,5 +88,38 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository
                 .findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
         return transactionMapper.toDTOList(transactions);
+    }
+    @Transactional
+    public TransactionDTO depositBalance(String username, DepositRequestDTO depositRequest) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // В реальном приложении здесь должна быть интеграция с платежной системой
+        // Сейчас просто имитируем успешную оплату
+
+        try {
+            // Создаем транзакцию
+            Transaction transaction = new Transaction();
+            transaction.setBuyer(user);
+            transaction.setSeller(user); // При пополнении отправитель и получатель один и тот же
+            transaction.setAmount(depositRequest.getAmount());
+            transaction.setCreatedAt(LocalDateTime.now());
+            transaction.setType(TransactionType.BALANCE_DEPOSIT);
+            transaction.setStatus(TransactionStatus.PENDING);
+
+            transaction = transactionRepository.save(transaction);
+
+            // Обновляем баланс пользователя
+            user.setBalance(user.getBalance().add(depositRequest.getAmount()));
+            userRepository.save(user);
+
+            // Помечаем транзакцию как успешную
+            transaction.setStatus(TransactionStatus.COMPLETED);
+            transaction = transactionRepository.save(transaction);
+
+            return transactionMapper.toDTO(transaction);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process deposit: " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>О сервисе AskFM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: #000000;
+      --card-bg: #1a1a1a;
+      --text-color: #ffffff;
+      --hover-color: #20B2AA;
+      --sidebar-width: 280px;
+    }
+
+    body {
+      background-color: var(--main-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .feature-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      color: var(--hover-color);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      color: var(--hover-color);
+      margin-bottom: 2rem;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+
+<div class="main-content">
+  <div class="container py-5">
+    <h1 class="text-center section-title mb-5">Добро пожаловать в AskFM Photo</h1>
+
+    <div class="row mb-5">
+      <div class="col-md-8 mx-auto">
+        <div class="feature-card">
+          <h2 class="text-center mb-4">Ваша платформа для обмена эксклюзивным контентом</h2>
+          <p class="lead text-center">
+            AskFM Photo - это инновационная платформа, где творческие личности могут монетизировать свой контент,
+            а пользователи получают доступ к уникальным фотографиям.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="feature-card h-100">
+          <div class="text-center">
+            <i class="fas fa-camera feature-icon"></i>
+          </div>
+          <h3 class="text-center mb-3">Загрузка фото</h3>
+          <p>
+            Создавайте и делитесь своим контентом:
+          <ul>
+            <li>Простая загрузка фотографий</li>
+            <li>Установка индивидуальной цены</li>
+            <li>Добавление описаний</li>
+            <li>Маркировка контента 18+</li>
+          </ul>
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="feature-card h-100">
+          <div class="text-center">
+            <i class="fas fa-coins feature-icon"></i>
+          </div>
+          <h3 class="text-center mb-3">Монетизация</h3>
+          <p>
+            Зарабатывайте на своем контенте:
+          <ul>
+            <li>Получайте монеты за каждую разблокировку</li>
+            <li>Отслеживайте доход в реальном времени</li>
+            <li>Просматривайте историю транзакций</li>
+            <li>Анализируйте популярность контента</li>
+          </ul>
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="feature-card h-100">
+          <div class="text-center">
+            <i class="fas fa-lock-open feature-icon"></i>
+          </div>
+          <h3 class="text-center mb-3">Доступ к контенту</h3>
+          <p>
+            Получайте доступ к эксклюзивным материалам:
+          <ul>
+            <li>Пополнение баланса монет</li>
+            <li>Безопасные транзакции</li>
+            <li>Мгновенная разблокировка</li>
+            <li>Постоянный доступ к купленному контенту</li>
+          </ul>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-md-6 mb-4">
+        <div class="feature-card">
+          <h3 class="text-center mb-3">Для авторов</h3>
+          <p>
+            <strong>Как начать зарабатывать:</strong>
+          <ol>
+            <li>Зарегистрируйтесь на платформе</li>
+            <li>Загрузите свои фотографии</li>
+            <li>Установите цену за разблокировку</li>
+            <li>Добавьте описание для привлечения аудитории</li>
+            <li>Получайте монеты при каждой разблокировке</li>
+          </ol>
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-4">
+        <div class="feature-card">
+          <h3 class="text-center mb-3">Для пользователей</h3>
+          <p>
+            <strong>Как получить доступ к контенту:</strong>
+          <ol>
+            <li>Создайте аккаунт</li>
+            <li>Пополните баланс монет</li>
+            <li>Выберите интересующие фотографии</li>
+            <li>Разблокируйте контент</li>
+            <li>Наслаждайтесь доступом к эксклюзивным материалам</li>
+          </ol>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-8 mx-auto">
+        <div class="feature-card">
+          <h3 class="text-center mb-3">Безопасность и конфиденциальность</h3>
+          <p class="text-center">
+            Мы обеспечиваем полную безопасность ваших данных и транзакций.
+            Все платежи проходят через защищенные каналы, а доступ к контенту строго контролируется.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-md-8 mx-auto">
+        <div class="feature-card">
+          <h3 class="text-center mb-4">Как найти интересный контент?</h3>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-start mb-3">
+                <i class="fas fa-user-circle fs-2 me-3 text-primary"></i>
+                <div>
+                  <h5>Профили пользователей</h5>
+                  <p>Посетите профиль любого пользователя и перейдите во вкладку "Медиа", где собраны все его фотографии</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-start mb-3">
+                <i class="fas fa-compass fs-2 me-3 text-primary"></i>
+                <div>
+                  <h5>Раздел "Поиск"</h5>
+                  <p>Используйте поиск, чтобы найти интересующих вас авторов и их контент</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-5">
+            <a href="/register" class="btn btn-primary btn-lg me-3">
+              <i class="fas fa-user-plus me-2"></i>
+              Создать аккаунт
+            </a>
+            <a href="/users/suggestions" class="btn btn-outline-primary btn-lg me-3">
+              <i class="fas fa-compass me-2"></i>
+              Открыть поиск
+            </a>
+
+          </div>
+
+          <div class="mt-4 text-center">
+            <p class="text-white fs-5"> <!-- Увеличенный шрифт и белый цвет -->
+              <i class="fas fa-info-circle me-2"></i>
+              Чтобы просмотреть фотографии конкретного пользователя, перейдите в его профиль
+              и нажмите на вкладку "Медиа"
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

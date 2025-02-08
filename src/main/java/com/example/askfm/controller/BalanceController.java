@@ -1,9 +1,11 @@
 package com.example.askfm.controller;
 
+import com.example.askfm.dto.DepositRequestDTO;
 import com.example.askfm.dto.TransactionDTO;
 import com.example.askfm.model.User;
 import com.example.askfm.service.TransactionService;
 import com.example.askfm.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +16,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -125,5 +129,44 @@ public class BalanceController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
         return transactionService.getTransactionsByDateRange(startDate, endDate);
+    }
+
+    @GetMapping("/deposit")
+    public String showDepositForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("depositRequest", new DepositRequestDTO());
+        return "balance/deposit";
+    }
+
+    @PostMapping("/deposit")
+    public String processDeposit(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @ModelAttribute DepositRequestDTO depositRequest,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            return "balance/deposit";
+        }
+
+        try {
+            TransactionDTO transaction = transactionService.depositBalance(
+                    userDetails.getUsername(),
+                    depositRequest
+            );
+            redirectAttributes.addFlashAttribute("success",
+                    "Successfully deposited " + depositRequest.getAmount() + " coins");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to process deposit: " + e.getMessage());
+        }
+
+        return "redirect:/balance";
     }
 }

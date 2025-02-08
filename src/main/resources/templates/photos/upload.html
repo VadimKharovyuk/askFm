@@ -5,8 +5,83 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
+    :root {
+      --main-bg: #000000;
+      --card-bg: #1a1a1a;
+      --text-color: #ffffff;
+      --hover-color: #20B2AA;
+      --sidebar-width: 280px;
+    }
+
+    body {
+      background-color: var(--main-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .left-sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      padding: 1rem;
+      background-color: var(--main-bg);
+      border-right: 1px solid #2f2f2f;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      color: var(--text-color);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      padding: 0.5rem;
+    }
+
+    .logo-link:hover {
+      color: var(--hover-color);
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 9999px;
+      transition: all 0.2s;
+    }
+
+    .side-link:hover {
+      background-color: #2f2f2f;
+      color: var(--hover-color);
+    }
+
+    .side-link i {
+      margin-right: 1rem;
+      font-size: 1.25rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+
     .card {
       transition: transform 0.2s ease;
+      background-color: var(--card-bg);
     }
 
     .card:hover {
@@ -28,52 +103,137 @@
   </style>
 </head>
 <body>
-<div class="container mt-4">
-  <!-- Сообщения об успехе/ошибке -->
-  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-    <span th:text="${success}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
-  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span th:if="${unreadCount > 0}"
+            class="notification-badge"
+            th:text="${unreadCount}"></span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+      <span th:if="${unreadMessagesCount > 0}"
+            class="notification-badge"
+            th:text="${unreadMessagesCount}"></span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a href="/photos/upload" class="side-link">
+      <i class="fas fa-camera"></i>
+      <span>Фото</span>
+    </a>
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-eye"></i>
+      <span>Истории</span>
+    </a>
+    <a th:href="@{'/users/' + ${username}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/ads" class="side-link">
+      <i class="fas fa-ad"></i>
+      <span>Мои рекламы</span>
+    </a>
+    <a href="/settings" class="side-link">
+      <i class="fas fa-cog"></i>
+      <span>Налаштування</span>
+    </a>
+    <a href="/balance" class="side-link">
+      <i class="fas fa-coins"></i>
+      <span>Balance</span>
+    </a>
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Вийти</span>
+      </button>
+    </form>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="container">
+    <!-- Сообщения об успехе/ошибке -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
 
   <!-- Форма загрузки -->
   <div class="card mb-4">
-    <div class="card-header">
-      <h4>Upload New Photo</h4>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h4 class="text-white">3агрузите новое фото </h4>
+      </div>
+      <div class="card-body">
+        <form th:action="@{/photos/upload}" method="post" enctype="multipart/form-data" th:object="${photoRequest}">
+          <div class="mb-3">
+            <label class="form-label text-white">Select Photo</label>
+            <input type="file" name="image" class="form-control bg-dark text-white border-secondary" accept="image/*" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white">Price (coins)</label>
+            <input type="number" th:field="*{price}" class="form-control bg-dark text-white border-secondary" min="0" step="0.01" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white">Description</label>
+            <textarea th:field="*{description}" class="form-control bg-dark text-white border-secondary" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3 form-check">
+            <input type="checkbox" th:field="*{isNSFW}" class="form-check-input bg-dark border-secondary" id="nsfwCheck">
+            <label class="form-check-label text-white" for="nsfwCheck">18+ Content</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Загрузить фото</button>
+        </form>
+      </div>
     </div>
-    <div class="card-body">
-      <form th:action="@{/photos/upload}" method="post" enctype="multipart/form-data" th:object="${photoRequest}">
-        <div class="mb-3">
-          <label class="form-label">Select Photo</label>
-          <input type="file" name="image" class="form-control" accept="image/*" required>
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label">Price (coins)</label>
-          <input type="number" th:field="*{price}" class="form-control" min="0" step="0.01" required>
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-        </div>
-
-        <div class="mb-3 form-check">
-          <input type="checkbox" th:field="*{isNSFW}" class="form-check-input" id="nsfwCheck">
-          <label class="form-check-label" for="nsfwCheck">NSFW Content</label>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Upload Photo</button>
-      </form>
+    <!-- Информационный блок -->
+    <div class="card mb-4 p-4 text-center">
+      <div class="d-flex align-items-center justify-content-center gap-3">
+        <i class="fas fa-info-circle text-primary" style="font-size: 1.5rem;"></i>
+        <span class="text-white">Нужна помощь с загрузкой или настройкой фото?</span>
+        <a href="/photos/about" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-book-reader me-2"></i>
+          Открыть инструкцию
+        </a>
+      </div>
     </div>
-  </div>
 
 
 <!--  !&#45;&#45; Сетка моих фото &ndash;&gt;-->
-  <h4 class="mb-3">My Photos</h4>
+  <h4 class="text-white">My Photos</h4>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
     <div class="col" th:each="photo : ${userPhotos}">
       <div class="card h-100">
@@ -84,7 +244,7 @@
                style="height: 200px; object-fit: cover;">
         </a>
         <div class="card-body">
-          <p class="card-text" th:text="${photo.description}"></p>
+          <p class="text-white" th:text="${photo.description}"></p>
           <div class="d-flex justify-content-between align-items-center">
             <span class="badge bg-primary" th:text="${photo.price + ' coins'}"></span>
             <span th:if="${photo.isLocked}" class="badge bg-warning">Locked</span>
@@ -110,6 +270,9 @@
     </ul>
   </nav>
 </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
