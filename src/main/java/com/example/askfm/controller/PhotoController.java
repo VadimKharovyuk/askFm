@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +48,9 @@ public class PhotoController {
         String username = userDetails.getUsername();
         model.addAttribute("photoRequest", new CreatePhotoRequest());
 
+        // Передаем текущего пользователя в метод
         Pageable pageable = PageRequest.of(page, size);
-        Page<PhotoDTO> userPhotos = photoService.getUserPhotosByUsername(username, pageable);
+        Page<PhotoDTO> userPhotos = photoService.getUserPhotosByUsername(username, username, pageable);
 
         model.addAttribute("userPhotos", userPhotos.getContent());
         model.addAttribute("currentPage", page);
@@ -58,10 +60,42 @@ public class PhotoController {
         return "photos/upload";
     }
 
+
+
     @ModelAttribute("isPhotoUnlocked")
     public Function<PhotoDTO, Boolean> isPhotoUnlocked(@AuthenticationPrincipal UserDetails currentUser) {
         String username = currentUser != null ? currentUser.getUsername() : null;
         return photoService.createPhotoUnlockChecker(username);
+    }
+
+
+
+    @GetMapping("/{photoId}")
+    public String showPhoto(
+            @PathVariable Long photoId,
+            @AuthenticationPrincipal UserDetails currentUser,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (currentUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Please login to view photos");
+            return "redirect:/login";
+        }
+
+        try {
+            PhotoDTO photo = photoService.getPhoto(photoId, currentUser.getUsername());
+            User owner = userService.findByUsername(photo.getOwnerUsername());
+
+            model.addAttribute("photo", photo);
+            model.addAttribute("owner", owner);
+            model.addAttribute("currentUsername", currentUser.getUsername());
+            model.addAttribute("isUnlocked", photoService.createPhotoUnlockChecker(currentUser.getUsername()).apply(photo));
+
+            return "photos/view";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", "Photo not found or access denied");
+            return "redirect:/photos";
+        }
     }
 
     @PostMapping("/upload")
@@ -91,6 +125,7 @@ public class PhotoController {
                     image.getBytes()
             );
 
+
             redirectAttributes.addFlashAttribute("success", "Photo uploaded successfully");
             return "redirect:/photos/user/" + username + "/photos";
 
@@ -111,24 +146,22 @@ public class PhotoController {
             @AuthenticationPrincipal UserDetails currentUser,
             Model model
     ) {
-        try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<PhotoDTO> photos = photoService.getUserPhotosByUsername(username, pageable);
-            User photoOwner = userService.findByUsername(username);
+        Pageable pageable = PageRequest.of(page, size);
+        // Передаем username текущего пользователя
+        String currentUsername = currentUser != null ? currentUser.getUsername() : null;
+        Page<PhotoDTO> photos = photoService.getUserPhotosByUsername(username, currentUsername, pageable);
 
-            model.addAttribute("photos", photos);
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", photos.getTotalPages());
-            model.addAttribute("photoOwner", photoOwner);
-            model.addAttribute("currentUsername",
-                    currentUser != null ? currentUser.getUsername() : null);
+        User photoOwner = userService.findByUsername(username);
 
-            return "photos/grid";
-        } catch (RuntimeException e) {
-            model.addAttribute("error", "Failed to load photos: " + e.getMessage());
-            return "error";
-        }
+        model.addAttribute("photos", photos);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", photos.getTotalPages());
+        model.addAttribute("photoOwner", photoOwner);
+        model.addAttribute("currentUsername", currentUsername);
+
+        return "photos/grid";
     }
+
 
     @PostMapping("/{photoId}/unlock")
     public String unlockPhoto(

@@ -30,6 +30,7 @@ public class PhotoService {
     private final PhotoMapper photoMapper;
     private final UnlockedPhotoRepository unlockedPhotoRepository;
 
+
     public PhotoDTO createPhoto(CreatePhotoRequest request, String username, byte[] imageData) throws IOException {
         User owner = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -37,21 +38,54 @@ public class PhotoService {
         Photo photo = photoMapper.toEntity(request, owner, imageData);
         Photo savedPhoto = photoRepository.save(photo);
 
-        return photoMapper.toDTO(savedPhoto);
+        return photoMapper.toDTO(savedPhoto, owner); // Передаем владельца
     }
+
+//    public PhotoDTO createPhoto(CreatePhotoRequest request, String username, byte[] imageData) throws IOException {
+//        User owner = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        Photo photo = photoMapper.toEntity(request, owner, imageData);
+//        Photo savedPhoto = photoRepository.save(photo);
+//
+//        return photoMapper.toDTO(savedPhoto);
+//    }
 
     @Transactional(readOnly = true)
     public PhotoDTO getPhoto(Long photoId, String username) {
         Photo photo = photoRepository.findById(photoId)
                 .orElseThrow(() -> new RuntimeException("Photo not found"));
 
-        // Бизнес-логика проверки доступа
-        if (photo.getIsLocked() && !photo.getOwner().getUsername().equals(username)) {
-            return photoMapper.toDTO(photo);
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return photoMapper.toDTO(photo);
+        return photoMapper.toDTO(photo, user); // Маппер сам решит, блюрить фото или нет
     }
+//    @Transactional(readOnly = true)
+//    public PhotoDTO getPhoto(Long photoId, String username) {
+//        Photo photo = photoRepository.findById(photoId)
+//                .orElseThrow(() -> new RuntimeException("Photo not found"));
+//
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        // Проверяем условия доступа:
+//        // 1. Пользователь является владельцем фото
+//        // 2. Фото не заблокировано
+//        // 3. Пользователь разблокировал это фото
+//        boolean hasAccess = photo.getOwner().getUsername().equals(username) ||
+//                !photo.getIsLocked() ||
+//                unlockedPhotoRepository.existsByUserAndPhoto(user, photo);
+//
+//        if (!hasAccess) {
+//            // Если нет доступа - возвращаем DTO без изображения
+//            return photoMapper.toDTOWithoutImage(photo);
+//        }
+//
+//        // Если есть доступ - возвращаем полное DTO с изображением
+//        return photoMapper.toDTO(photo);
+//    }
+
 
 
     @Transactional
@@ -95,7 +129,7 @@ public class PhotoService {
             unlockedPhoto.setUnlockedAt(LocalDateTime.now());
             unlockedPhotoRepository.save(unlockedPhoto);
 
-            return photoMapper.toDTO(photo);
+            return photoMapper.toDTO(photo, user);
         } catch (Exception e) {
             throw new RuntimeException("Failed to process transaction: " + e.getMessage());
         }
@@ -114,13 +148,26 @@ public class PhotoService {
         };
     }
 
-    public Page<PhotoDTO> getUserPhotosByUsername(String username, Pageable pageable) {
-        // Получаем страницу фотографий пользователя по username
+    public Page<PhotoDTO> getUserPhotosByUsername(String username, String currentUsername, Pageable pageable) {
         Page<Photo> photoPage = photoRepository.findByOwnerUsername(username, pageable);
 
-        // Преобразуем каждое фото в DTO
-        return photoPage.map(photoMapper::toDTO);
+        User currentUser = null;
+        if (currentUsername != null) {
+            currentUser = userRepository.findByUsername(currentUsername)
+                    .orElseThrow(() -> new RuntimeException("Current user not found"));
+        }
+
+        User finalCurrentUser = currentUser;
+        return photoPage.map(photo -> photoMapper.toDTO(photo, finalCurrentUser));
     }
+
+//    public Page<PhotoDTO> getUserPhotosByUsername(String username, Pageable pageable) {
+//        // Получаем страницу фотографий пользователя по username
+//        Page<Photo> photoPage = photoRepository.findByOwnerUsername(username, pageable);
+//
+//        // Преобразуем каждое фото в DTO
+//        return photoPage.map(photoMapper::toDTO);
+//    }
 
     
     
