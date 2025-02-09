@@ -270,10 +270,6 @@ public class PostService {
         log.debug("🔹 Знайдено в БД {} переглядів для поста {}", viewsCount, postId);
         return viewsCount;
     }
-//
-//    public long getPostViews(Long postId) {
-//        return postViewRepository.countByPostId(postId);
-//    }
 
 
     public Post getPost(Long postId) {
