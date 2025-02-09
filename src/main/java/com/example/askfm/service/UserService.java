@@ -1,12 +1,13 @@
 package com.example.askfm.service;
 
 import com.example.askfm.config.CacheMonitor;
-import com.example.askfm.dto.ChangePasswordDTO;
-import com.example.askfm.dto.UserRegistrationDTO;
-import com.example.askfm.dto.UserSearchDTO;
+import com.example.askfm.dto.*;
 import com.example.askfm.enums.UserRole;
 import com.example.askfm.exception.UserNotFoundException;
+import com.example.askfm.maper.UserMapper;
+import com.example.askfm.model.BlockInfo;
 import com.example.askfm.model.User;
+import com.example.askfm.repository.BlockInfoRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -46,7 +51,8 @@ public class UserService implements UserDetailsService {
     private final SubscriptionService subscriptionService ;
     private final ImageService imageService;
     private  final CacheManager cacheManager;
-
+    private final UserMapper userMapper;
+private final BlockInfoRepository blockInfoRepository;
 
 
     @Override
@@ -105,79 +111,124 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-
-
     public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+        // Проверяем наличие кеша
         Cache cache = cacheManager.getCache("userSearch");
-        String cacheKey = "search:" + query.toLowerCase().trim();
+        String cacheKey = "search:" + (query != null ? query.toLowerCase().trim() : "") +
+                ":user:" + currentUsername;
 
+        // Пытаемся получить результаты из кеша
         List<UserSearchDTO> cachedResults = cache != null ?
                 (List<UserSearchDTO>) cache.get(cacheKey, List.class) : null;
 
         if (cachedResults != null) {
-            log.debug("✅ Взято з кешу {} результатів для запиту: '{}'",
+            log.debug("✅ Получено из кеша {} результатов для запроса: '{}'",
                     cachedResults.size(), query);
             return cachedResults;
         }
 
+        // Если запрос пустой, возвращаем пустой список
         if (!StringUtils.hasText(query)) {
             return Collections.emptyList();
         }
 
+        // Если в кеше нет результатов, выполняем поиск
         long startTime = System.currentTimeMillis();
         String normalizedQuery = query.toLowerCase().trim();
-        log.debug("⛔ Пошук в БД за запитом: '{}'", normalizedQuery);
+        log.debug("⛔ Поиск в БД по запросу: '{}'", normalizedQuery);
 
+        // Получаем результаты из базы данных
         List<UserSearchDTO> results = userRepository.searchByUsername(normalizedQuery)
                 .stream()
-                .map(user -> mapToUserSearchDTO(user, currentUsername, cache))
+                .map(user -> userMapper.toSearchDTO(user, currentUsername))
                 .collect(Collectors.toList());
 
-        cache.put(cacheKey, results);
+        // Сохраняем результаты в кеш
+        if (cache != null) {
+            cache.put(cacheKey, results);
+            log.debug("💾 Результаты сохранены в кеш для запроса: '{}'", normalizedQuery);
+        }
+
+        // Логируем время выполнения
         long endTime = System.currentTimeMillis();
-        log.debug("🔹 Знайдено в БД {} результатів за запитом: '{}' за {} мс",
+        log.debug("🔹 Найдено в БД {} результатов по запросу: '{}' за {} мс",
                 results.size(), normalizedQuery, endTime - startTime);
+
         return results;
     }
 
-    private UserSearchDTO mapToUserSearchDTO(User user, String currentUsername, Cache cache) {
-        String username = user.getUsername();
 
-        Cache followersCache = cacheManager.getCache("followers");
+//    public List<UserSearchDTO> searchUsers(String query, String currentUsername) {
+//        Cache cache = cacheManager.getCache("userSearch");
+//        String cacheKey = "search:" + query.toLowerCase().trim();
+//
+//        List<UserSearchDTO> cachedResults = cache != null ?
+//                (List<UserSearchDTO>) cache.get(cacheKey, List.class) : null;
+//
+//        if (cachedResults != null) {
+//            log.debug("✅ Взято з кешу {} результатів для запиту: '{}'",
+//                    cachedResults.size(), query);
+//            return cachedResults;
+//        }
+//
+//        if (!StringUtils.hasText(query)) {
+//            return Collections.emptyList();
+//        }
+//
+//        long startTime = System.currentTimeMillis();
+//        String normalizedQuery = query.toLowerCase().trim();
+//        log.debug("⛔ Пошук в БД за запитом: '{}'", normalizedQuery);
+//
+//        List<UserSearchDTO> results = userRepository.searchByUsername(normalizedQuery)
+//                .stream()
+//                .map(user -> mapToUserSearchDTO(user, currentUsername, cache))
+//                .collect(Collectors.toList());
+//
+//        cache.put(cacheKey, results);
+//        long endTime = System.currentTimeMillis();
+//        log.debug("🔹 Знайдено в БД {} результатів за запитом: '{}' за {} мс",
+//                results.size(), normalizedQuery, endTime - startTime);
+//        return results;
+//    }
 
-        // Получаем количество подписчиков
-        Long followersCount;
-        String followersKey = "subscribers_count:" + username;
-        Cache.ValueWrapper followersWrapper = followersCache.get(followersKey);
-        if (followersWrapper != null) {
-            followersCount = (Long) followersWrapper.get();
-        } else {
-            followersCount = subscriptionService.getSubscribersCount(username);
-            followersCache.put(followersKey, followersCount);
-        }
-
-        // Проверяем подписку
-        boolean isFollowing = false;
-        if (currentUsername != null) {
-            String followingKey = "is_following:" + currentUsername + "_" + username;
-            Cache.ValueWrapper followingWrapper = followersCache.get(followingKey);
-            if (followingWrapper != null) {
-                isFollowing = (Boolean) followingWrapper.get();
-            } else {
-                isFollowing = subscriptionService.isFollowing(currentUsername, username);
-                followersCache.put(followingKey, isFollowing);
-            }
-        }
-
-        return UserSearchDTO.builder()
-                .username(username)
-                .avatar(user.getAvatar() != null ?
-                        "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
-                        null)
-                .followersCount(followersCount)
-                .isFollowing(isFollowing)
-                .build();
-    }
+//    private UserSearchDTO mapToUserSearchDTO(User user, String currentUsername, Cache cache) {
+//        String username = user.getUsername();
+//
+//        Cache followersCache = cacheManager.getCache("followers");
+//
+//        // Получаем количество подписчиков
+//        Long followersCount;
+//        String followersKey = "subscribers_count:" + username;
+//        Cache.ValueWrapper followersWrapper = followersCache.get(followersKey);
+//        if (followersWrapper != null) {
+//            followersCount = (Long) followersWrapper.get();
+//        } else {
+//            followersCount = subscriptionService.getSubscribersCount(username);
+//            followersCache.put(followersKey, followersCount);
+//        }
+//
+//        // Проверяем подписку
+//        boolean isFollowing = false;
+//        if (currentUsername != null) {
+//            String followingKey = "is_following:" + currentUsername + "_" + username;
+//            Cache.ValueWrapper followingWrapper = followersCache.get(followingKey);
+//            if (followingWrapper != null) {
+//                isFollowing = (Boolean) followingWrapper.get();
+//            } else {
+//                isFollowing = subscriptionService.isFollowing(currentUsername, username);
+//                followersCache.put(followingKey, isFollowing);
+//            }
+//        }
+//
+//        return UserSearchDTO.builder()
+//                .username(username)
+//                .avatar(user.getAvatar() != null ?
+//                        "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+//                        null)
+//                .followersCount(followersCount)
+//                .isFollowing(isFollowing)
+//                .build();
+//    }
 
 
     public User findByUsername(String username) {
@@ -378,4 +429,110 @@ public class UserService implements UserDetailsService {
     public void save(User user) {
         userRepository.save(user);
     }
+
+
+//заблокировать
+    @Transactional
+    public BlockInfoDTO blockUser(String blockerUsername, String blockedUsername) {
+        // Проверяем входные данные
+        if (blockerUsername == null || blockedUsername == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
+        User blocker = findByUsername(blockerUsername);
+        User blocked = findByUsername(blockedUsername);
+
+        // Проверяем, не пытается ли пользователь заблокировать сам себя
+        if (blocker.getId().equals(blocked.getId())) {
+            throw new IllegalArgumentException("Нельзя заблокировать самого себя");
+        }
+
+        // Проверяем, не заблокирован ли уже пользователь
+        if (isUserBlocked(blockerUsername, blockedUsername)) {
+            throw new IllegalStateException("Пользователь уже заблокирован");
+        }
+
+        // Добавляем в множество заблокированных
+        blocker.getBlockedUsers().add(blocked);
+        userRepository.save(blocker); // Явно сохраняем изменения
+
+        // Создаем запись о блокировке
+        BlockInfo blockInfo = userMapper.toBlockInfo(blocker, blocked);
+        blockInfoRepository.save(blockInfo);
+
+        log.info("User {} blocked user {}", blockerUsername, blockedUsername);
+        return userMapper.toBlockInfoDTO(blockInfo);
+    }
+//разблокировать
+    @Transactional
+    public void unblockUser(String blockerUsername, String blockedUsername) {
+        if (blockerUsername == null || blockedUsername == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
+        User blocker = findByUsername(blockerUsername);
+        User blocked = findByUsername(blockedUsername);
+
+        // Проверяем, заблокирован ли пользователь
+        if (!isUserBlocked(blockerUsername, blockedUsername)) {
+            throw new IllegalStateException("Пользователь не был заблокирован");
+        }
+
+        // Удаляем из множества заблокированных
+        blocker.getBlockedUsers().remove(blocked);
+        userRepository.save(blocker); // Явно сохраняем изменения
+
+        // Удаляем запись о блокировке
+        blockInfoRepository.deleteByBlockerAndBlocked(blocker, blocked);
+
+        log.info("User {} unblocked user {}", blockerUsername, blockedUsername);
+    }
+
+
+//черный список
+@Transactional(readOnly = true)
+public Page<BlockedUserDTO> getBlockedUsers(String username) {
+    if (username == null) {
+        throw new IllegalArgumentException("Username cannot be null");
+    }
+
+    User user = findByUsername(username);
+    // Создаем Pageable для первых 20 записей, сортированных по дате блокировки
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "blockedAt"));
+
+    // Получаем страницу с блокировками
+    Page<BlockInfo> blockInfoPage = blockInfoRepository.findByBlocker(user, pageable);
+
+    // Преобразуем в DTO
+    return blockInfoPage.map(blockInfo -> userMapper.toBlockedUserDTO(blockInfo.getBlocked(), blockInfo));
+}
+
+    @Transactional(readOnly = true)
+    public boolean isUserBlocked(String blockerUsername, String blockedUsername) {
+        if (blockerUsername == null || blockedUsername == null) {
+            return false;
+        }
+
+        try {
+            User blocker = findByUsername(blockerUsername);
+            User blocked = findByUsername(blockedUsername);
+            return blockInfoRepository.existsByBlockerAndBlocked(blocker, blocked);
+        } catch (UsernameNotFoundException e) {
+            return false;
+        }
+    }
+
+    // Вспомогательный метод для получения количества заблокированных пользователей
+    @Transactional(readOnly = true)
+    public long getBlockedUsersCount(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
+        User user = findByUsername(username);
+        return blockInfoRepository.countByBlocker(user);
+    }
+
+
+
 }

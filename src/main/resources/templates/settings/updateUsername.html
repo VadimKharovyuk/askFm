@@ -1,112 +1,415 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Изменить имя пользователя</title>-->
+<!--  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">-->
+<!--  <style>-->
+<!--    :root {-->
+<!--      &#45;&#45;background-dark: #050505;-->
+<!--      &#45;&#45;secondary-bg: #16181c;-->
+<!--      &#45;&#45;text-white: #dce3e7;-->
+<!--      &#45;&#45;text-gray: #e7eaee;-->
+<!--      &#45;&#45;border-color: #2f3336;-->
+<!--      &#45;&#45;blue-accent: #1d9bf0;-->
+<!--      &#45;&#45;blue-hover: #1a8cd8;-->
+<!--      &#45;&#45;error-color: #ff4444;-->
+<!--    }-->
+
+<!--    .form-container {-->
+<!--      background-color: var(&#45;&#45;secondary-bg);-->
+<!--      border-radius: 15px;-->
+<!--      padding: 25px;-->
+<!--      max-width: 500px;-->
+<!--      margin: 20px auto;-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .form-group {-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+
+<!--    .form-group label {-->
+<!--      display: block;-->
+<!--      margin-bottom: 8px;-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--    }-->
+
+<!--    .form-control {-->
+<!--      width: 100%;-->
+<!--      padding: 10px;-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--      border-radius: 5px;-->
+<!--      background-color: var(&#45;&#45;background-dark);-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      font-size: 16px;-->
+<!--    }-->
+
+<!--    .form-control:focus {-->
+<!--      outline: none;-->
+<!--      border-color: var(&#45;&#45;blue-accent);-->
+<!--    }-->
+
+<!--    .btn-primary {-->
+<!--      background-color: var(&#45;&#45;blue-accent);-->
+<!--      color: var(&#45;&#45;text-white);-->
+<!--      border: none;-->
+<!--      padding: 12px 24px;-->
+<!--      border-radius: 25px;-->
+<!--      cursor: pointer;-->
+<!--      font-size: 16px;-->
+<!--      width: 100%;-->
+<!--    }-->
+
+<!--    .btn-primary:hover {-->
+<!--      background-color: var(&#45;&#45;blue-hover);-->
+<!--    }-->
+
+<!--    .error-message {-->
+<!--      color: var(&#45;&#45;error-color);-->
+<!--      font-size: 14px;-->
+<!--      margin-top: 5px;-->
+<!--    }-->
+
+<!--    .current-username {-->
+<!--      color: var(&#45;&#45;text-gray);-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="form-container">-->
+<!--  <h2 style="color: var(&#45;&#45;text-white); margin-bottom: 20px;">Изменить имя пользователя</h2>-->
+
+<!--  <div class="current-username">-->
+<!--    Текущее имя пользователя: <span th:text="${username}"></span>-->
+<!--  </div>-->
+
+<!--  <form th:action="@{/settings/updateUsername}" th:object="${usernameUpdateDto}" method="post">-->
+<!--    <div class="form-group">-->
+<!--      <label for="newUsername">Новое имя пользователя</label>-->
+<!--      <input type="text"-->
+<!--             id="newUsername"-->
+<!--             th:field="*{newUsername}"-->
+<!--             class="form-control"-->
+<!--             placeholder="Введите новое имя пользователя">-->
+<!--      <div class="error-message" th:if="${#fields.hasErrors('newUsername')}"-->
+<!--           th:errors="*{newUsername}">Ошибка</div>-->
+<!--    </div>-->
+
+<!--    <div class="error-message" th:if="${error}" th:text="${error}"></div>-->
+
+<!--    <button type="submit" class="btn-primary">-->
+<!--      <i class="fas fa-save"></i> Сохранить изменения-->
+<!--    </button>-->
+<!--  </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Изменить имя пользователя</title>
-<!--  <meta http-equiv="content-type" content="no-cache, no-store, must-revalidate">-->
-<!--  <meta http-equiv="refresh" content="no-cache">-->
-<!--  <meta http-equiv="refresh" content="0">-->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     :root {
-      --background-dark: #050505;
-      --secondary-bg: #16181c;
-      --text-white: #dce3e7;
-      --text-gray: #e7eaee;
-      --border-color: #2f3336;
-      --blue-accent: #1d9bf0;
-      --blue-hover: #1a8cd8;
-      --error-color: #ff4444;
+      --bg-primary: #f8f9fa;
+      --bg-card: #ffffff;
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --accent-color: #0ea5e9;
+      --accent-hover: #0284c7;
+      --border-color: #e9ecef;
+      --error-color: #dc2626;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1b1e;
+      --bg-card: #25262b;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --accent-color: #0ea5e9;
+      --accent-hover: #0284c7;
+      --border-color: #2d2e32;
+      --error-color: #ef4444;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-button:hover {
+      background: var(--bg-card);
+      color: var(--accent-color);
     }
 
     .form-container {
-      background-color: var(--secondary-bg);
-      border-radius: 15px;
-      padding: 25px;
-      max-width: 500px;
-      margin: 20px auto;
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .current-username {
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
       border: 1px solid var(--border-color);
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 1.5rem;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 8px;
-      color: var(--text-white);
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      font-weight: 500;
     }
 
     .form-control {
       width: 100%;
-      padding: 10px;
+      padding: 0.75rem 1rem;
       border: 1px solid var(--border-color);
-      border-radius: 5px;
-      background-color: var(--background-dark);
-      color: var(--text-white);
-      font-size: 16px;
+      border-radius: 8px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s;
     }
 
     .form-control:focus {
       outline: none;
-      border-color: var(--blue-accent);
-    }
-
-    .btn-primary {
-      background-color: var(--blue-accent);
-      color: var(--text-white);
-      border: none;
-      padding: 12px 24px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 16px;
-      width: 100%;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--blue-hover);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
 
     .error-message {
       color: var(--error-color);
-      font-size: 14px;
-      margin-top: 5px;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
     }
 
-    .current-username {
-      color: var(--text-gray);
-      margin-bottom: 20px;
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .settings-nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .settings-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-color);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    .settings-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .settings-card i {
+      color: var(--accent-color);
+    }
+
+    .settings-card p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      color: var(--text-primary);
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(45deg);
     }
   </style>
 </head>
 <body>
-<div class="form-container">
-  <h2 style="color: var(--text-white); margin-bottom: 20px;">Изменить имя пользователя</h2>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <i class="fas fa-moon"></i>
+</button>
 
-  <div class="current-username">
-    Текущее имя пользователя: <span th:text="${username}"></span>
-  </div>
+<div class="settings-container">
+  <a href="/settings" class="back-button">
+    <i class="fas fa-arrow-left"></i>
+    Вернуться к настройкам
+  </a>
 
-  <form th:action="@{/settings/updateUsername}" th:object="${usernameUpdateDto}" method="post">
-    <div class="form-group">
-      <label for="newUsername">Новое имя пользователя</label>
-      <input type="text"
-             id="newUsername"
-             th:field="*{newUsername}"
-             class="form-control"
-             placeholder="Введите новое имя пользователя">
-      <div class="error-message" th:if="${#fields.hasErrors('newUsername')}"
-           th:errors="*{newUsername}">Ошибка</div>
+  <div class="form-container">
+    <h2 class="section-title">
+      <i class="fas fa-user-edit"></i>
+      Изменить имя пользователя
+    </h2>
+
+    <div class="current-username">
+      <i class="fas fa-user"></i>
+      Текущее имя пользователя: <strong th:text="${username}"></strong>
     </div>
 
-    <div class="error-message" th:if="${error}" th:text="${error}"></div>
+    <form th:action="@{/settings/updateUsername}" th:object="${usernameUpdateDto}" method="post">
+      <div class="form-group">
+        <label for="newUsername">Новое имя пользователя</label>
+        <input type="text"
+               id="newUsername"
+               th:field="*{newUsername}"
+               class="form-control"
+               placeholder="Введите новое имя пользователя">
+        <div class="error-message" th:if="${#fields.hasErrors('newUsername')}"
+             th:errors="*{newUsername}">Ошибка</div>
+      </div>
 
-    <button type="submit" class="btn-primary">
-      <i class="fas fa-save"></i> Сохранить изменения
-    </button>
-  </form>
+      <div class="error-message" th:if="${error}" th:text="${error}"></div>
+
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-save"></i>
+        Сохранить изменения
+      </button>
+    </form>
+  </div>
+
+  <div class="settings-nav">
+    <a href="/settings/profile" class="settings-card">
+      <h3>
+        <i class="fas fa-user-circle"></i>
+        Профиль
+      </h3>
+      <p>Редактировать информацию профиля</p>
+    </a>
+
+    <a href="/settings/password" class="settings-card">
+      <h3>
+        <i class="fas fa-shield-alt"></i>
+        Безопасность
+      </h3>
+      <p>Изменить пароль и настройки безопасности</p>
+    </a>
+
+    <a href="/blocks" class="settings-card">
+      <h3>
+        <i class="fas fa-user-lock"></i>
+        Черный список
+      </h3>
+      <p>Управление заблокированными пользователями</p>
+    </a>
+  </div>
 </div>
+
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    const icon = document.querySelector('.theme-toggle i');
+
+    if (body.getAttribute('data-theme') === 'dark') {
+      body.removeAttribute('data-theme');
+      icon.classList.remove('fa-sun');
+      icon.classList.add('fa-moon');
+    } else {
+      body.setAttribute('data-theme', 'dark');
+      icon.classList.remove('fa-moon');
+      icon.classList.add('fa-sun');
+    }
+  }
+
+  // Check system preference
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle i').classList.replace('fa-moon', 'fa-sun');
+  }
+</script>
 </body>
 </html>

@@ -49,6 +49,29 @@ public class UserProfileController {
         User recipient = userService.findByUsername(username);
 
 
+        // Проверяем, является ли это профилем текущего пользователя
+        if (currentUser != null) {
+            boolean isBlockedByUser = userService.isUserBlocked(username, currentUser.getUsername());
+            if (isBlockedByUser) {
+                model.addAttribute("blockerUsername", username);
+                return "redirect:/user/" + username + "/blocked-info";
+            }
+        }
+
+        // Проверяем, является ли это профилем текущего пользователя
+        boolean isCurrentUser = false;
+        boolean isBlocked = false;
+
+        if (currentUser != null) {
+            isCurrentUser = currentUser.getUsername().equals(username);
+            isBlocked = userService.isUserBlocked(currentUser.getUsername(), username);
+        }
+
+        model.addAttribute("isCurrentUser", isCurrentUser);
+        model.addAttribute("isBlocked", isBlocked);
+
+        model.addAttribute("user", user);
+
         //новые сообщения
         long unreadMessages = messageService.getUnreadCount(username);
         model.addAttribute("unreadMessagesCount", unreadMessages);
@@ -82,11 +105,6 @@ public class UserProfileController {
         if (user.getProfile() != null) {
             website = user.getProfile().getWebsite();
         }
-
-// Получаем количество просмотров для каждого поста
-//        List<PostDTO> userPostsViews = postService.getUserPostsWiews(username, currentUsername);
-//        model.addAttribute("posts", userPostsViews);
-
 
 
         // Получение рекомендуемых пользователей
@@ -169,5 +187,16 @@ public class UserProfileController {
         model.addAttribute("currentUser", currentUser != null ? currentUser.getUsername() : null);
 
         return "user/user-info";
+    }
+
+    @GetMapping("/user/{blockerUsername}/blocked-info")
+    public String showBlockedInfo(@PathVariable String blockerUsername,
+                                  @AuthenticationPrincipal UserDetails currentUser,
+                                  Model model) {
+        User user = userService.findByUsername(currentUser.getUsername());
+        model.addAttribute("user", user);
+        model.addAttribute("blockerUsername", blockerUsername);
+
+        return "user/blocked-info";
     }
 }

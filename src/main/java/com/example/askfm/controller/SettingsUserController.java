@@ -22,11 +22,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/settings")
 public class SettingsUserController {
     private final UserService userService;
+
     @GetMapping
     public String settings(Model model,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String currentUser = userDetails.getUsername();
+        Long blockedCount = userService.getBlockedUsersCount(currentUser);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("blockedCount", blockedCount);
         return "settings/home";
     }
 

@@ -150,6 +150,52 @@
     .side-link:hover i {
       transform: scale(1.1);
     }
+
+    .settings-card {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .settings-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-color);
+      border-color: var(--accent-color);
+    }
+
+    .settings-card h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .settings-card i {
+      color: var(--accent-color);
+      font-size: 1.5rem;
+    }
+
+    .settings-card p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .blocked-count {
+      background: var(--danger-color);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
   </style>
 </head>
 <body>
@@ -241,6 +287,16 @@
         Редактировать профиль
       </h2>
       <p>Измените информацию в вашем профиле</p>
+    </a>
+
+    <a href="/blocks" class="settings-card">
+      <h2>
+        <i class="fas fa-user-lock"></i>
+        Заблокированные пользователи
+        <span class="blocked-count" th:if="${blockedCount > 0}"
+              th:text="${blockedCount}">0</span>
+      </h2>
+      <p>Управление черным списком и доступом к вашему аккаунту</p>
     </a>
 
     <a href="/settings/notifications" class="settings-card">

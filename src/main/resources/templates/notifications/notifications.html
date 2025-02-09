@@ -366,7 +366,7 @@
         <span>Истории</span>
       </a>
 
-      <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+      <a th:href="@{'/users/' + ${currentUser.getUsername()}}" class="side-link">
         <i class="fas fa-user"></i>
         <span>Профиль</span>
       </a>

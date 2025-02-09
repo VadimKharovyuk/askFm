@@ -92,6 +92,13 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Repost> reposts = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_blocks",
+            joinColumns = @JoinColumn(name = "blocker_id"),
+            inverseJoinColumns = @JoinColumn(name = "blocked_id")
+    )
+    private Set<User> blockedUsers = new HashSet<>();
 
 
 }

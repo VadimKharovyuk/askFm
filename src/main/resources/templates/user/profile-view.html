@@ -575,16 +575,21 @@
                      style="object-fit: cover;"
                      alt="Cover"
                      id="preview-cover">
-
             </div>
+
             <img th:if="${avatarBase64 != null}"
                  th:src="@{'data:image/jpeg;base64,' + ${avatarBase64}}"
                  class="profile-avatar"
                  th:alt="${profileUser.username + ' avatar'}"
                  id="preview-avatar">
 
-            <img th:unless="${profileUser.avatar}" src="/api/placeholder/134/134"
-                 class="profile-avatar" alt="Default avatar">
+            <img th:unless="${avatarBase64 != null}"
+                 src="/api/placeholder/134/134"
+                 class="profile-avatar"
+                 alt="Default avatar">
+
+            <!-- Форма блокировки -->
+
         </div>
 
         <!-- Profile Actions -->
@@ -605,6 +610,20 @@
                     <i class="fas fa-envelope"></i> Написать
                 </a>
             </th:block>
+
+            <form th:if="${!isCurrentUser and !isBlocked}"
+                  th:action="@{/blocks/block/{username}(username=${profileUser.username})}"
+                  method="post"
+                  class="block-form">
+                <button type="submit" class="btn btn-block">Заблокировать</button>
+            </form>
+
+            <form th:if="${!isCurrentUser and isBlocked}"
+                  th:action="@{/blocks/unblock/{username}(username=${profileUser.username})}"
+                  method="post"
+                  class="block-form">
+                <button type="submit" class="btn btn-unblock">Разблокировать</button>
+            </form>
         </div>
 
 
