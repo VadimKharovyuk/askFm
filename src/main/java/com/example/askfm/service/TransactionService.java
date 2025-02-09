@@ -83,6 +83,11 @@ public class TransactionService {
         Page<Transaction> transactionsPage = transactionRepository.findAll(pageable);
         return transactionsPage.map(transactionMapper::toDTO);
     }
+    public Page<TransactionDTO> getAllTransactionsPaged(String username, Pageable pageable) {
+        Page<Transaction> transactionsPage = transactionRepository
+                .findByBuyerUsernameOrSellerUsername(username, username, pageable);
+        return transactionsPage.map(transactionMapper::toDTO);
+    }
 
     public List<TransactionDTO> getTransactionsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         List<Transaction> transactions = transactionRepository

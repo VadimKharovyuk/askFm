@@ -24,7 +24,31 @@ public class NotificationListener {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
 
+    @EventListener
+    @Async("notificationExecutor")
+    public void handlePhotoBay(PhotoPurchaseEvent event) {
+        try {
+            log.debug("📸 Обработка события покупки фото от {} для фото {}",
+                    event.getBuyer().getUsername(), event.getPhoto().getId());
 
+            Notification notification = Notification.builder()
+                    .user(event.getPhoto().getOwner()) // владелец фото получает уведомление
+                    .initiator(event.getBuyer())       // покупатель является инициатором
+                    .photo(event.getPhoto())           // связываем с фото
+                    .type(NotificationType.PHOTO_PURCHASE)
+                    .message(String.format("%s купил(-а) вашу фотографию",
+                            event.getBuyer().getUsername()))
+                    .createdAt(LocalDateTime.now())
+                    .isRead(false)
+                    .build();
+
+            notificationRepository.save(notification);
+            log.debug("✅ Уведомление о покупке фото сохранено в БД");
+        } catch (Exception e) {
+            log.error("❌ Ошибка при создании уведомления о покупке фото: {}", e.getMessage());
+            throw e;
+        }
+    }
 
     @EventListener
     @Async("notificationExecutor")

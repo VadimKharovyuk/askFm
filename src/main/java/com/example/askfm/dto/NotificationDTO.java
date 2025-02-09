@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,4 +31,13 @@ public class NotificationDTO {
     private String postMedia;
 
     private PostDTO post;
+
+    // Информация о фото
+    private Long photoId;
+    private String photoDescription;
+    private String photoBase64;
+    private BigDecimal photoPrice;
+    private String photoOwnerUsername;
+
+
 }

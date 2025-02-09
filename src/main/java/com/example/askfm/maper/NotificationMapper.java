@@ -2,6 +2,7 @@ package com.example.askfm.maper;
 
 import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.model.Notification;
+import com.example.askfm.model.Photo;
 import com.example.askfm.model.Post;
 import com.example.askfm.model.Tag;
 import com.example.askfm.service.ImageService;
@@ -18,6 +19,7 @@ public class NotificationMapper {
 
     public NotificationDTO toDto(Notification notification) {
         Post post = notification.getPost();
+        Photo photo = notification.getPhoto();
 
         return NotificationDTO.builder()
                 .id(notification.getId())
@@ -35,6 +37,14 @@ public class NotificationMapper {
                 .postAuthorUsername(post != null ? post.getAuthor().getUsername() : null)
                 .postMedia(post != null && post.getMedia() != null ?
                         imageService.getBase64Avatar(post.getMedia()) : null)
+
+                // Информация о фото
+                .photoId(photo != null ? photo.getId() : null)
+                .photoDescription(photo != null ? photo.getDescription() : null)
+                .photoPrice(photo != null ? photo.getPrice() : null)
+                .photoBase64(photo != null && photo.getPhoto() != null ?
+                        imageService.getBase64Avatar(photo.getPhoto()) : null)
+                .photoOwnerUsername(photo != null ? photo.getOwner().getUsername() : null)
                 .build();
     }
 

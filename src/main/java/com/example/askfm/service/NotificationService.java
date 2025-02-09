@@ -1,17 +1,11 @@
 package com.example.askfm.service;
 
-import com.example.askfm.EventListener.CommentEvent;
-import com.example.askfm.EventListener.LikeEvent;
-import com.example.askfm.EventListener.RepostEvent;
-import com.example.askfm.EventListener.SubscriptionEvent;
+import com.example.askfm.EventListener.*;
 import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.exception.NotificationNotFoundException;
 import com.example.askfm.exception.UnauthorizedException;
 import com.example.askfm.maper.NotificationMapper;
-import com.example.askfm.model.Notification;
-import com.example.askfm.model.Post;
-import com.example.askfm.model.Repost;
-import com.example.askfm.model.User;
+import com.example.askfm.model.*;
 import com.example.askfm.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +58,18 @@ public class NotificationService {
         return notificationRepository.countByUserUsernameAndIsReadFalse(username);
     }
 
+    public void notifyAboutPhotoEvent(User buyer, Photo photo) {
+        log.debug("🚀 Публикация события о покупке фото: buyer={}, photoId={}",
+                buyer.getUsername(), photo.getId());
+
+        try {
+            eventPublisher.publishEvent(new PhotoPurchaseEvent(buyer, photo));
+            log.debug("✅ Событие о покупке фото успешно опубликовано");
+        } catch (Exception e) {
+            log.error("❌ Ошибка при публикации события о покупке фото: {}", e.getMessage());
+            throw e;
+        }
+    }
 
     public void notifyAboutLike(User liker, Post post) {
 

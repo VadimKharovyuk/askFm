@@ -36,6 +36,11 @@ public class Notification {
     @JoinColumn(name = "post_id")
     private Post post; // Связанный пост (для лайков и комментариев)
 
+    @ManyToOne
+    @JoinColumn(name = "photo_id") // Добавляем связь с фото
+    private Photo photo;
+
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;

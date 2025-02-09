@@ -61,7 +61,8 @@ public class BalanceController {
             return "redirect:/login";
         }
 
-        Page<TransactionDTO> transactions = transactionService.getAllTransactionsPaged(pageable);
+        String username = userDetails.getUsername();
+        Page<TransactionDTO> transactions = transactionService.getAllTransactionsPaged(username, pageable);
         model.addAttribute("transactions", transactions);
         return "balance/transactions";
     }
