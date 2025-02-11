@@ -51,7 +51,7 @@ public class NotificationListener {
     }
 
     @EventListener
-    @Async("notificationExecutor")
+    @Async("commentExecutor")
     public void handleCommentEvent(CommentEvent event) {
         try {
             log.debug("📝 Обработка события комментария от {} для поста {}",
@@ -79,7 +79,7 @@ public class NotificationListener {
 
 
     @EventListener
-    @Async("notificationExecutor")
+    @Async("likeExecutor")
     public void handleLikeEvent(LikeEvent event) {
         try {
             log.debug("📝 Обработка события лайка от {} для поста {}",
@@ -139,7 +139,7 @@ public class NotificationListener {
 
 
     @EventListener
-    @Async("notificationExecutor")
+    @Async("eventExecutor")
     public void handleRepostEvent(RepostEvent repostEvent) {
         try {
             log.debug("📝 Обработка репоста от {} поста {}",

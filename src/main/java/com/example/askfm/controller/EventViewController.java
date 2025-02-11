@@ -87,17 +87,23 @@ public class EventViewController {
         model.addAttribute("currentUser", currentUser);
 
         Page<EventListDto> events;
-        if (category != null) {
+
+        // Handle search criteria
+        if (city != null && !city.isEmpty()) {
+            events = eventService.getEventsByCity(city, page, size);
+        } else if (location != null && !location.isEmpty()) {
+            events = eventService.getEventsByLocation(location, page, size);
+        } else if (category != null) {
             events = eventService.getEventsByCategory(category, page, size);
         } else {
             events = eventService.getAllEvents(page, size);
         }
 
-
-        // Добавляем выбранную категорию в модель
+        model.addAttribute("searchCity", city);
+        model.addAttribute("searchLocation", location);
         model.addAttribute("selectedCategory", category);
 
-        // Опционально: добавляем количество событий в каждой категории
+        // Add category counts
         Map<EventCategory, Long> categoryCount = eventService.getEventCountByCategory();
         model.addAttribute("categoryCount", categoryCount);
 

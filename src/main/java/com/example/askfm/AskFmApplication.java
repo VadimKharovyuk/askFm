@@ -24,6 +24,8 @@ public class AskFmApplication {
 
     //рекоменрации по Ню фото
 
+    //add lokation  в dto ивента
+
 
 
 

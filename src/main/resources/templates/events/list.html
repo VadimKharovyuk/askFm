@@ -143,17 +143,17 @@
 <div class="main-content">
   <!-- Search Section -->
   <div class="search-section">
-    <form class="row g-3" action="/events/city/" method="get" onsubmit="submitForm(event)">
+    <form class="row g-3" method="get" action="">
       <div class="col-md-4">
         <div class="input-group">
         <span class="input-group-text bg-dark border-dark text-light">
             <i class="fas fa-map-marker-alt"></i>
         </span>
           <input type="text"
-                 id="citySearch"
                  name="city"
                  class="form-control bg-dark border-dark text-light"
-                 placeholder="Search by city...">
+                 placeholder="Search by city..."
+                 th:value="${searchCity}">
         </div>
       </div>
       <div class="col-md-4">
@@ -164,7 +164,8 @@
           <input type="text"
                  name="location"
                  class="form-control bg-dark border-dark text-light"
-                 placeholder="Location...">
+                 placeholder="Location..."
+                 th:value="${searchLocation}">
         </div>
       </div>
       <div class="col-md-4">
@@ -174,16 +175,6 @@
       </div>
     </form>
   </div>
-
-  <script>
-    function submitForm(event) {
-      event.preventDefault();
-      const cityValue = document.getElementById('citySearch').value;
-      if(cityValue) {
-        window.location.href = '/events/city/' + encodeURIComponent(cityValue);
-      }
-    }
-  </script>
 
   <!-- Events Grid -->
   <div class="row row-cols-1 row-cols-md-3 g-4">

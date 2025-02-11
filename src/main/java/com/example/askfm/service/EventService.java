@@ -176,4 +176,10 @@ public class EventService {
 
         return eventMapper.toListDto(relatedEvents.getContent());
     }
+
+    public Page<EventListDto> getEventsByLocation(String location, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
+        Page<Event> eventsPage = eventRepository.findByLocation(location, pageable);
+        return eventsPage.map(event -> eventMapper.toListDto(List.of(event)).get(0));
+    }
 }

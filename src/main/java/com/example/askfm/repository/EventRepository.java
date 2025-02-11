@@ -48,4 +48,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     long countByCategory(@Param("category") EventCategory category);
 
     Page<Event> findByCategoryAndIdNot(EventCategory category, Long eventId, PageRequest eventDate);
+
+    Page<Event> findByLocation(String location, Pageable pageable);
+
 }
