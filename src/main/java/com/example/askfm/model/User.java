@@ -3,6 +3,7 @@ package com.example.askfm.model;
 import com.example.askfm.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -100,5 +101,12 @@ public class User {
     )
     private Set<User> blockedUsers = new HashSet<>();
 
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "creator")
+    private List<Event> createdEvents;
+
+
+    @OneToMany(mappedBy = "user")
+    private List<EventAttendance> eventAttendances = new ArrayList<>();
 
 }

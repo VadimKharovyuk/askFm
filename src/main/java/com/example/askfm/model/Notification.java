@@ -30,14 +30,14 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "initiator_id")
-    private User initiator; // Пользователь, который вызвал уведомление
+    private User initiator;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private Post post; // Связанный пост (для лайков и комментариев)
+    private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "photo_id") // Добавляем связь с фото
+    @JoinColumn(name = "photo_id")
     private Photo photo;
 
 

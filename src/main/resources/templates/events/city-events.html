@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- Main Content -->
+<div class="main-content">
+    <div class="search-section">
+        <form class="row g-3" action="/events/city/" method="get" onsubmit="submitForm(event)">
+            <div class="col-md-4">
+                <div class="input-group">
+        <span class="input-group-text bg-dark border-dark text-light">
+            <i class="fas fa-map-marker-alt"></i>
+        </span>
+                    <input type="text"
+                           id="citySearch"
+                           name="city"
+                           class="form-control bg-dark border-dark text-light"
+                           placeholder="Search by city...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+        <span class="input-group-text bg-dark border-dark text-light">
+            <i class="fas fa-map"></i>
+        </span>
+                    <input type="text"
+                           name="location"
+                           class="form-control bg-dark border-dark text-light"
+                           placeholder="Location...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-create w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function submitForm(event) {
+            event.preventDefault();
+            const cityValue = document.getElementById('citySearch').value;
+            if(cityValue) {
+                window.location.href = '/events/city/' + encodeURIComponent(cityValue);
+            }
+        }
+    </script>
+    <!-- City Header -->
+    <div class="city-header mb-4">
+        <h2 class="text-light">
+            <i class="fas fa-map-marker-alt"></i>
+            Events in <span th:text="${city}">City Name</span>
+        </h2>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col" th:each="event : ${events}">
+            <a th:href="@{'/events/' + ${event.id}}" class="text-decoration-none text-light">
+                <div class="card h-100">
+                    <img th:if="${event.photoBase64}"
+                         th:src="'data:image/jpeg;base64,' + ${event.photoBase64}"
+                         class="card-img-top" alt="Event photo"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${event.title}">Event Title</h5>
+                        <p class="card-text">
+                            <i class="fas fa-calendar-day text-muted"></i>
+                            <span class="text-muted"
+                                  th:text="${#temporals.format(event.eventDate, 'dd-MM-yyyy HH:mm')}">
+                Date
+              </span>
+                        </p>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt text-muted"></i>
+                            <span class="text-muted"
+                                  th:text="${event.address}">
+                Address
+              </span>
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                <span class="badge rounded-pill me-2">
+                  <i class="fas fa-users"></i>
+                  <span th:text="${event.goingCount}">0</span>
+                </span>
+                                <span class="badge rounded-pill">
+                  <i class="fas fa-star"></i>
+                  <span th:text="${event.interestedCount}">0</span>
+                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4 mb-3">
+        <a href="/events" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left"></i> Back to All Events
+        </a>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" th:if="${events.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${events.first ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{/events/city/{city}(city=${city}, page=${events.number - 1})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, events.totalPages - 1)}"
+                th:classappend="${i == events.number ? 'active' : ''}">
+                <a class="page-link"
+                   th:href="@{/events/city/{city}(city=${city}, page=${i})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${events.last ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{/events/city/{city}(city=${city}, page=${events.number + 1})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

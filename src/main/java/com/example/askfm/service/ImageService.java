@@ -20,6 +20,58 @@ import java.util.Iterator;
 @RequiredArgsConstructor
 public class ImageService {
 
+
+
+
+    public byte[] resizeImage(byte[] imageData, int targetWidth) throws IOException {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+
+            BufferedImage originalImage = ImageIO.read(bis);
+
+            // Вычисляем новую высоту, сохраняя пропорции
+            int targetHeight = (int) ((double) targetWidth / originalImage.getWidth() * originalImage.getHeight());
+
+            BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+            resizedImage.getGraphics().drawImage(originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH), 0, 0, null);
+
+            ImageIO.write(resizedImage, "jpg", bos);
+            return bos.toByteArray();
+        }
+    }
+
+    public String getBase64Avatar(byte[] avatar) {
+        if (avatar != null) {
+            return Base64.getEncoder().encodeToString(avatar);
+        }
+        return null;
+    }
+
+
+
+
+
+    public byte[] addWatermark(byte[] imageData, String watermarkText) throws IOException {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            BufferedImage originalImage = ImageIO.read(bis);
+
+            Graphics2D g2d = originalImage.createGraphics();
+            g2d.setFont(new Font("Arial", Font.BOLD, 36));
+            g2d.setColor(new Color(255, 255, 255, 128));
+
+            // Добавляем водяной знак
+            FontMetrics fm = g2d.getFontMetrics();
+            int x = (originalImage.getWidth() - fm.stringWidth(watermarkText)) / 2;
+            int y = originalImage.getHeight() / 2;
+
+            g2d.drawString(watermarkText, x, y);
+            g2d.dispose();
+
+            ImageIO.write(originalImage, "jpg", bos);
+            return bos.toByteArray();
+        }
+    }
     public byte[] blurImage(byte[] imageData) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -73,57 +125,6 @@ public class ImageService {
                 writer.write(null, iioImage, param);
             }
 
-            return bos.toByteArray();
-        }
-    }
-
-
-    public byte[] resizeImage(byte[] imageData, int targetWidth) throws IOException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
-             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-
-            BufferedImage originalImage = ImageIO.read(bis);
-
-            // Вычисляем новую высоту, сохраняя пропорции
-            int targetHeight = (int) ((double) targetWidth / originalImage.getWidth() * originalImage.getHeight());
-
-            BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-            resizedImage.getGraphics().drawImage(originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH), 0, 0, null);
-
-            ImageIO.write(resizedImage, "jpg", bos);
-            return bos.toByteArray();
-        }
-    }
-
-    public String getBase64Avatar(byte[] avatar) {
-        if (avatar != null) {
-            return Base64.getEncoder().encodeToString(avatar);
-        }
-        return null;
-    }
-
-
-
-
-
-    public byte[] addWatermark(byte[] imageData, String watermarkText) throws IOException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
-             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            BufferedImage originalImage = ImageIO.read(bis);
-
-            Graphics2D g2d = originalImage.createGraphics();
-            g2d.setFont(new Font("Arial", Font.BOLD, 36));
-            g2d.setColor(new Color(255, 255, 255, 128));
-
-            // Добавляем водяной знак
-            FontMetrics fm = g2d.getFontMetrics();
-            int x = (originalImage.getWidth() - fm.stringWidth(watermarkText)) / 2;
-            int y = originalImage.getHeight() / 2;
-
-            g2d.drawString(watermarkText, x, y);
-            g2d.dispose();
-
-            ImageIO.write(originalImage, "jpg", bos);
             return bos.toByteArray();
         }
     }
