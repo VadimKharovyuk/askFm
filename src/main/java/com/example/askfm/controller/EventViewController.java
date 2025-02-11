@@ -111,6 +111,7 @@ public class EventViewController {
         return "events/list";
     }
 
+
     @GetMapping("/my")
     public String getMyEvents(Model model,
                               @AuthenticationPrincipal UserDetails userDetails,

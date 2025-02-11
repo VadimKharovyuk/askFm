@@ -70,7 +70,7 @@ public class EventService {
         return eventsPage.map(event -> eventMapper.toListDto(List.of(event)).get(0));
     }
 
-    // Предстоящие события с пагинацией
+    // Предстоящие события с пагинацией +
     public Page<EventListDto> getUpcomingEvents(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").ascending());
         Page<Event> eventsPage = eventRepository.findByEventDateAfter(LocalDateTime.now(), pageable);
@@ -176,7 +176,7 @@ public class EventService {
 
         return eventMapper.toListDto(relatedEvents.getContent());
     }
-
+//find by lokation
     public Page<EventListDto> getEventsByLocation(String location, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
         Page<Event> eventsPage = eventRepository.findByLocation(location, pageable);
