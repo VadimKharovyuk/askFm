@@ -41,6 +41,7 @@ public class EventService {
 
 
 
+
     public EventResponseDto createEvent(EventCreateDto createDto, Long creatorId) {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + creatorId));

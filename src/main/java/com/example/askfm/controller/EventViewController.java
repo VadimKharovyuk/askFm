@@ -24,6 +24,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +118,7 @@ public class EventViewController {
                               @AuthenticationPrincipal UserDetails userDetails,
                               @RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "20") int size) {
+
 
         User currentUser = userService.findByUsername(userDetails.getUsername());
 

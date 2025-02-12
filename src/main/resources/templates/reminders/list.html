@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Event Reminders</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --main-bg: #000000;
+      --card-bg: #1a1a1a;
+      --text-color: #ffffff;
+      --hover-color: #20B2AA;
+      --card-border: #2d2d2d;
+    }
+
+    body {
+      background-color: var(--main-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      margin-bottom: 1rem;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background-color: var(--hover-color);
+      border-color: var(--hover-color);
+    }
+
+    .filter-section {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      padding: 0.5em 1em;
+    }
+
+    .status-filters {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-control {
+      background-color: var(--card-bg);
+      border-color: var(--card-border);
+      color: var(--text-color);
+    }
+
+    .form-control:focus {
+      background-color: var(--card-bg);
+      border-color: var(--hover-color);
+      color: var(--text-color);
+      box-shadow: 0 0 0 0.25rem rgba(32, 178, 170, 0.25);
+    }
+
+    .alert {
+      background-color: var(--card-bg);
+      border-color: var(--card-border);
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="mb-4">Event Reminders</h2>
+
+  <!-- Статистика -->
+  <div class="status-filters mb-4">
+    <div class="btn-group w-100">
+      <a th:href="@{/reminders(status='all')}"
+         class="btn"
+         th:classappend="${currentStatus == 'all' ? 'btn-primary' : 'btn-outline-primary'}">
+        <i class="fas fa-list"></i> All Reminders
+        <span class="badge bg-secondary" th:text="${sentCount + unsentCount}">0</span>
+      </a>
+      <a th:href="@{/reminders(status='sent')}"
+         class="btn"
+         th:classappend="${currentStatus == 'sent' ? 'btn-primary' : 'btn-outline-primary'}">
+        <i class="fas fa-check"></i> Sent
+        <span class="badge bg-success" th:text="${sentCount}">0</span>
+      </a>
+      <a th:href="@{/reminders(status='unsent')}"
+         class="btn"
+         th:classappend="${currentStatus == 'unsent' ? 'btn-primary' : 'btn-outline-primary'}">
+        <i class="fas fa-clock"></i> Pending
+        <span class="badge bg-warning" th:text="${unsentCount}">0</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Счетчик очереди -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-envelope"></i>
+    Emails in queue: <strong th:text="${queueSize}">0</strong>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="filter-section">
+    <form method="get" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Event ID</label>
+        <input type="number" class="form-control" name="eventId" th:value="${eventId}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Start Date</label>
+        <input type="datetime-local"
+               class="form-control"
+               name="startDate"
+               th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd''T''HH:mm') : ''}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">End Date</label>
+        <input type="datetime-local"
+               class="form-control"
+               name="endDate"
+               th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd''T''HH:mm') : ''}">
+      </div>
+      <input type="hidden" name="status" th:value="${currentStatus}">
+      <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Список напоминаний -->
+  <div class="reminders-list">
+    <div th:each="reminder : ${reminders}" class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title" th:text="${reminder.eventTitle}">Event Title</h5>
+          <span class="badge" th:classappend="${reminder.sent ? 'bg-success' : 'bg-warning'}">
+                            <i class="fas" th:classappend="${reminder.sent ? 'fa-check' : 'fa-clock'}"></i>
+                            <span th:text="${reminder.sent ? 'Sent' : 'Pending'}"></span>
+                        </span>
+        </div>
+        <p class="card-text">
+          <i class="fas fa-user me-2"></i>
+          <span th:text="${reminder.username}">Username</span>
+        </p>
+        <p class="card-text">
+          <i class="fas fa-calendar me-2"></i>
+          <span th:text="${#temporals.format(reminder.sentAt, 'dd-MM-yyyy HH:mm')}">Send Date</span>
+        </p>
+        <div class="d-flex justify-content-end" th:if="${!reminder.sent}">
+          <button class="btn btn-sm btn-primary mark-sent-btn"
+                  th:data-reminder-id="${reminder.id}"
+                  onclick="markAsSent(this)">
+            <i class="fas fa-paper-plane me-1"></i> Mark as Sent
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${reminders.empty}" class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i> No reminders found
+    </div>
+  </div>
+
+  <!-- Действия -->
+  <div class="mt-4 d-flex gap-2">
+    <button class="btn btn-danger" onclick="deleteOldReminders()">
+      <i class="fas fa-trash me-2"></i> Delete Reminders Older Than 7 Days
+    </button>
+    <button class="btn btn-danger" onclick="deleteAllReminders()">
+      <i class="fas fa-trash-alt me-2"></i> Delete All Reminders
+    </button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function markAsSent(button) {
+    const reminderId = button.getAttribute('data-reminder-id');
+    fetch(`/reminders/${reminderId}/mark-sent`, {
+      method: 'POST'
+    })
+            .then(response => {
+              if (response.ok) {
+                location.reload();
+              } else {
+                alert('Failed to mark reminder as sent');
+              }
+            });
+  }
+
+  function deleteAllReminders() {
+    if (confirm('WARNING: Are you sure you want to delete ALL reminders? This action cannot be undone.')) {
+      fetch('/reminders/delete-all', {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (response.ok) {
+                  location.reload();
+                } else {
+                  alert('Failed to delete reminders');
+                }
+              });
+    }
+  }
+  function deleteOldReminders() {
+    if (confirm('Are you sure you want to delete all reminders older than 7 days?')) {
+      fetch('/reminders/delete-old', {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (response.ok) {
+                  location.reload();
+                } else {
+                  alert('Failed to delete old reminders');
+                }
+              });
+    }
+  }
+</script>
+</body>
+</html>

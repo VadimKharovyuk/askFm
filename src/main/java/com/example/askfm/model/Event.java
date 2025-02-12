@@ -24,6 +24,15 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private User creator;
+
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<EventAttendance> attendances = new ArrayList<>();
+
 
     @Column(nullable = false)
     private String title;
@@ -62,12 +71,7 @@ public class Event {
     @Column
     private String duration;
 
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<EventAttendance> attendances = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private User creator;
+
+
 }

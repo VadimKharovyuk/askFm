@@ -51,4 +51,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Page<Event> findByLocation(String location, Pageable pageable);
 
+    List<Event> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
+
 }
