@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
 
@@ -53,4 +54,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
 
+
+    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.creator WHERE e.id = :eventId")
+    Optional<Event> findByIdWithCreator(@Param("eventId") Long eventId);
 }

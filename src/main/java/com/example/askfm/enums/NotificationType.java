@@ -2,6 +2,7 @@ package com.example.askfm.enums;
 
 import lombok.Getter;
 
+
 @Getter
 public enum NotificationType {
     LIKE("поставил(-а) лайк вашему посту"),
@@ -14,9 +15,8 @@ public enum NotificationType {
     EVENT_UPDATED("обновил(-а) информацию о событии"),
     EVENT_CANCELLED("отменил(-а) событие"),
     EVENT_GOING("собирается посетить ваше событие"),
-    EVENT_INTERESTED("заинтересовался(-ась) вашим событием"),
+    EVENT_INTERESTED("заинтересовался(-ась) вашим событием");
 
-    EVENT_REMINDER("напоминание о предстоящем событии");
 
     private final String actionMessage;
 

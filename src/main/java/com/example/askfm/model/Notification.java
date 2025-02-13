@@ -20,6 +20,11 @@ public class Notification {
 
 
     @ManyToOne
+    @JoinColumn(name = "events_id")
+    private Event event;
+
+
+    @ManyToOne
     @JoinColumn(name = "reposts_id")
     private Repost repost;
 
@@ -39,7 +44,6 @@ public class Notification {
     @ManyToOne
     @JoinColumn(name = "photo_id")
     private Photo photo;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

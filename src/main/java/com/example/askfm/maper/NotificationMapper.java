@@ -1,14 +1,18 @@
 package com.example.askfm.maper;
 
+import com.example.askfm.dto.EventCreateDto;
 import com.example.askfm.dto.NotificationDTO;
-import com.example.askfm.model.Notification;
-import com.example.askfm.model.Photo;
-import com.example.askfm.model.Post;
-import com.example.askfm.model.Tag;
+import com.example.askfm.enums.EventStatus;
+import com.example.askfm.exception.EventCreationException;
+import com.example.askfm.model.*;
 import com.example.askfm.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +24,7 @@ public class NotificationMapper {
     public NotificationDTO toDto(Notification notification) {
         Post post = notification.getPost();
         Photo photo = notification.getPhoto();
+        Event event = notification.getEvent();
 
         return NotificationDTO.builder()
                 .id(notification.getId())
@@ -45,7 +50,44 @@ public class NotificationMapper {
                 .photoBase64(photo != null && photo.getPhoto() != null ?
                         imageService.getBase64Avatar(photo.getPhoto()) : null)
                 .photoOwnerUsername(photo != null ? photo.getOwner().getUsername() : null)
+
+                //инфа ивент
+                .eventId(event != null ? event.getId() : null)
+                .eventTitle(event != null ? event.getTitle() : null)
+                .eventDescription(event != null ? event.getDescription() : null)
+                .eventDate(event != null ? event.getEventDate() : null)
+                .eventCity(event != null ? event.getCity() : null)
+                .eventAddress(event != null ? event.getAddress() : null)
+                .eventCreatorUsername(event != null ? event.getCreator().getUsername() : null)
+                .eventMedia(event != null && event.getPhoto() != null ?
+                        imageService.getBase64Avatar(event.getPhoto()) : null)
+                .eventStatus(event != null ? event.getStatus() : null)
+
                 .build();
+    }
+
+
+    public Event toEntity(EventCreateDto dto, User creator) {
+        return Event.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .eventDate(dto.getEventDate())
+                .city(dto.getCity())
+                .address(dto.getAddress())
+                .creator(creator)
+                .status(EventStatus.ACTIVE)  // Начальный статус
+                .photo(dto.getPhoto() != null ? processPhoto(dto.getPhoto()) : null)  // Обработка фото
+                .attendances(new ArrayList<>())  // Пустой список посещений
+                .build();
+    }
+
+    // Метод для обработки фото
+    private byte[] processPhoto(MultipartFile photo) {
+        try {
+            return photo.getBytes();
+        } catch (IOException e) {
+            throw new EventCreationException("Error processing event photo: " + e.getMessage());
+        }
     }
 
     public List<NotificationDTO> toDtoList(List<Notification> notifications) {
@@ -58,4 +100,5 @@ public class NotificationMapper {
         if (content == null) return null;
         return content.length() > 50 ? content.substring(0, 47) + "..." : content;
     }
+
 }

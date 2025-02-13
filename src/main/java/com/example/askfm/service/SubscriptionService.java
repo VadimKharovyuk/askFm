@@ -94,43 +94,6 @@ public class SubscriptionService {
         }
     }
 
-//    public void follow(String subscriberUsername, String subscribedToUsername) {
-//        log.debug("⛔ Створення підписки: {} -> {}", subscriberUsername, subscribedToUsername);
-//
-//        if (subscriberUsername.equals(subscribedToUsername)) {
-//            throw new IllegalArgumentException("Ви не можете підписатися на себе");
-//        }
-//
-//        User subscriber = userRepository.findByUsername(subscriberUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscriberUsername));
-//
-//        User subscribedTo = userRepository.findByUsername(subscribedToUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено: " + subscribedToUsername));
-//
-//        if (subscriptionRepository.existsBySubscriberAndSubscribedTo(subscriber, subscribedTo)) {
-//            throw new IllegalArgumentException("Ви вже підписані на цього користувача");
-//        }
-//
-//        Subscription subscription = Subscription.builder()
-//                .subscriber(subscriber)
-//                .subscribedTo(subscribedTo)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//
-//
-//        subscriptionRepository.save(subscription);
-//        notificationService.notifyAboutSubscription(subscriber,subscribedTo);
-//        // Очистка кэша
-//        Cache cache = cacheManager.getCache("followers");
-//        cache.evict("subscribers_count:" + subscribedToUsername);
-//        cache.evict("subscriptions_count:" + subscriberUsername);
-//        cache.evict("is_following:" + subscriberUsername + "_" + subscribedToUsername);
-//        cache.evict("following_users:" + subscriberUsername);
-//        cache.evict("followers_list:" + subscribedToUsername);
-//
-//        log.debug("✅ Успішно створено підписку: {} -> {}", subscriberUsername, subscribedToUsername);
-//    }
 
     public void unfollow(String subscriberUsername, String subscribedToUsername) {
         log.debug("⛔ Видалення підписки: {} -> {}", subscriberUsername, subscribedToUsername);

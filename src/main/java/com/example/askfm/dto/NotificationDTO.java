@@ -1,5 +1,6 @@
 package com.example.askfm.dto;
 
+import com.example.askfm.enums.EventStatus;
 import com.example.askfm.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,22 @@ public class NotificationDTO {
     private String photoBase64;
     private BigDecimal photoPrice;
     private String photoOwnerUsername;
+
+
+    // Новые поля для события
+    private Long eventId;
+    private String eventTitle;
+    private String eventDescription;
+    private LocalDateTime eventDate;
+    private String eventCity;
+    private String eventAddress;
+    private String eventCreatorUsername;
+    private String eventMedia;
+    private EventStatus eventStatus;
+
+
+
+
 
 
 }

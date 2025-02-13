@@ -1,21 +1,29 @@
 package com.example.askfm.EventListener;
 
 import com.example.askfm.dto.NotificationDTO;
+import com.example.askfm.dto.UserSearchDTO;
 import com.example.askfm.enums.NotificationType;
+import com.example.askfm.exception.NotificationProcessingException;
 import com.example.askfm.maper.NotificationMapper;
-import com.example.askfm.model.Notification;
-import com.example.askfm.model.Post;
-import com.example.askfm.model.Repost;
-import com.example.askfm.model.User;
+import com.example.askfm.model.*;
+import com.example.askfm.repository.EventRepository;
 import com.example.askfm.repository.NotificationRepository;
+import com.example.askfm.repository.SubscriptionRepository;
+import com.example.askfm.repository.UserRepository;
+import com.example.askfm.service.NotificationService;
+import com.example.askfm.service.SubscriptionService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -23,6 +31,66 @@ import java.time.LocalDateTime;
 public class NotificationListener {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+  private final SubscriptionRepository subscriptionRepository;
+
+    @EventListener
+    @Async("eventExecutor")
+    @Transactional
+    public void handleEventCreated(EventEvent eventEvent) {
+        try {
+            Event event = eventRepository.findByIdWithCreator(eventEvent.getEventId())
+                    .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + eventEvent.getEventId()));
+
+            User creator = userRepository.findByIdEager(eventEvent.getCreatorId())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + eventEvent.getCreatorId()));
+
+            log.debug("📝 Обработка создания события от {} для события {}",
+                    creator.getUsername(), event.getId());
+
+            // Получаем ID всех подписчиков
+            List<Long> subscriberIds = subscriptionRepository.findSubscriberIdsBySubscribedToId(creator.getId());
+
+            if (!subscriberIds.isEmpty()) {
+                // Формируем параметры для batch insert
+                LocalDateTime now = LocalDateTime.now();
+                String message = creator.getUsername() + " " + NotificationType.EVENT_CREATED.getActionMessage();
+
+                // Обрабатываем по частям
+                int batchSize = 1000;
+                for (int i = 0; i < subscriberIds.size(); i += batchSize) {
+                    List<Long> batch = subscriberIds.subList(
+                            i, Math.min(subscriberIds.size(), i + batchSize)
+                    );
+
+                    for (Long subscriberId : batch) {
+                        notificationRepository.batchCreateEventNotifications(
+                                subscriberId,
+                                creator.getId(),
+                                event.getId(),
+                                NotificationType.EVENT_CREATED.name(),
+                                message,
+                                now
+                        );
+                    }
+
+                    log.debug("📨 Создана пачка уведомлений о событии ({} из {})",
+                            Math.min(i + batchSize, subscriberIds.size()),
+                            subscriberIds.size());
+                }
+            }
+
+            log.info("✅ Созданы уведомления о событии для {} подписчиков", subscriberIds.size());
+
+        } catch (Exception e) {
+            log.error("❌ Неожиданная ошибка при создании уведомлений: {}", e.getMessage());
+            throw new NotificationProcessingException("Неожиданная ошибка: " + e.getMessage());
+        }
+    }
+
+
+
 
     @EventListener
     @Async("notificationExecutor")

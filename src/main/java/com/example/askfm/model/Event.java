@@ -1,6 +1,7 @@
 package com.example.askfm.model;
 
 import com.example.askfm.enums.EventCategory;
+import com.example.askfm.enums.EventStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -33,6 +34,10 @@ public class Event {
     @Builder.Default
     private List<EventAttendance> attendances = new ArrayList<>();
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private EventStatus status = EventStatus.ACTIVE;
 
     @Column(nullable = false)
     private String title;

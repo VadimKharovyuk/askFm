@@ -120,4 +120,20 @@ public class NotificationService {
         log.debug("✅ Уведомление {} удалено", notificationId);
     }
 
+
+    public void notifyAboutEventCreation(Event event, User creator) {
+        log.debug("🚀 Публикация создания события: {} создал событие {}",
+                creator.getUsername(), event.getTitle());
+
+        try {
+            EventEvent eventEvent = EventEvent.createEvent(event, creator);
+            eventPublisher.publishEvent(eventEvent);
+        } catch (Exception e) {
+            log.error("❌ Ошибка при публикации создания события {} от {}: {}",
+                    event.getTitle(), creator.getUsername(), e.getMessage());
+            throw e;
+        }
+    }
+
+
 }

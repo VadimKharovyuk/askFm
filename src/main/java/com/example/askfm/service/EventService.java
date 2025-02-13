@@ -23,12 +23,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +40,10 @@ public class EventService {
     private final EventMapper eventMapper;
     private final UserRepository userRepository;
     private final EventAttendanceRepository attendanceRepository;
+    private final NotificationService notificationService;
 
 
-
-
+    @Transactional
     public EventResponseDto createEvent(EventCreateDto createDto, Long creatorId) {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + creatorId));
@@ -49,6 +51,10 @@ public class EventService {
         try {
             Event event = eventMapper.toEntity(createDto, creator);
             Event savedEvent = eventRepository.save(event);
+            eventRepository.flush(); // Гарантируем сохранение в БД
+
+            notificationService.notifyAboutEventCreation(savedEvent, creator);
+
             return eventMapper.toDto(savedEvent, null);
         } catch (IOException e) {
             throw new EventCreationException("Error processing event photo: " + e.getMessage());
@@ -139,6 +145,8 @@ public class EventService {
         if (!event.getCreator().getUsername().equals(username)) {
             throw new IllegalStateException("Only creator can update the event");
         }
+        User updater = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
 
         event.setTitle(updateDto.getTitle());
         event.setDescription(updateDto.getDescription());

@@ -40,4 +40,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
 
     void deleteByPostId(Long postId);
+
+    @Modifying
+    @Query(value = "INSERT INTO notifications (user_id, initiator_id, events_id, type, message, created_at, is_read) " +
+            "VALUES (:userId, :initiatorId, :eventId, :type, :message, :createdAt, false)",
+            nativeQuery = true)
+    void batchCreateEventNotifications(
+            @Param("userId") Long userId,
+            @Param("initiatorId") Long initiatorId,
+            @Param("eventId") Long eventId,
+            @Param("type") String type,
+            @Param("message") String message,
+            @Param("createdAt") LocalDateTime createdAt);
 }
