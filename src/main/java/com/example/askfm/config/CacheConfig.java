@@ -88,6 +88,18 @@ public class CacheConfig {
                 .maximumSize(4000)                   // Большой размер для хранения фото
                 .recordStats();
 
+
+
+        // Конфигурация кеша для профилей пользователей
+        Caffeine<Object, Object> userProfileBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(7, TimeUnit.DAYS)      // Кеш живет 7 дней
+                .expireAfterAccess(7, TimeUnit.DAYS)
+                .initialCapacity(200)
+                .maximumSize(2000)
+                .recordStats();
+
+
+
         // Устанавливаем специальную конфигурацию
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
         cacheManager.registerCustomCache("userSearch", userSearchCacheBuilder.build());
@@ -95,6 +107,7 @@ public class CacheConfig {
         cacheManager.registerCustomCache("posts", postsBuilder.build());
         cacheManager.registerCustomCache("views", viewsBuilder.build());
         cacheManager.registerCustomCache("likes", likesBuilder.build());
+        cacheManager.registerCustomCache("userProfiles", userProfileBuilder.build());
         cacheManager.registerCustomCache("userPhotos", photosBuilder.build());
 
 
