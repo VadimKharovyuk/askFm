@@ -45,6 +45,7 @@ public class AsyncConfig {
         return executor;
     }
 
+
     @Bean(name = "eventExecutor")
     public Executor eventExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

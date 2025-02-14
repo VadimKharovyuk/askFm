@@ -401,6 +401,7 @@
         <div th:if="${unreadCount > 0}" class="text-gray">
           У вас <span th:text="${unreadCount}"></span> новых уведомлений
         </div>
+
       </div>
       <form th:action="@{/notifications/deleteNotifications}" method="post">
         <button type="submit" class="btn btn-danger">
@@ -549,8 +550,6 @@
               </div>
             </div>
 
-
-
             <!-- EVENT_CREATED уведомление -->
             <div th:if="${notification.type.name() == 'EVENT_CREATED'}" class="notification-content-wrapper">
               <a th:href="@{'/users/' + ${notification.initiatorUsername}}" class="notification-link d-flex align-items-center">
@@ -627,10 +626,6 @@
               </div>
             </div>
 
-
-
-
-
             <!-- EVENT_CANCELLED уведомление -->
             <div th:if="${notification.type.name() == 'EVENT_CANCELLED'}" class="notification-content-wrapper">
               <div class="notification-icon">
@@ -662,8 +657,8 @@
                     </div>
                   </div>
                 </div>
-
-
+              </div>
+            </div>
 
             <!-- Время для всех типов уведомлений -->
             <div class="notification-time" th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}"></div>
@@ -695,6 +690,7 @@
       </div>
     </div>
 
+
     <!-- Простое обновление страницы каждые 30 секунд -->
     <script>
       setTimeout(function() {
@@ -702,8 +698,7 @@
       }, 30000);
     </script>
   </main>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ public class NotificationListener {
     private final NotificationMapper notificationMapper;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-  private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
 
 
@@ -147,16 +147,11 @@ public class NotificationListener {
                             subscriberIds.size());
                 }
             }
-
-            log.info("✅ Созданы уведомления об обновлении события для {} подписчиков", subscriberIds.size());
-
         } catch (Exception e) {
             log.error("❌ Неожиданная ошибка при создании уведомлений об обновлении: {}", e.getMessage());
             throw new NotificationProcessingException("Неожиданная ошибка: " + e.getMessage());
         }
     }
-
-
 
 
     @EventListener
@@ -212,7 +207,6 @@ public class NotificationListener {
     }
 
 
-
     @EventListener
     @Async("likeExecutor")
     public void handleLikeEvent(LikeEvent event) {
@@ -241,6 +235,7 @@ public class NotificationListener {
             log.error("❌ Ошибка при создании уведомления о лайке: {}", e.getMessage());
         }
     }
+
     @EventListener
     @Async("notificationExecutor")
     public void handleSubscriptionEvent(SubscriptionEvent event) {

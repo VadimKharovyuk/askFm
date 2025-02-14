@@ -1,6 +1,7 @@
 package com.example.askfm.controller;
 
 import com.example.askfm.dto.NotificationDTO;
+import com.example.askfm.enums.NotificationType;
 import com.example.askfm.model.User;
 import com.example.askfm.service.NotificationService;
 import com.example.askfm.service.UserService;

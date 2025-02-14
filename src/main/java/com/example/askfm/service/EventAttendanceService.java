@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 @Slf4j
@@ -22,9 +23,10 @@ public class EventAttendanceService {
     private final EventAttendanceRepository attendanceRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
 
-
+    @Transactional
     public void attendEvent(Long eventId, String username, ParticipationType status) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id: " + eventId));
@@ -50,7 +52,8 @@ public class EventAttendanceService {
         attendance.setStatus(status);
         attendance.setUpdatedAt(LocalDateTime.now());
 
-        attendanceRepository.save(attendance);
+        EventAttendance savedAttendance = attendanceRepository.save(attendance);
+        attendanceRepository.flush();
     }
 
     public void cancelAttendance(Long eventId, String username) {

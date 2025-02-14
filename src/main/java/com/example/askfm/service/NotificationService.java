@@ -3,6 +3,7 @@ package com.example.askfm.service;
 import com.example.askfm.EventListener.*;
 import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.enums.NotificationType;
+import com.example.askfm.enums.ParticipationType;
 import com.example.askfm.exception.NotificationNotFoundException;
 import com.example.askfm.exception.UnauthorizedException;
 import com.example.askfm.maper.NotificationMapper;

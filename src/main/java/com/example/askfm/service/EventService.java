@@ -43,7 +43,7 @@ public class EventService {
     private final EventAttendanceRepository attendanceRepository;
     private final NotificationService notificationService;
     private final NotificationRepository  notificationRepository;
-    private final SubscriptionRepository subscriptionRepository;
+
 
 
     @Transactional
@@ -141,10 +141,9 @@ public class EventService {
         // Создаем уведомления об удалении
         notificationService.createCancelEventNotifications(event, updater);
 
-        // Удаляем все связанные записи в правильном порядке
-        notificationRepository.deleteByEventId(eventId); // Сначала удаляем уведомления
-        attendanceRepository.deleteByEventId(eventId);   // Затем записи об участии
-        eventRepository.delete(event);                   // И наконец само событие
+        notificationRepository.deleteByEventId(eventId);
+        attendanceRepository.deleteByEventId(eventId);
+        eventRepository.delete(event);
 
         log.info("✅ Событие '{}' и связанные данные успешно удалены", event.getTitle());
     }

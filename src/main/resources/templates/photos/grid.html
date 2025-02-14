@@ -332,7 +332,8 @@
       <div th:if="${photo.isLocked && !isPhotoUnlocked.apply(photo) && currentUsername != null && currentUsername != photoOwner.username}"
            class="card-footer">
         <form th:action="@{/photos/{id}/unlock(id=${photo.id})}"
-              method="post">
+              method="post"
+              onsubmit="return confirm('Are you sure you want to unlock this photo ');">
           <button type="submit" class="unlock-button">
             <i class="fas fa-unlock"></i>
             Unlock for <span th:text="${photo.price}"></span> coins

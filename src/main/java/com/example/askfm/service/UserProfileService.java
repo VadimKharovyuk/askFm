@@ -1,6 +1,8 @@
 package com.example.askfm.service;
 
 import com.example.askfm.dto.ProfileEditDTO;
+
+import com.example.askfm.maper.UserProfileMapper;
 import com.example.askfm.model.User;
 import com.example.askfm.model.UserProfile;
 import com.example.askfm.repository.UserProfileRepository;
@@ -16,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserProfileService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
-
+    private final UserProfileMapper userProfileMapper;
 
     public UserProfile getUserProfile(User user) {
         return userProfileRepository.findByUser(user)
@@ -33,32 +35,12 @@ public class UserProfileService {
             profile.setUser(user);
         }
 
-        profile.setBio(profileDTO.getBio());
-        profile.setDateOfBirth(profileDTO.getDateOfBirth());
-        profile.setLocation(profileDTO.getLocation());
-        profile.setEducation(profileDTO.getEducation());
-        profile.setWebsite(profileDTO.getWebsite());
-        profile.setOccupation(profileDTO.getOccupation());
-        profile.setInterests(profileDTO.getInterests());
-
+        profile = userProfileMapper.toEntity(profileDTO, profile);
         userProfileRepository.save(profile);
     }
 
-
     public ProfileEditDTO getProfileDTO(User user) {
         UserProfile profile = user.getProfile();
-        if (profile == null) {
-            return new ProfileEditDTO();
-        }
-
-        return ProfileEditDTO.builder()
-                .bio(profile.getBio())
-                .dateOfBirth(profile.getDateOfBirth())
-                .location(profile.getLocation())
-                .education(profile.getEducation())
-                .website(profile.getWebsite())
-                .occupation(profile.getOccupation())
-                .interests(profile.getInterests())
-                .build();
+        return userProfileMapper.toDto(profile);
     }
 }
