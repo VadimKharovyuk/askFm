@@ -2,17 +2,21 @@ package com.example.askfm.service;
 
 import com.example.askfm.EventListener.*;
 import com.example.askfm.dto.NotificationDTO;
+import com.example.askfm.enums.NotificationType;
 import com.example.askfm.exception.NotificationNotFoundException;
 import com.example.askfm.exception.UnauthorizedException;
 import com.example.askfm.maper.NotificationMapper;
 import com.example.askfm.model.*;
 import com.example.askfm.repository.NotificationRepository;
+import com.example.askfm.repository.SubscriptionRepository;
+import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,6 +26,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
     public List<NotificationDTO> getUserNotifications(String username) {
         log.debug("Получение уведомлений для пользователя: {}", username);
@@ -135,5 +141,54 @@ public class NotificationService {
         }
     }
 
+    public void notifyAboutEventUpdate(Event event, User updater) {
+        log.debug("🚀 Публикация обновления события: {} обновил событие {}",
+                updater.getUsername(), event.getTitle());
 
+        try {
+            EventEvent eventEvent = EventEvent.updateEvent(event, updater);
+            eventPublisher.publishEvent(eventEvent);
+        } catch (Exception e) {
+            log.error("❌ Ошибка при публикации обновления события {} от {}: {}",
+                    event.getTitle(), updater.getUsername(), e.getMessage());
+            throw e;
+        }
+    }
+
+
+    @Transactional
+    public void createCancelEventNotifications(Event event, User canceller) {
+        List<Long> subscriberIds = subscriptionRepository.findSubscriberIdsBySubscribedToId(event.getCreator().getId());
+
+        if (!subscriberIds.isEmpty()) {
+            LocalDateTime now = LocalDateTime.now();
+            String message = canceller.getUsername() + " " + NotificationType.EVENT_CANCELLED.getActionMessage();
+
+            // Сохраняем важную информацию о событии перед удалением
+            String eventTitle = event.getTitle();
+            Long eventId = event.getId();
+
+            for (Long subscriberId : subscriberIds) {
+                try {
+                    Notification notification = Notification.builder()
+                            .user(userRepository.getReferenceById(subscriberId))
+                            .initiator(canceller)
+                            .type(NotificationType.EVENT_CANCELLED)  // Явно указываем тип
+                            .message(message)
+                            .createdAt(now)
+                            .isRead(false)
+                            .build();
+
+                    notificationRepository.save(notification);
+
+                    log.debug("📨 Создано уведомление об отмене события для подписчика {}", subscriberId);
+                } catch (Exception e) {
+                    log.error("❌ Ошибка при создании уведомления для подписчика {}: {}", subscriberId, e.getMessage());
+                }
+            }
+
+            log.info("✅ Созданы уведомления об отмене события '{}' для {} подписчиков",
+                    eventTitle, subscriberIds.size());
+        }
+    }
 }

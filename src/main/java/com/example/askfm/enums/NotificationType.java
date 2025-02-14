@@ -14,6 +14,7 @@ public enum NotificationType {
     EVENT_CREATED("создал(-а) новое событие"),
     EVENT_UPDATED("обновил(-а) информацию о событии"),
     EVENT_CANCELLED("отменил(-а) событие"),
+
     EVENT_GOING("собирается посетить ваше событие"),
     EVENT_INTERESTED("заинтересовался(-ась) вашим событием");
 

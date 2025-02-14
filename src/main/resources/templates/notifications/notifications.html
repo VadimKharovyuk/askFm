@@ -425,6 +425,8 @@
             <i th:if="${notification.type.name() == 'REPOST'}" class="fas fa-retweet text-success"></i>
             <i th:if="${notification.type.name() == 'PHOTO_PURCHASE'}" class="fas fa-camera text-success"></i>
             <i th:if="${notification.type.name() == 'EVENT_CREATED'}" class="fas fa-calendar-plus text-info"></i>
+            <i th:if="${notification.type.name() == 'EVENT_UPDATED'}" class="fas fa-calendar-check text-warning"></i>
+            <i th:if="${notification.type.name() == 'EVENT_CANCELLED'}" class="fas fa-calendar-times text-danger"></i>
           </div>
 
           <!-- Блок сообщения -->
@@ -586,6 +588,81 @@
                 </a>
               </div>
             </div>
+
+            <!-- EVENT_UPDATED уведомление -->
+            <div th:if="${notification.type.name() == 'EVENT_UPDATED'}" class="notification-content-wrapper">
+              <a th:href="@{'/users/' + ${notification.initiatorUsername}}" class="notification-link d-flex align-items-center">
+                <img th:if="${notification.initiatorAvatar != null}"
+                     th:src="@{'data:image/jpeg;base64,' + ${notification.initiatorAvatar}}"
+                     class="rounded-circle me-2"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     alt="avatar"/>
+                <img th:if="${notification.initiatorAvatar == null}"
+                     src="/default-avatar.jpg"
+                     class="rounded-circle me-2"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     alt="default avatar"/>
+                <span th:text="${notification.initiatorUsername}"></span>
+              </a>
+              <span th:text="${notification.message}"></span>
+
+              <!-- Информация об обновленном событии -->
+              <div class="referenced-event mt-2">
+                <a th:href="@{'/events/' + ${notification.eventId}}" class="notification-link" style="text-decoration: none;">
+                  <div class="event-card p-3 border rounded">
+                    <h5 class="event-title" th:text="${notification.eventTitle}"></h5>
+                    <p class="event-description text-muted mb-2" th:text="${notification.eventDescription}"></p>
+                    <div class="event-details d-flex align-items-center mb-2">
+                      <i class="far fa-calendar-alt me-2"></i>
+                      <span th:text="${#temporals.format(notification.eventDate, 'dd.MM.yyyy HH:mm')}"></span>
+                      <i class="fas fa-map-marker-alt ms-3 me-2"></i>
+                      <span th:text="${notification.eventCity + ', ' + notification.eventAddress}"></span>
+                    </div>
+                    <img th:if="${notification.eventMedia != null}"
+                         th:src="@{'data:image/jpeg;base64,' + ${notification.eventMedia}}"
+                         class="event-media w-100"
+                         style="max-height: 200px; object-fit: cover; border-radius: 4px;"/>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+
+
+
+
+            <!-- EVENT_CANCELLED уведомление -->
+            <div th:if="${notification.type.name() == 'EVENT_CANCELLED'}" class="notification-content-wrapper">
+              <div class="notification-icon">
+              </div>
+
+              <div class="notification-message">
+                <!-- Информация об инициаторе -->
+                <a th:href="@{'/users/' + ${notification.initiatorUsername}}" class="notification-link d-flex align-items-center">
+                  <img th:if="${notification.initiatorAvatar != null}"
+                       th:src="@{'data:image/jpeg;base64,' + ${notification.initiatorAvatar}}"
+                       class="rounded-circle me-2"
+                       style="width: 40px; height: 40px; object-fit: cover;"
+                       alt="avatar"/>
+                  <img th:if="${notification.initiatorAvatar == null}"
+                       src="/default-avatar.jpg"
+                       class="rounded-circle me-2"
+                       style="width: 40px; height: 40px; object-fit: cover;"
+                       alt="default avatar"/>
+                  <span th:text="${notification.initiatorUsername}"></span>
+                </a>
+                <span th:text="${notification.message}"></span>
+
+                <!-- Специальный блок для отмененного события -->
+                <div class="referenced-event mt-2">
+                  <div class="event-card p-3 border rounded bg-light">
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                      <h5 class="event-title text-danger m-0">Событие отменено</h5>
+                    </div>
+                  </div>
+                </div>
+
 
 
             <!-- Время для всех типов уведомлений -->

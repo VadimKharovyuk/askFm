@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
@@ -35,10 +36,17 @@ public class NotificationListener {
     private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
 
+
+
     @EventListener
     @Async("eventExecutor")
     @Transactional
     public void handleEventCreated(EventEvent eventEvent) {
+        // Проверяем, что это событие создания
+        if (eventEvent.getType() != NotificationType.EVENT_CREATED) {
+            return;
+        }
+
         try {
             Event event = eventRepository.findByIdWithCreator(eventEvent.getEventId())
                     .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + eventEvent.getEventId()));
@@ -85,6 +93,65 @@ public class NotificationListener {
 
         } catch (Exception e) {
             log.error("❌ Неожиданная ошибка при создании уведомлений: {}", e.getMessage());
+            throw new NotificationProcessingException("Неожиданная ошибка: " + e.getMessage());
+        }
+    }
+
+    @EventListener
+    @Async("eventExecutor")
+    @Transactional
+    public void handleEventUpdated(EventEvent eventEvent) {
+        // Проверяем, что это событие обновления
+        if (eventEvent.getType() != NotificationType.EVENT_UPDATED) {
+            return;
+        }
+
+        try {
+            Event event = eventRepository.findByIdWithCreator(eventEvent.getEventId())
+                    .orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + eventEvent.getEventId()));
+
+            User updater = userRepository.findByIdEager(eventEvent.getCreatorId())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + eventEvent.getCreatorId()));
+
+            log.debug("📝 Обработка обновления события от {} для события {}",
+                    updater.getUsername(), event.getId());
+
+            // Получаем ID всех подписчиков
+            List<Long> subscriberIds = subscriptionRepository.findSubscriberIdsBySubscribedToId(updater.getId());
+
+            if (!subscriberIds.isEmpty()) {
+                // Формируем параметры для batch insert
+                LocalDateTime now = LocalDateTime.now();
+                String message = updater.getUsername() + " " + NotificationType.EVENT_UPDATED.getActionMessage();
+
+                // Обрабатываем по частям
+                int batchSize = 1000;
+                for (int i = 0; i < subscriberIds.size(); i += batchSize) {
+                    List<Long> batch = subscriberIds.subList(
+                            i, Math.min(subscriberIds.size(), i + batchSize)
+                    );
+
+                    for (Long subscriberId : batch) {
+                        notificationRepository.batchCreateEventNotifications(
+                                subscriberId,
+                                updater.getId(),
+                                event.getId(),
+                                NotificationType.EVENT_UPDATED.name(),
+                                message,
+                                now
+                        );
+                    }
+
+                    log.debug("📨 Создана пачка уведомлений об обновлении события ({} из {})",
+                            Math.min(i + batchSize, subscriberIds.size()),
+                            subscriberIds.size());
+                }
+            }
+
+            log.info("✅ Созданы уведомления об обновлении события для {} подписчиков", subscriberIds.size());
+
+        } catch (Exception e) {
+            log.error("❌ Неожиданная ошибка при создании уведомлений об обновлении: {}", e.getMessage());
             throw new NotificationProcessingException("Неожиданная ошибка: " + e.getMessage());
         }
     }

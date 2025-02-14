@@ -21,4 +21,14 @@ public class EventEvent {
         );
     }
 
+    public static EventEvent updateEvent(Event updatedEvent, User updater) {
+        return new EventEvent(
+                updatedEvent.getId(),
+                updater.getId(),
+                NotificationType.EVENT_UPDATED
+        );
+    }
+
+
+
 }

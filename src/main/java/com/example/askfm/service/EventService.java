@@ -5,6 +5,7 @@ import com.example.askfm.dto.EventListDto;
 import com.example.askfm.dto.EventResponseDto;
 import com.example.askfm.dto.EventUpdateDto;
 import com.example.askfm.enums.EventCategory;
+import com.example.askfm.enums.NotificationType;
 import com.example.askfm.enums.ParticipationType;
 import com.example.askfm.exception.EventCreationException;
 import com.example.askfm.exception.EventNotFoundException;
@@ -14,10 +15,9 @@ import com.example.askfm.maper.EventMapper;
 import com.example.askfm.model.Event;
 import com.example.askfm.model.EventAttendance;
 import com.example.askfm.model.User;
-import com.example.askfm.repository.EventAttendanceRepository;
-import com.example.askfm.repository.EventRepository;
-import com.example.askfm.repository.UserRepository;
+import com.example.askfm.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,8 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventAttendanceRepository attendanceRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository  notificationRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
 
     @Transactional
@@ -60,7 +63,6 @@ public class EventService {
             throw new EventCreationException("Error processing event photo: " + e.getMessage());
         }
     }
-
 
 
     public Page<EventListDto> getAllEvents(int page, int size) {
@@ -124,18 +126,27 @@ public class EventService {
         return eventMapper.toDto(event, null);
     }
 
+    @Transactional
     public void deleteEvent(Long eventId, String username) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id: " + eventId));
 
-        // Проверяем, является ли пользователь создателем события
         if (!event.getCreator().getUsername().equals(username)) {
             throw new IllegalStateException("Only creator can delete the event");
         }
-        // Сначала удаляем все записи об участии
-        attendanceRepository.deleteByEventId(eventId);
-        // Затем удаляем само событие
-        eventRepository.delete(event);
+
+        User updater = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+
+        // Создаем уведомления об удалении
+        notificationService.createCancelEventNotifications(event, updater);
+
+        // Удаляем все связанные записи в правильном порядке
+        notificationRepository.deleteByEventId(eventId); // Сначала удаляем уведомления
+        attendanceRepository.deleteByEventId(eventId);   // Затем записи об участии
+        eventRepository.delete(event);                   // И наконец само событие
+
+        log.info("✅ Событие '{}' и связанные данные успешно удалены", event.getTitle());
     }
 
     public EventResponseDto updateEvent(Long eventId, EventUpdateDto updateDto, String username) {
@@ -154,8 +165,11 @@ public class EventService {
         event.setCity(updateDto.getCity());
         event.setAddress(updateDto.getAddress());
 
-        Event savedEvent = eventRepository.save(event);
-        return eventMapper.toDto(savedEvent, null);
+        Event updatedEvent = eventRepository.save(event);
+        eventRepository.flush();
+
+        notificationService.notifyAboutEventUpdate(updatedEvent, updater);
+        return eventMapper.toDto(updatedEvent, null);
     }
 
 
@@ -173,7 +187,8 @@ public class EventService {
         }
         return counts;
     }
-//список по категориям
+
+    //список по категориям
     public List<EventListDto> getRelatedEvents(Long eventId, int limit) {
         Event currentEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
@@ -185,7 +200,8 @@ public class EventService {
 
         return eventMapper.toListDto(relatedEvents.getContent());
     }
-//find by lokation
+
+    //find by lokation
     public Page<EventListDto> getEventsByLocation(String location, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
         Page<Event> eventsPage = eventRepository.findByLocation(location, pageable);

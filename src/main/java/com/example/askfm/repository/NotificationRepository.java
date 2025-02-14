@@ -52,4 +52,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("type") String type,
             @Param("message") String message,
             @Param("createdAt") LocalDateTime createdAt);
+
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.event.id = :eventId")
+    void deleteByEventId(@Param("eventId") Long eventId);
 }

@@ -3,6 +3,7 @@ package com.example.askfm.maper;
 import com.example.askfm.dto.EventCreateDto;
 import com.example.askfm.dto.NotificationDTO;
 import com.example.askfm.enums.EventStatus;
+import com.example.askfm.enums.NotificationType;
 import com.example.askfm.exception.EventCreationException;
 import com.example.askfm.model.*;
 import com.example.askfm.service.ImageService;
@@ -20,52 +21,80 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationMapper {
     private final ImageService imageService;
-
-    public NotificationDTO toDto(Notification notification) {
+    public  NotificationDTO toDto(Notification notification) {
         Post post = notification.getPost();
         Photo photo = notification.getPhoto();
         Event event = notification.getEvent();
 
-        return NotificationDTO.builder()
+        NotificationDTO.NotificationDTOBuilder builder = NotificationDTO.builder()
                 .id(notification.getId())
                 .type(notification.getType())
                 .message(notification.getMessage())
                 .createdAt(notification.getCreatedAt())
                 .isRead(notification.isRead())
                 .initiatorUsername(notification.getInitiator().getUsername())
-                .postId(post != null ? post.getId() : null)
                 .initiatorAvatar(notification.getInitiator().getAvatar() != null ?
-                        imageService.getBase64Avatar(notification.getInitiator().getAvatar()) : null)
-                // Информация о посте
-                .postContent(post != null ? post.getContent() : null)
-                .postCreatedAt(post != null ? post.getPublishedAt() : null)
-                .postAuthorUsername(post != null ? post.getAuthor().getUsername() : null)
-                .postMedia(post != null && post.getMedia() != null ?
-                        imageService.getBase64Avatar(post.getMedia()) : null)
+                        imageService.getBase64Avatar(notification.getInitiator().getAvatar()) : null);
 
-                // Информация о фото
-                .photoId(photo != null ? photo.getId() : null)
-                .photoDescription(photo != null ? photo.getDescription() : null)
-                .photoPrice(photo != null ? photo.getPrice() : null)
-                .photoBase64(photo != null && photo.getPhoto() != null ?
-                        imageService.getBase64Avatar(photo.getPhoto()) : null)
-                .photoOwnerUsername(photo != null ? photo.getOwner().getUsername() : null)
+        // Если это уведомление об отмене события, не пытаемся получить данные события
+        if (notification.getType() == NotificationType.EVENT_CANCELLED) {
+            return builder
+                    .eventId(null)  // ID удаленного события
+                    .eventTitle("Событие удалено")  // Заглушка для удаленного события
+                    .build();
+        }
 
-                //инфа ивент
-                .eventId(event != null ? event.getId() : null)
-                .eventTitle(event != null ? event.getTitle() : null)
-                .eventDescription(event != null ? event.getDescription() : null)
-                .eventDate(event != null ? event.getEventDate() : null)
-                .eventCity(event != null ? event.getCity() : null)
-                .eventAddress(event != null ? event.getAddress() : null)
-                .eventCreatorUsername(event != null ? event.getCreator().getUsername() : null)
-                .eventMedia(event != null && event.getPhoto() != null ?
-                        imageService.getBase64Avatar(event.getPhoto()) : null)
-                .eventStatus(event != null ? event.getStatus() : null)
+        // Для остальных типов уведомлений добавляем информацию как обычно
+        if (post != null) {
+            builder
+                    .postId(post.getId())
+                    .postContent(post.getContent())
+                    .postCreatedAt(post.getPublishedAt())
+                    .postAuthorUsername(post.getAuthor().getUsername())
+                    .postMedia(post.getMedia() != null ?
+                            imageService.getBase64Avatar(post.getMedia()) : null);
+        }
 
-                .build();
+        if (photo != null) {
+            builder
+                    .photoId(photo.getId())
+                    .photoDescription(photo.getDescription())
+                    .photoPrice(photo.getPrice())
+                    .photoBase64(photo.getPhoto() != null ?
+                            imageService.getBase64Avatar(photo.getPhoto()) : null)
+                    .photoOwnerUsername(photo.getOwner().getUsername());
+        }
+
+        // Обработка информации о событии
+        if (notification.getType() == NotificationType.EVENT_CANCELLED) {
+            // Для отмененных событий устанавливаем базовую информацию
+            builder
+                    .eventId(null)
+                    .eventTitle("Событие удалено")
+                    .eventDescription("Это событие больше недоступно")
+                    .eventDate(null)
+                    .eventCity(null)
+                    .eventAddress(null)
+                    .eventCreatorUsername(notification.getInitiator().getUsername())
+                    .eventMedia(null)
+                    .eventStatus(EventStatus.CANCELLED);
+        } else if (event != null) {
+            // Для всех остальных случаев обрабатываем как обычно
+            builder
+                    .eventId(event.getId())
+                    .eventTitle(event.getTitle())
+                    .eventDescription(event.getDescription())
+                    .eventDate(event.getEventDate())
+                    .eventCity(event.getCity())
+                    .eventAddress(event.getAddress())
+                    .eventCreatorUsername(event.getCreator().getUsername())
+                    .eventMedia(event.getPhoto() != null ?
+                            imageService.getBase64Avatar(event.getPhoto()) : null)
+                    .eventStatus(event.getStatus());
+        }
+
+        return builder.build();
     }
-
 
     public Event toEntity(EventCreateDto dto, User creator) {
         return Event.builder()
