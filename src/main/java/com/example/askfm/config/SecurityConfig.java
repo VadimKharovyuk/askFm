@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/account-locked",
                                 "/support/**",
                                 "/contact",
+                                "/legal/**",
                                 "/forgot-password/**",
                                 "/css/**", "/js/**")
                         .permitAll()
