@@ -298,6 +298,21 @@
       outline: none;
       box-shadow: 0 0 0 2px var(--background-dark), 0 0 0 4px var(--text-white);
     }
+    .form-control.is-invalid {
+      border-color: var(--error-red);
+      background-image: none;
+    }
+
+    .form-control.is-invalid:focus {
+      border-color: var(--error-red);
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .invalid-feedback {
+      color: var(--error-red);
+      font-size: 12px;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -319,7 +334,10 @@
              id="username"
              th:field="*{username}"
              th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
-             placeholder="Имя пользователя">
+             placeholder="Имя пользователя"
+             required
+             minlength="3"
+             maxlength="20">
       <label for="username" class="form-label">Имя пользователя</label>
       <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}"
            th:errors="*{username}">Ошибка имени пользователя</div>
@@ -331,7 +349,8 @@
              id="email"
              th:field="*{email}"
              th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-             placeholder="Email">
+             placeholder="Email"
+             required>
       <label for="email" class="form-label">Email</label>
       <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
            th:errors="*{email}">Ошибка email</div>
@@ -343,7 +362,10 @@
              id="password"
              th:field="*{password}"
              th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
-             placeholder="Пароль">
+             placeholder="Пароль"
+             required
+             minlength="3"
+             maxlength="40">
       <label for="password" class="form-label">Пароль</label>
       <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}"
            th:errors="*{password}">Ошибка пароля</div>
@@ -397,6 +419,53 @@
     }
 
     termsCheckbox.addEventListener('change', updateButtonState);
+    updateButtonState();
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const termsCheckbox = document.getElementById('termsAccepted');
+    const registerButton = document.getElementById('registerButton');
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[required]');
+
+    function validateForm() {
+      let isValid = true;
+      inputs.forEach(input => {
+        if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+          isValid = false;
+        }
+      });
+      return isValid;
+    }
+
+    function updateButtonState() {
+      const isFormValid = validateForm();
+      registerButton.disabled = !termsCheckbox.checked || !isFormValid;
+      registerButton.style.opacity = (termsCheckbox.checked && isFormValid) ? '1' : '0.5';
+    }
+
+    // Слушаем изменения во всех полях формы
+    inputs.forEach(input => {
+      input.addEventListener('input', updateButtonState);
+    });
+
+    termsCheckbox.addEventListener('change', updateButtonState);
+
+    // Добавляем валидацию перед отправкой формы
+    form.addEventListener('submit', function(e) {
+      if (!validateForm()) {
+        e.preventDefault();
+        // Показываем стандартные сообщения об ошибках браузера
+        inputs.forEach(input => {
+          if (!input.value) {
+            input.classList.add('is-invalid');
+          }
+        });
+      }
+    });
+
     updateButtonState();
   });
 </script>
