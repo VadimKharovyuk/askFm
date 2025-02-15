@@ -29,9 +29,18 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new UserRegistrationDTO());
+        // Добавляем объект для формы регистрации
+        model.addAttribute("userRegistrationDTO", new UserRegistrationDTO());
+
+        // Устанавливаем значение по умолчанию для чекбокса
+        ((UserRegistrationDTO) model.getAttribute("userRegistrationDTO")).setTermsAccepted(false);
+
+        // Опционально: добавляем флаг для отслеживания первого визита на страницу
+        model.addAttribute("isFirstVisit", true);
+
         return "aut/register";
     }
+
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDTO registrationDTO,
@@ -39,10 +48,15 @@ public class AuthController {
         if (result.hasErrors()) {
             return "aut/register";
         }
+        if (!registrationDTO.getTermsAccepted()) {
+            result.rejectValue("termsAccepted", "error.termsAccepted",
+                    "Вы должны принять условия использования");
+            return "/aut/register";
+        }
 
         try {
             userService.registerNewUser(registrationDTO);
-            return "redirect:/login?registered";
+            return "redirect:/login";
         } catch (IllegalArgumentException e) {
             result.rejectValue("username", "error.user", e.getMessage());
             return "aut/register";
