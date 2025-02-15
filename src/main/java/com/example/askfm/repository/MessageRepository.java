@@ -33,6 +33,7 @@ package com.example.askfm.repository;//package com.example.askfm.repository;
 
 import com.example.askfm.model.Message;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -50,18 +51,19 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     Page<Message> findRecentMessages(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
-        SELECT m1 FROM Message m1 
-        WHERE (m1.sender.id = :userId OR m1.recipient.id = :userId) 
-        AND m1.timestamp = (
-            SELECT MAX(m2.timestamp) FROM Message m2 
-            WHERE (m2.sender.id = :userId AND m2.recipient.id = m1.recipient.id) 
-            OR (m2.sender.id = m1.recipient.id AND m2.recipient.id = :userId)
-            OR (m2.sender.id = m1.sender.id AND m2.recipient.id = :userId)
-            OR (m2.sender.id = :userId AND m2.recipient.id = m1.sender.id)
-        )
-        ORDER BY m1.timestamp DESC
-    """)
-    List<Message> findConversations(@Param("userId") Long userId);
+    SELECT m FROM Message m
+    WHERE m.id IN (
+        SELECT MAX(m2.id)
+        FROM Message m2
+        WHERE m2.sender.id = :userId OR m2.recipient.id = :userId
+        GROUP BY CASE
+            WHEN m2.sender.id = :userId THEN m2.recipient.id
+            ELSE m2.sender.id
+        END
+    )
+    ORDER BY m.timestamp DESC
+""")
+    List<Message> findConversations(Long userId);
 
 
     @Query("""
@@ -94,4 +96,16 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 """)
     void markMessagesAsRead(@Param("userId") Long userId, @Param("senderId") Long senderId);
 
+
+    //проверка чатов админ
+    @Query("SELECT m FROM Message m WHERE m.recipient.id = :userId OR m.sender.id = :userId")
+    Page<Message> findByRecipientOrSender(Long userId, Pageable pageable);
+
+    @Query("SELECT m FROM Message m WHERE " +
+            "(m.sender.id = :user1Id AND m.recipient.id = :user2Id) OR " +
+            "(m.sender.id = :user2Id AND m.recipient.id = :user1Id) " +
+            "ORDER BY m.timestamp DESC")
+    List<Message> findConversationBetweenUsers(Long user1Id, Long user2Id);
+
+    Page<Message> findByContentContainingIgnoreCase(String keyword, Pageable pageable);
 }

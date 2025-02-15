@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -63,4 +65,26 @@ public class UserMapper {
         blockInfo.setBlockedAt(LocalDateTime.now());
         return blockInfo;
     }
+    public AdminUserSearchDTO toAdminSearchDTO(User user) {
+        return AdminUserSearchDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .avatar(user.getAvatar() != null ?
+                        "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar()) :
+                        null)
+                .bio(user.getProfile() != null ? user.getProfile().getBio() : null)
+                .followersCount(subscriptionService.getSubscribersCount(user.getUsername()))
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+
+    public List<AdminUserSearchDTO> toAdminSearchDTOList(List<User> users) {
+        return users.stream()
+                .map(this::toAdminSearchDTO)
+                .collect(Collectors.toList());
+    }
+
+
 }

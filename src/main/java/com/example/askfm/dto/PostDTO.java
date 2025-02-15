@@ -33,7 +33,7 @@ public class PostDTO {
 
     private String repostedBy;
     private LocalDateTime repostedAt;
-    private String originalAuthorUsername;  // Оригинальный автор для репостов
-    private LocalDateTime originalPublishedAt; // Оригинальная дата публикации
+    private String originalAuthorUsername;
+    private LocalDateTime originalPublishedAt;
 
 }

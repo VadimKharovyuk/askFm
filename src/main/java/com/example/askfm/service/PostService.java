@@ -44,7 +44,6 @@ public class PostService {
     private final SavedPostRepository savedPostRepository;
 
 
-
     public List<PostDTO> getUserPosts(String username, String currentUsername) {
         Cache cache = cacheManager.getCache("posts");
         String cacheKey = "posts:" + username + ":" + currentUsername;

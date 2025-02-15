@@ -37,4 +37,21 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByTagNames(@Param("tagNames") Set<String> tagNames, Pageable pageable);
 //новости по подписки
     Page<Post> findByAuthorIdInOrderByPublishedAtDesc(List<Long> authorIds, Pageable pageable);
+//посты по кол лайку
+
+    @Query("SELECT p FROM Post p " +
+            "WHERE p.publishedAt >= :since " +
+            "GROUP BY p.id " +
+            "ORDER BY SIZE(p.likedBy) DESC")
+    Page<Post> findTopLikedPosts(@Param("since") LocalDateTime since, Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "ORDER BY SIZE(p.likedBy) DESC")
+    Page<Post> findAllTimeTopLikedPosts(Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "WHERE p.publishedAt >= :since " +
+            "GROUP BY p.id " +
+            "ORDER BY SIZE(p.likedBy) DESC")
+    Page<Post> findGlobalTopPosts(@Param("since") LocalDateTime since, Pageable pageable);
 }

@@ -6,6 +6,9 @@ import com.example.askfm.model.UserProfile;
 import com.example.askfm.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,6 +40,7 @@ public class UserProfileController {
     private final VisitService visitService;
     private final NotificationService notificationService;
     private final MessageService messageService;
+    private final TopLikedPostsService topLikedPostsService;
 
 
 
@@ -47,7 +51,6 @@ public class UserProfileController {
                                   Model model) {
         User user = userService.findByUsername(username);
         User recipient = userService.findByUsername(username);
-
 
         // Проверяем, является ли это профилем текущего пользователя
         if (currentUser != null) {
@@ -132,6 +135,10 @@ public class UserProfileController {
             visitService.recordVisit(visitor, user);
         }
 
+        // Получаем топ-5 постов для превью
+        List<PostDTO> trendingPosts = topLikedPostsService.getTopLikedPostsPreview(currentUsername);
+        model.addAttribute("trendingPosts", trendingPosts);
+
         // Существующие атрибуты
         model.addAttribute("profileUser", user);
         model.addAttribute("isFollowing", isFollowing);
@@ -149,6 +156,7 @@ public class UserProfileController {
 
         // Добавляем рекомендуемых пользователей
         model.addAttribute("suggestedUsers", suggestedUsers);
+
 
 
         return "user/profile-view";
