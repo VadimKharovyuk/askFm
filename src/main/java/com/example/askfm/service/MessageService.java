@@ -188,10 +188,13 @@ public class MessageService {
 
 
     @Transactional(readOnly = true)
-    public long getUnreadCount(String username) {
-        return messageRepository.countByRecipientUsernameAndReadFalse(username);
+    public long getUnreadCount(String currentUsername) {
+        if (currentUsername == null) {
+            return 0;
+        }
+        // Получаем только непрочитанные сообщения для текущего пользователя
+        return messageRepository.countByRecipientUsernameAndReadFalse(currentUsername);
     }
-
 
     @Transactional
     public void markConversationAsRead(Long userId, Long senderId) {

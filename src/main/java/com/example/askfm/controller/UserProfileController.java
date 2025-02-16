@@ -75,13 +75,7 @@ public class UserProfileController {
 
         model.addAttribute("user", user);
 
-        //новые сообщения
-        long unreadMessages = messageService.getUnreadCount(username);
-        model.addAttribute("unreadMessagesCount", unreadMessages);
 
-        //увидомление
-        long unreadCount = notificationService.getUnreadCount(currentUser.getUsername());
-        model.addAttribute("unreadCount", unreadCount);
 
         String currentUsername = currentUser != null ? currentUser.getUsername() : null;
         List<PostDTO> userPosts = postService.getUserPosts(username, currentUsername);
@@ -95,6 +89,15 @@ public class UserProfileController {
         String location = null;
         if (user.getProfile() != null) {
             location = user.getProfile().getLocation();
+        }
+
+        //новые сообщения
+        if (currentUsername != null) {
+            long unreadMessages = messageService.getUnreadCount(currentUsername);
+            long unreadNotifications = notificationService.getUnreadCount(currentUsername);
+
+            model.addAttribute("unreadMessagesCount", unreadMessages);
+            model.addAttribute("unreadCount", unreadNotifications);
         }
 
         // Безопасное получение местоположения

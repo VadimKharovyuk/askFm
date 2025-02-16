@@ -40,13 +40,15 @@ public class ChatController {
         model.addAttribute("userId", userId);
         model.addAttribute("currentUser", userDetails.getUsername());
         model.addAttribute("conversations", messageService.getUserConversations(userId));
-
+        String currentUsername = userDetails.getUsername();
         // Добавляем разные атрибуты для сообщений и уведомлений
-        long unreadMessages = messageService.getUnreadCount(userDetails.getUsername());
-        long unreadNotifications = notificationService.getUnreadCount(userDetails.getUsername());
+        if (currentUsername != null) {
+            long unreadMessages = messageService.getUnreadCount(currentUsername);
+            long unreadNotifications = notificationService.getUnreadCount(currentUsername);
 
-        model.addAttribute("unreadMessagesCount", unreadMessages);
-        model.addAttribute("unreadCount", unreadNotifications);
+            model.addAttribute("unreadMessagesCount", unreadMessages);
+            model.addAttribute("unreadCount", unreadNotifications);
+        }
 
         return "chat/index";
     }

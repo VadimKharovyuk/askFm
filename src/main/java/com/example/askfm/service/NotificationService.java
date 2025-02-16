@@ -61,8 +61,12 @@ public class NotificationService {
         log.info("Уведомление {} отмечено как прочитанное", notificationId);
     }
 
-    public long getUnreadCount(String username) {
-        return notificationRepository.countByUserUsernameAndIsReadFalse(username);
+    public long getUnreadCount(String currentUsername) {
+        if (currentUsername == null) {
+            return 0;
+        }
+        // Получаем только непрочитанные уведомления для текущего пользователя
+        return notificationRepository.countByUserUsernameAndIsReadFalse(currentUsername);
     }
 
     public void notifyAboutPhotoEvent(User buyer, Photo photo) {
