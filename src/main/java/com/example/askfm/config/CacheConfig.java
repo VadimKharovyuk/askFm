@@ -99,6 +99,26 @@ public class CacheConfig {
                 .recordStats();
 
 
+        // Кеш для топовых постов
+        Caffeine<Object, Object> topPostsBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES)    // Обновление каждые 30 минут
+                .expireAfterAccess(1, TimeUnit.HOURS)      // Удаление если не обращались час
+                .initialCapacity(100)                       // Начальный размер
+                .maximumSize(500)                          // Максимальный размер
+                .recordStats();
+
+        cacheManager.registerCustomCache("topPosts", topPostsBuilder.build());
+
+
+        // Кеш для предпросмотра топовых постов
+        Caffeine<Object, Object> topPostsPreviewBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(15, TimeUnit.MINUTES)    // Обновление каждые 15 минут
+                .expireAfterAccess(30, TimeUnit.MINUTES)   // Удаление если не обращались 30 минут
+                .initialCapacity(50)                       // Начальный размер
+                .maximumSize(200)                          // Максимальный размер
+                .recordStats();
+
+        cacheManager.registerCustomCache("topPostsPreview", topPostsPreviewBuilder.build());
 
         // Устанавливаем специальную конфигурацию
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
