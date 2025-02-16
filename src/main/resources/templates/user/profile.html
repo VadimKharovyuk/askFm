@@ -57,7 +57,7 @@
         }
 
         .cover-photo {
-            height: 200px;
+            height: 300px;
             background-color: #333639;
             position: relative;
         }
@@ -764,14 +764,15 @@
         </div>
     </div>
 
+
     <!-- Сообщение, если реклам нет -->
     <div th:unless="${hasAd}" class="no-ads-message">
-        <!--        <div class="empty-ad-container">-->
-        <!--            <i class="fas fa-ad"></i>-->
-        <!--            <h3>Тут может быть ваша реклама</h3>-->
-        <!--            <p>Разместите свою рекламу и получите новых клиентов!</p>-->
-        <!--            <a href="/ads/create" class="btn btn-primary">Разместить рекламу</a>-->
-        <!--        </div>-->
+                <div class="empty-ad-container">
+                    <i class="fas fa-ad"></i>
+                    <h3>Тут может быть ваша реклама</h3>
+                    <p>Разместите свою рекламу и получите новых клиентов!</p>
+                    <a href="/ads/create" class="btn btn-primary">Разместить рекламу</a>
+                </div>
     </div>
 
 </aside>
@@ -872,20 +873,9 @@
                     </button>
                 </form>
             </div>
-
-            <h4 class="mb-1" th:text="${username}">Username</h4>
-            <div class="text-muted mb-3" th:text="'@' + ${username}">@username</div>
-
-            <div class="d-flex mb-3">
-                <a th:href="@{'/users/' + ${username} + '/following'}" class="stats-link">
-                    <span class="fw-bold">250</span> <span class="text-muted">подписок</span>
-                </a>
-                <a th:href="@{'/users/' + ${username} + '/followers'}" class="stats-link">
-                    <span class="fw-bold">1.2K</span> <span class="text-muted">подписчиков</span>
-                </a>
-            </div>
         </div>
-    </div>
+    </div><br><br>
+
     <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}"
           autocomplete="off">
         <div class="d-flex gap-3">
@@ -894,11 +884,11 @@
                  style="width: 48px; height: 48px;"
                  alt="User avatar">
             <div class="flex-grow-1">
-     <textarea class="form-control bg-transparent text-white border-0"
-               style="resize: none; height: 100px;"
-               placeholder="Что нового?"
-               th:field="*{content}"
-               autocomplete="off"></textarea>
+            <textarea class="form-control bg-transparent text-white border-0"
+                      style="resize: none; height: 100px;"
+                      placeholder="Что нового?"
+                      th:field="*{content}"
+                      autocomplete="off"></textarea>
 
                 <input type="text"
                        class="form-control bg-transparent text-white border-0 mt-2"
@@ -906,11 +896,20 @@
                        th:field="*{tags}"
                        autocomplete="off"/>
 
+                <!-- Контейнер для предпросмотра -->
+                <div id="imagePreviewContainer" class="mt-3" style="display: none;">
+                    <div class="position-relative">
+                        <img id="imagePreview" class="img-fluid rounded" style="max-height: 300px; width: auto;" alt="Preview">
+                        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2"
+                                id="removeImage" style="background-color: rgba(0,0,0,0.5);"></button>
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div class="d-flex gap-2">
                         <label class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-image"></i>
-                            <input type="file" name="media" style="display: none;" accept="image/*">
+                            <input type="file" name="media" id="mediaInput" style="display: none;" accept="image/*">
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm px-4">
@@ -920,6 +919,129 @@
             </div>
         </div>
     </form>
+
+    <style>
+        #imagePreviewContainer {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        #imagePreview {
+            object-fit: cover;
+            width: 100%;
+            border-radius: 14px;
+        }
+
+        .btn-close-white {
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-close-white:hover {
+            opacity: 1;
+        }
+
+        /* Анимация для появления/исчезновения превью */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+
+        .preview-show {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .preview-hide {
+            animation: fadeOut 0.3s ease forwards;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mediaInput = document.getElementById('mediaInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const removeButton = document.getElementById('removeImage');
+
+            mediaInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Проверка размера файла (например, макс. 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Файл слишком большой. Максимальный размер 5MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Проверка типа файла
+                    if (!file.type.startsWith('image/')) {
+                        alert('Пожалуйста, выберите изображение');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Создаем URL для предпросмотра
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                        previewContainer.classList.add('preview-show');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeButton.addEventListener('click', function() {
+                previewContainer.classList.add('preview-hide');
+                setTimeout(() => {
+                    previewContainer.style.display = 'none';
+                    previewContainer.classList.remove('preview-hide');
+                    mediaInput.value = ''; // Очищаем input
+                }, 300);
+            });
+        });
+    </script>
+<!--    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data" th:object="${postForm}"-->
+<!--          autocomplete="off">-->
+<!--        <div class="d-flex gap-3">-->
+<!--            <img th:src="${avatarBase64 != null ? 'data:image/jpeg;base64,' + avatarBase64 : '/api/placeholder/48/48'}"-->
+<!--                 class="rounded-circle"-->
+<!--                 style="width: 48px; height: 48px;"-->
+<!--                 alt="User avatar">-->
+<!--            <div class="flex-grow-1">-->
+<!--     <textarea class="form-control bg-transparent text-white border-0"-->
+<!--               style="resize: none; height: 100px;"-->
+<!--               placeholder="Что нового?"-->
+<!--               th:field="*{content}"-->
+<!--               autocomplete="off"></textarea>-->
+
+<!--                <input type="text"-->
+<!--                       class="form-control bg-transparent text-white border-0 mt-2"-->
+<!--                       placeholder="Теги (через запятую)"-->
+<!--                       th:field="*{tags}"-->
+<!--                       autocomplete="off"/>-->
+
+<!--                <div class="d-flex justify-content-between align-items-center mt-3">-->
+<!--                    <div class="d-flex gap-2">-->
+<!--                        <label class="btn btn-outline-primary btn-sm">-->
+<!--                            <i class="fas fa-image"></i>-->
+<!--                            <input type="file" name="media" style="display: none;" accept="image/*">-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <button type="submit" class="btn btn-primary btn-sm px-4">-->
+<!--                        Опубликовать-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </form>-->
 
     <div class="feed-section">
         <div class="posts-container">

@@ -33,6 +33,7 @@ public class SettingsUserController {
         return "settings/home";
     }
 
+
     @GetMapping("/updateUsername")
     public String updateUsername(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         model.addAttribute("username", userDetails.getUsername());
