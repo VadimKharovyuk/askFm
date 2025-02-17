@@ -221,6 +221,7 @@ public class PhotoService {
     }
 
 
+
     @Transactional(readOnly = true)
     public Photo getPhotoEntity(Long photoId) {
         return photoRepository.findById(photoId)

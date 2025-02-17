@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+
 @Controller
 @RequestMapping("/photos")
 @RequiredArgsConstructor
@@ -37,27 +39,37 @@ public class PhotoController {
     @GetMapping("/upload")
     public String showUploadForm(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size,
             Model model
     ) {
         if (userDetails == null) {
             return "redirect:/login";
         }
 
+
         String username = userDetails.getUsername();
         model.addAttribute("photoRequest", new CreatePhotoRequest());
+        model.addAttribute("username", username);
+
+        return "photos/upload";
+    }
+    @GetMapping("/my-list")
+    public String myPhotoList(@AuthenticationPrincipal UserDetails userDetails,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "8") int size,
+                              Model model) {
+        String username = userDetails.getUsername();
+
 
         // Передаем текущего пользователя в метод
         Pageable pageable = PageRequest.of(page, size);
         Page<PhotoDTO> userPhotos = photoService.getUserPhotosByUsername(username, username, pageable);
-
+        model.addAttribute("username", username);
         model.addAttribute("userPhotos", userPhotos.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPhotos.getTotalPages());
         model.addAttribute("username", username);
 
-        return "photos/upload";
+        return "photos/myPhotoList";
     }
 
 

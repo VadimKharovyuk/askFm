@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Upload Photos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: #000000;
+      --card-bg: #1a1a1a;
+      --text-color: #ffffff;
+      --hover-color: #20B2AA;
+      --sidebar-width: 280px;
+    }
+
+    body {
+      background-color: var(--main-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .left-sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      padding: 1rem;
+      background-color: var(--main-bg);
+      border-right: 1px solid #2f2f2f;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      color: var(--text-color);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      padding: 0.5rem;
+    }
+
+    .logo-link:hover {
+      color: var(--hover-color);
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: 9999px;
+      transition: all 0.2s;
+    }
+
+    .side-link:hover {
+      background-color: #2f2f2f;
+      color: var(--hover-color);
+    }
+
+    .side-link i {
+      margin-right: 1rem;
+      font-size: 1.25rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+
+    .card {
+      transition: transform 0.2s ease;
+      background-color: var(--card-bg);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card a {
+      overflow: hidden;
+      display: block;
+    }
+
+    .card a img {
+      transition: transform 0.3s ease;
+    }
+
+    .card a:hover img {
+      transform: scale(1.05);
+    }
+    /* Стили для блоков действий */
+    .action-card {
+      background-color: var(--card-bg);
+      border: 1px solid #2f2f2f;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .action-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--hover-color);
+      box-shadow: 0 5px 15px rgba(32, 178, 170, 0.2);
+    }
+
+    .action-card .card-header {
+      background-color: transparent;
+      border-bottom: 1px solid #2f2f2f;
+      padding: 1.5rem;
+    }
+
+    .action-card .card-body {
+      padding: 1.5rem;
+    }
+
+    .action-link {
+      display: block;
+      text-decoration: none;
+      color: var(--text-color);
+      padding: 1rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .action-link:hover {
+      background-color: rgba(32, 178, 170, 0.1);
+      color: var(--hover-color);
+    }
+
+    .upload-section {
+      margin-bottom: 2rem;
+    }
+
+    .stats-section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title i {
+      color: var(--hover-color);
+    }
+
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--hover-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .action-button:hover {
+      background-color: #1a8f89;
+      color: var(--text-color);
+      transform: translateY(-2px);
+    }
+
+    /* Обновим стили для карточек фото */
+    .photo-grid {
+      margin-top: 2rem;
+    }
+
+    .photo-card {
+      background-color: var(--card-bg);
+      border: 1px solid #2f2f2f;
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      transition: all 0.3s ease;
+    }
+
+    .photo-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .photo-info {
+      padding: 1rem;
+    }
+
+    .price-badge {
+      background-color: var(--hover-color);
+      color: var(--text-color);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+    }
+
+    .locked-badge {
+      background-color: #ffd700;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+    }
+    .right-sidebar {
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      padding: 1rem;
+      background-color: var(--main-bg);
+      border-left: 1px solid #2f2f2f;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-right: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    .sidebar-card {
+      background-color: var(--card-bg);
+      border: 1px solid #2f2f2f;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .sidebar-card .card-header {
+      padding: 1rem;
+      border-bottom: 1px solid #2f2f2f;
+      background-color: transparent;
+    }
+
+    .sidebar-card .card-body {
+      padding: 1rem;
+    }
+
+    .sidebar-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--hover-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .sidebar-button:hover {
+      background-color: #1a8f89;
+      color: var(--text-color);
+      transform: translateY(-2px);
+    }
+    .sidebar-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+<aside class="right-sidebar">
+  <div class="sidebar-card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="fas fa-camera text-primary me-2"></i>
+        Добавить фото
+      </h5>
+    </div>
+    <div class="card-body">
+      <a href="/photos/upload" class="sidebar-button">
+        <i class="fas fa-upload"></i>
+        Загрузить
+      </a>
+    </div>
+  </div>
+
+  <div class="sidebar-card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="fas fa-chart-bar text-primary me-2"></i>
+        Статистика
+      </h5>
+    </div>
+    <div class="card-body">
+      <p class="small mb-3 text-white-50">
+        Топ пользователей и популярные фото
+      </p>
+      <a href="/photo-stats" class="sidebar-button">
+        <i class="fas fa-chart-line"></i>
+        Смотреть
+      </a>
+    </div>
+  </div>
+</aside>
+
+<aside class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/explore" class="side-link">
+      <i class="fas fa-hashtag"></i>
+      <span>Поиск</span>
+    </a>
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span th:if="${unreadCount > 0}"
+            class="notification-badge"
+            th:text="${unreadCount}"></span>
+    </a>
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+      <span th:if="${unreadMessagesCount > 0}"
+            class="notification-badge"
+            th:text="${unreadMessagesCount}"></span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+    <a href="/photos/upload" class="side-link">
+      <i class="fas fa-camera"></i>
+      <span>Фото</span>
+    </a>
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-eye"></i>
+      <span>Истории</span>
+    </a>
+    <a th:href="@{'/users/' + ${username}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/ads" class="side-link">
+      <i class="fas fa-ad"></i>
+      <span>Мои рекламы</span>
+    </a>
+    <a href="/settings" class="side-link">
+      <i class="fas fa-cog"></i>
+      <span>Налаштування</span>
+    </a>
+    <a href="/balance" class="side-link">
+      <i class="fas fa-coins"></i>
+      <span>Balance</span>
+    </a>
+    <form th:action="@{/logout}" method="post" class="m-0">
+      <button type="submit" class="side-link border-0 bg-transparent w-100 text-start">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Вийти</span>
+      </button>
+    </form>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="container">
+    <!-- Сообщения об успехе/ошибке -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+
+      <!--  !&#45;&#45; Сетка моих фото &ndash;&gt;-->
+      <h4 class="text-white">My Photos</h4>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="col" th:each="photo : ${userPhotos}">
+          <div class="card h-100">
+            <!-- Добавляем ссылку на фото -->
+            <a th:href="@{/photos/{id}(id=${photo.id})}" class="text-decoration-none">
+              <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"
+                   class="card-img-top"
+                   style="height: 200px; object-fit: cover;">
+            </a>
+            <div class="card-body">
+              <p class="text-white" th:text="${photo.description}"></p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-primary" th:text="${photo.price + ' coins'}"></span>
+                <span th:if="${photo.isLocked}" class="badge bg-warning">Locked</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пагинация -->
+      <nav th:if="${totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+            <a class="page-link" th:href="@{/photos/upload(page=${currentPage - 1})}">Previous</a>
+          </li>
+          <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+              th:classappend="${pageNum == currentPage ? 'active' : ''}">
+            <a class="page-link" th:href="@{/photos/upload(page=${pageNum})}" th:text="${pageNum + 1}"></a>
+          </li>
+          <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+            <a class="page-link" th:href="@{/photos/upload(page=${currentPage + 1})}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

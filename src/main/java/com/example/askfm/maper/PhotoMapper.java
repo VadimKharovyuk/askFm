@@ -1,11 +1,14 @@
 package com.example.askfm.maper;
 import com.example.askfm.dto.CreatePhotoRequest;
 import com.example.askfm.dto.PhotoDTO;
+import com.example.askfm.dto.PhotoStatDTO;
+import com.example.askfm.dto.PhotoUnlockStatDTO;
 import com.example.askfm.model.Photo;
 import com.example.askfm.model.User;
 import com.example.askfm.repository.UnlockedPhotoRepository;
 import com.example.askfm.service.ImageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -82,5 +85,47 @@ public class PhotoMapper {
                 .createdAt(LocalDateTime.now())
                 .isNSFW(request.getIsNSFW())
                 .build();
+    }
+
+    public PhotoUnlockStatDTO toUnlockStatDTO(Photo photo, Long unlockCount) {
+        return PhotoUnlockStatDTO.builder()
+                .photoId(photo.getId())
+                .ownerUsername(photo.getOwner().getUsername())
+                .description(photo.getDescription())
+                .price(photo.getPrice())
+                .unlockCount(unlockCount)
+                .createdAt(photo.getCreatedAt())
+                .build();
+    }
+
+    public Page<PhotoUnlockStatDTO> toUnlockStatDTOPage(Page<Object[]> pageResult) {
+        return pageResult.map(result -> {
+            Photo photo = (Photo) result[0];
+            Long unlockCount = (Long) result[1];
+            return toUnlockStatDTO(photo, unlockCount);
+        });
+    }
+
+    public PhotoStatDTO toPhotoStatDTO(User user, Long totalPhotos) {
+        String avatarBase64 = null;
+        if (user.getAvatar() != null) {
+            avatarBase64 = "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar());
+        }
+
+        return PhotoStatDTO.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .userAvatar(avatarBase64)
+                .totalPhotos(totalPhotos)
+                .build();
+    }
+
+    // Маппинг для страницы статистики
+    public Page<PhotoStatDTO> toPhotoStatDTOPage(Page<Object[]> pageResult) {
+        return pageResult.map(result -> {
+            User user = (User) result[0];
+            Long count = (Long) result[1];
+            return toPhotoStatDTO(user, count);
+        });
     }
 }

@@ -232,44 +232,11 @@
     </div>
 
 
-<!--  !&#45;&#45; Сетка моих фото &ndash;&gt;-->
-  <h4 class="text-white">My Photos</h4>
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-    <div class="col" th:each="photo : ${userPhotos}">
-      <div class="card h-100">
-        <!-- Добавляем ссылку на фото -->
-        <a th:href="@{/photos/{id}(id=${photo.id})}" class="text-decoration-none">
-          <img th:src="@{'data:image/jpeg;base64,' + ${photo.photoBase64}}"
-               class="card-img-top"
-               style="height: 200px; object-fit: cover;">
-        </a>
-        <div class="card-body">
-          <p class="text-white" th:text="${photo.description}"></p>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="badge bg-primary" th:text="${photo.price + ' coins'}"></span>
-            <span th:if="${photo.isLocked}" class="badge bg-warning">Locked</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Пагинация -->
-  <nav th:if="${totalPages > 1}" class="mt-4">
-    <ul class="pagination justify-content-center">
-      <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-        <a class="page-link" th:href="@{/photos/upload(page=${currentPage - 1})}">Previous</a>
-      </li>
-      <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
-          th:classappend="${pageNum == currentPage ? 'active' : ''}">
-        <a class="page-link" th:href="@{/photos/upload(page=${pageNum})}" th:text="${pageNum + 1}"></a>
-      </li>
-      <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
-        <a class="page-link" th:href="@{/photos/upload(page=${currentPage + 1})}">Next</a>
-      </li>
-    </ul>
-  </nav>
-</div>
+
+
+
+
 </div>
 
 
