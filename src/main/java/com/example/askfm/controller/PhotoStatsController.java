@@ -68,6 +68,7 @@ public class PhotoStatsController {
         return photoStatisticsService.getTopPhotoUploaders(PageRequest.of(page, size));
     }
 
+
     // Вспомогательный метод для получения отдельной статистики
     @GetMapping("/top-unlocked")
     @ResponseBody

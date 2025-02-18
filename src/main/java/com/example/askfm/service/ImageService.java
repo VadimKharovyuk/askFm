@@ -20,9 +20,6 @@ import java.util.Iterator;
 @RequiredArgsConstructor
 public class ImageService {
 
-
-
-
     public byte[] resizeImage(byte[] imageData, int targetWidth) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

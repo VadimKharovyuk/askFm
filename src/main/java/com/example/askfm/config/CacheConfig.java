@@ -157,7 +157,6 @@ public class CacheConfig {
 
 
         cacheManager.setCaffeine(defaultCacheBuilder);
-//        cacheManager.setCacheNames(Arrays.asList("userSearch", "followers", "suggestions", "posts","likes","views"));
         return cacheManager;
     }
 }

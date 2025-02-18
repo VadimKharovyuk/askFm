@@ -58,20 +58,6 @@ public class PhotoMapper {
                 .build();
     }
 
-    // Для случаев, когда нам не нужно изображение вообще
-    public PhotoDTO toDTOWithoutImage(Photo photo) {
-        return PhotoDTO.builder()
-                .id(photo.getId())
-                .ownerId(photo.getOwner().getId())
-                .ownerUsername(photo.getOwner().getUsername())
-                .photoBase64(null)
-                .price(photo.getPrice())
-                .isLocked(photo.getIsLocked())
-                .description(photo.getDescription())
-                .createdAt(photo.getCreatedAt())
-                .isNSFW(photo.getIsNSFW())
-                .build();
-    }
 
     public Photo toEntity(CreatePhotoRequest request, User owner, byte[] photoData) throws IOException {
         byte[] resizedImage = imageService.resizeImage(photoData, 1024);
@@ -111,6 +97,7 @@ public class PhotoMapper {
         if (user.getAvatar() != null) {
             avatarBase64 = "data:image/jpeg;base64," + imageService.getBase64Avatar(user.getAvatar());
         }
+
 
         return PhotoStatDTO.builder()
                 .userId(user.getId())

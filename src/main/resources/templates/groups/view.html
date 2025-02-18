@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${group.name}">Группа</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <!-- Сообщения об успехе/ошибке -->
+  <div th:if="${successMessage}"
+       class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+    <span th:text="${successMessage}"></span>
+  </div>
+  <div th:if="${errorMessage}"
+       class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+    <span th:text="${errorMessage}"></span>
+  </div>
+
+  <!-- Обложка группы -->
+  <div class="relative w-full h-64 mb-8">
+    <img th:if="${group.coverBase64}"
+         th:src="'data:image/jpeg;base64,' + ${group.coverBase64}"
+         class="w-full h-full object-cover rounded-lg shadow-lg"
+         alt="Group cover">
+    <div th:unless="${group.coverBase64}"
+         class="w-full h-full bg-gray-300 rounded-lg"></div>
+  </div>
+
+  <!-- Трехколоночная структура -->
+  <div class="flex gap-6">
+    <!-- Левая панель навигации -->
+    <aside class="w-64 flex-shrink-0">
+      <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
+        <nav class="space-y-2">
+          <a href="#" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-info-circle text-blue-500"></i>
+            <span>Информация</span>
+          </a>
+          <a th:href="@{/groups/{id}/members(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-users text-blue-500"></i>
+            <span th:text="${group.membersCount + ' участников'}">0 участников</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Центральная часть с контентом -->
+    <main class="flex-grow">
+
+
+      <!-- Кнопка для открытой группы -->
+      <div th:if="${!group.isPrivate && group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).NOT_MEMBER}"
+           class="bg-white rounded-lg shadow-lg p-6 mb-6 text-center">
+        <h2 class="text-xl font-semibold mb-2">Открытая группа</h2>
+        <p class="text-gray-600 mb-4">Вы можете сразу присоединиться к группе</p>
+        <form th:action="@{/groups/{id}/join(id=${group.id})}" method="post">
+          <button type="submit"
+                  class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            Присоединиться к группе
+          </button>
+        </form>
+      </div>
+      <!-- Контент для участников или открытой группы -->
+      <div th:if="${group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).MEMBER || !group.isPrivate}">
+        <!-- Форма создания поста -->
+        <div th:if="${group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).MEMBER}"
+             class="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <form th:action="@{/groups/{id}/posts(id=${group.id})}" method="post">
+                        <textarea name="content"
+                                  class="w-full p-4 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500"
+                                  rows="3"
+                                  placeholder="Что у вас нового?"></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit"
+                      class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                Опубликовать
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Лента постов -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <p class="text-gray-600 text-center">Постов пока нет</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Сообщение для закрытой группы -->
+      <div th:if="${group.isPrivate && group.membershipStatus != T(com.example.askfm.enums.MembershipStatus).MEMBER}"
+           class="bg-white rounded-lg shadow-lg p-6 text-center">
+        <i class="fas fa-lock text-4xl text-gray-400 mb-4"></i>
+        <h2 class="text-xl font-semibold mb-2">Это закрытая группа</h2>
+        <p class="text-gray-600 mb-4">Чтобы видеть содержимое группы, необходимо стать её участником</p>
+
+        <!-- Кнопка подачи заявки если еще не подавал -->
+        <div th:if="${group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).NOT_MEMBER}">
+          <form th:action="@{/groups/{id}/join(id=${group.id})}" method="post">
+            <button type="submit"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              Подать заявку на вступление
+            </button>
+          </form>
+        </div>
+
+        <!-- Сообщение если заявка на рассмотрении -->
+        <div th:if="${group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).PENDING}"
+             class="text-gray-600">
+          Ваша заявка на рассмотрении
+        </div>
+      </div>
+    </main>
+
+    <!-- Правая панель с информацией -->
+    <aside class="w-80 flex-shrink-0">
+      <!-- Основная информация о группе -->
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
+        <!-- Аватар и название -->
+        <div class="flex items-center space-x-4 mb-4">
+          <img th:if="${group.avatarBase64}"
+               th:src="'data:image/jpeg;base64,' + ${group.avatarBase64}"
+               class="w-16 h-16 rounded-lg object-cover"
+               alt="Group avatar">
+          <div th:unless="${group.avatarBase64}"
+               class="w-16 h-16 bg-gray-200 rounded-lg"></div>
+          <div>
+            <h2 class="text-xl font-bold" th:text="${group.name}">Название группы</h2>
+            <p class="text-gray-600" th:text="${group.category.displayName}">Категория</p>
+          </div>
+        </div>
+
+        <!-- Навигация группы -->
+        <nav class="space-y-2">
+          <a th:href="@{/groups/{id}(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-newspaper text-blue-500"></i>
+            <span>Новости</span>
+          </a>
+          <a th:href="@{/groups/{id}/info(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-info-circle text-blue-500"></i>
+            <span>О группе</span>
+          </a>
+          <a th:href="@{/groups/{id}/members(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-users text-blue-500"></i>
+            <span th:text="${group.membersCount + ' участников'}">0 участников</span>
+          </a>
+          <a th:if="${group.membershipStatus == T(com.example.askfm.enums.MembershipStatus).MEMBER}"
+             th:href="@{/groups/{id}/photos(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-images text-blue-500"></i>
+            <span>Фотографии</span>
+          </a>
+          <!-- Для модераторов -->
+          <a th:if="${group.canApproveMembers}"
+             th:href="@{/groups/{id}/requests(id=${group.id})}"
+             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-user-plus text-blue-500"></i>
+            <span>Заявки на вступление</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Правила группы -->
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-4" th:if="${group.rules}">
+        <h3 class="text-lg font-semibold mb-3">Правила группы</h3>
+        <div class="text-gray-600" th:text="${group.rules}">
+          Правила группы
+        </div>
+      </div>
+
+      <!-- Администрация -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold mb-3">Администрация группы</h3>
+        <div class="flex items-center space-x-4">
+          <img th:if="${group.owner.userAvatarBase64}"
+               th:src="'data:image/jpeg;base64,' + ${group.owner.userAvatarBase64}"
+               class="w-12 h-12 rounded-full object-cover"
+               alt="Owner avatar">
+          <div>
+            <div class="font-semibold" th:text="${group.owner.username}">Имя владельца</div>
+            <div class="text-sm text-gray-600">Владелец группы</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${group.name}">Группа</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <!-- Обложка группы -->
+  <div class="relative w-full h-64 mb-8">
+    <img th:if="${group.coverBase64}"
+         th:src="'data:image/jpeg;base64,' + ${group.coverBase64}"
+         class="w-full h-full object-cover rounded-lg shadow-lg"
+         alt="Group cover">
+    <div th:unless="${group.coverBase64}"
+         class="w-full h-full bg-gray-300 rounded-lg"></div>
+
+    <!-- Панель управления группой для модераторов -->
+    <div th:if="${group.canModerate}"
+         class="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg shadow p-3">
+      <div class="flex space-x-3">
+        <a href="#" class="text-blue-600 hover:text-blue-800">
+          <span class="text-sm">Управление группой</span>
+        </a>
+        <a th:if="${group.canInviteMembers}" href="#" class="text-blue-600 hover:text-blue-800">
+          <span class="text-sm">Пригласить участников</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основная информация о группе -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <div class="flex items-start space-x-6">
+      <!-- Аватар группы -->
+      <div class="flex-shrink-0">
+        <img th:if="${group.avatarBase64}"
+             th:src="'data:image/jpeg;base64,' + ${group.avatarBase64}"
+             class="w-32 h-32 rounded-lg object-cover"
+             alt="Group avatar">
+        <div th:unless="${group.avatarBase64}"
+             class="w-32 h-32 bg-gray-200 rounded-lg"></div>
+      </div>
+
+      <!-- Информация о группе -->
+      <div class="flex-grow">
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-2xl font-bold" th:text="${group.name}">Название группы</h1>
+            <p class="text-gray-600 mt-2" th:text="${group.description}">Описание группы</p>
+
+            <!-- Информация о членстве -->
+            <div class="mt-3 flex items-center space-x-3">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                      th:text="${group.userRole.displayName}">
+                                    Роль
+                                </span>
+              <span class="text-sm text-gray-500">
+                                    Участник с <span th:text="${#temporals.format(group.joinedAt, 'dd.MM.yyyy')}">01.01.2024</span>
+                                </span>
+            </div>
+          </div>
+
+          <!-- Статус группы и категория -->
+          <div class="flex space-x-2">
+                            <span th:if="${group.isPrivate}"
+                                  class="px-3 py-1 bg-gray-800 text-white rounded-full text-sm">
+                                Закрытая группа
+                            </span>
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  th:text="${group.category.displayName}">
+                                Категория
+                            </span>
+          </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="flex space-x-6 mt-4 text-gray-600">
+          <div>
+            <span class="font-semibold" th:text="${group.membersCount}">0</span> участников
+          </div>
+          <div>
+            <span class="font-semibold" th:text="${group.postsCount}">0</span> постов
+          </div>
+          <div>
+            Создана <span th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="mt-6 flex justify-end space-x-4">
+      <!-- Кнопка создания поста -->
+      <a th:if="${group.canCreatePosts}"
+         th:href="@{/groups/{id}/posts/create(id=${group.id})}"
+         class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-300">
+        Создать пост
+      </a>
+
+      <!-- Кнопка выхода из группы -->
+      <form th:action="@{/groups/{id}/leave(id=${group.id})}"
+            method="post"
+            onsubmit="return confirm('Вы уверены, что хотите покинуть группу?');">
+        <button type="submit"
+                class="px-6 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 focus:ring-2 focus:ring-red-300">
+          Покинуть группу
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Правила группы -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-8" th:if="${group.rules}">
+    <h2 class="text-xl font-semibold mb-4">Правила группы</h2>
+    <div class="prose" th:text="${group.rules}">
+      Правила группы
+    </div>
+  </div>
+
+  <!-- Владелец группы -->
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">Администрация группы</h2>
+    <div class="flex items-center space-x-4">
+      <img th:if="${group.owner.userAvatarBase64}"
+           th:src="'data:image/jpeg;base64,' + ${group.owner.userAvatarBase64}"
+           class="w-12 h-12 rounded-full object-cover"
+           alt="Owner avatar">
+      <div>
+        <div class="font-semibold" th:text="${group.owner.username}">Имя владельца</div>
+        <div class="text-sm text-gray-600">Владелец группы</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
