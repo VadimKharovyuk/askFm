@@ -110,6 +110,7 @@ public class CacheConfig {
         cacheManager.registerCustomCache("topPosts", topPostsBuilder.build());
 
 
+
         // Кеш для предпросмотра топовых постов
         Caffeine<Object, Object> topPostsPreviewBuilder = Caffeine.newBuilder()
                 .expireAfterWrite(15, TimeUnit.MINUTES)    // Обновление каждые 15 минут
@@ -119,6 +120,28 @@ public class CacheConfig {
                 .recordStats();
 
         cacheManager.registerCustomCache("topPostsPreview", topPostsPreviewBuilder.build());
+
+
+
+        // Кеш для статистики загрузок фото
+        Caffeine<Object, Object> photoUploadsStatsCache = Caffeine.newBuilder()
+                .expireAfterWrite(15, TimeUnit.MINUTES)    // Обновление каждые 15 минут
+                .expireAfterAccess(1, TimeUnit.HOURS)      // Удаление если не обращались час
+                .initialCapacity(50)                       // Начальный размер
+                .maximumSize(200)                          // Максимальный размер
+                .recordStats();
+        cacheManager.registerCustomCache("photoUploadsStats", photoUploadsStatsCache.build());
+
+        // Кеш для статистики разблокировок
+        Caffeine<Object, Object> photoUnlocksStatsCache = Caffeine.newBuilder()
+                .expireAfterWrite(15, TimeUnit.MINUTES)    // Обновление каждые 15 минут
+                .expireAfterAccess(1, TimeUnit.HOURS)      // Удаление если не обращались час
+                .initialCapacity(50)                       // Начальный размер
+                .maximumSize(200)                          // Максимальный размер
+                .recordStats();
+
+        cacheManager.registerCustomCache("photoUnlocksStats", photoUnlocksStatsCache.build());
+
 
         // Устанавливаем специальную конфигурацию
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
