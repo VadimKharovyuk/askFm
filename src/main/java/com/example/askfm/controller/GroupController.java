@@ -173,6 +173,7 @@ public class GroupController {
     ) {
         List<GroupJoinRequest> requests = groupService.getPendingRequests(id, userDetails.getUsername());
         model.addAttribute("requests", requests);
+        model.addAttribute("groupId", id);
         return "groups/requests";
     }
 

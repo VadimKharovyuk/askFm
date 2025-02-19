@@ -10,12 +10,12 @@ import com.example.askfm.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -24,8 +24,8 @@ import java.util.List;
 public class GroupMapper {
     private final ImageService imageService;
 
-    private static final int COVER_WIDTH = 1024;  // Увеличили размер
-    private static final int AVATAR_WIDTH = 1024; // Увеличили размер
+    private static final int COVER_WIDTH = 1024;
+    private static final int AVATAR_WIDTH = 1024;
 
     public Group toEntity(CreateGroupDTO dto, User owner) throws IOException {
         LocalDateTime now = LocalDateTime.now();
@@ -171,5 +171,53 @@ public class GroupMapper {
                 .canModerate(canModerate)
                 .canInviteMembers(canInviteMembers)
                 .build();
+    }
+    public GroupMembersListDTO toMembersListDto(Group group, Page<GroupMember> members) {
+        return GroupMembersListDTO.builder()
+                .groupId(group.getId())
+                .groupName(group.getName())
+                .groupAvatarBase64(imageService.getBase64Avatar(group.getAvatar()))
+                .isPrivate(group.isPrivate())
+                .members(members.map(this::toMemberDto)) // Преобразуем Page<GroupMember> в Page<GroupMemberDTO>
+                .build();
+    }
+
+    public Page<GroupMemberDTO> toMemberDtoPage(Page<GroupMember> members) {
+        return members.map(this::toMemberDto);
+    }
+
+    private GroupMemberDTO toMemberDto(GroupMember member) {
+        return GroupMemberDTO.builder()
+                .userId(member.getUser().getId())
+                .username(member.getUser().getUsername())
+                .avatarBase64(member.getUser().getAvatar() != null ?
+                        imageService.getBase64Avatar(member.getUser().getAvatar()) : null)
+                .role(member.getRole())
+                .joinedAt(member.getJoinedAt())
+                .build();
+    }
+
+
+    public void updateGroupFromDto(Group group, UpdateGroupDTO dto) {
+        group.setName(dto.getName());
+        group.setDescription(dto.getDescription());
+        group.setPrivate(dto.getIsPrivate());
+        group.setCategory(dto.getCategory());
+        group.setRules(dto.getRules());
+        group.setUpdatedAt(LocalDateTime.now());
+    }
+
+    public void updateGroupMedia(Group group, MultipartFile avatar, MultipartFile cover) throws IOException {
+        if (avatar != null && !avatar.isEmpty()) {
+            byte[] resizedAvatar = imageService.resizeImage(avatar.getBytes(), AVATAR_WIDTH);
+            group.setAvatar(resizedAvatar);
+        }
+
+        if (cover != null && !cover.isEmpty()) {
+            byte[] resizedCover = imageService.resizeImage(cover.getBytes(), COVER_WIDTH);
+            group.setCover(resizedCover);
+        }
+
+        group.setUpdatedAt(LocalDateTime.now());
     }
 }

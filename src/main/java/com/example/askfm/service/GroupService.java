@@ -1,9 +1,6 @@
 package com.example.askfm.service;
 
-import com.example.askfm.dto.CreateGroupDTO;
-import com.example.askfm.dto.GroupListDTO;
-import com.example.askfm.dto.GroupMembershipDTO;
-import com.example.askfm.dto.GroupViewDTO;
+import com.example.askfm.dto.*;
 import com.example.askfm.enums.GroupRole;
 import com.example.askfm.enums.JoinRequestStatus;
 import com.example.askfm.enums.MembershipStatus;
@@ -18,12 +15,14 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.GroupJoinRequestRepository;
 import com.example.askfm.repository.GroupMemberRepository;
 import com.example.askfm.repository.GroupRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -38,6 +37,7 @@ public class GroupService {
     private final UserService userService;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupJoinRequestRepository joinRequestRepository;
+
 
     @Transactional
     public Group createGroup(CreateGroupDTO dto, String username) throws IOException {
@@ -64,6 +64,11 @@ public class GroupService {
             return dto;
         });
     }
+    public Group getGroupBasicInfo(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundException("Group not found with id: " + groupId));
+    }
+
     public GroupViewDTO getGroupById(Long groupId, String currentUsername) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException("Group not found"));
@@ -246,4 +251,47 @@ public class GroupService {
             return dto;
         });
     }
+
+    public GroupMembersListDTO getGroupMembers(Long groupId, String searchQuery, Pageable pageable) {
+        Group group = getGroupBasicInfo(groupId);
+
+        Page<GroupMember> members;
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            // Поиск по имени пользователя
+            members = groupMemberRepository.searchByUsername(groupId, searchQuery.trim(), pageable);
+        } else {
+            // Получение всех участников
+            members = groupMemberRepository.findByGroupId(groupId, pageable);
+        }
+
+        return groupMapper.toMembersListDto(group, members);
+    }
+
+
+    public void updateGroup(Long groupId, UpdateGroupDTO dto, String username) {
+        Group group = getGroupBasicInfo(groupId);
+        checkModificationPermission(group, username);
+
+        groupMapper.updateGroupFromDto(group, dto);
+        groupRepository.save(group);
+    }
+
+    public void updateGroupMedia(Long groupId, MultipartFile avatar, MultipartFile cover, String username) throws IOException {
+        Group group = getGroupBasicInfo(groupId);
+        checkModificationPermission(group, username);
+
+        groupMapper.updateGroupMedia(group, avatar, cover);
+        groupRepository.save(group);
+    }
+
+    private void checkModificationPermission(Group group, String username) {
+        GroupMember member = groupMemberRepository.findByGroupAndUser_Username(group, username)
+                .orElseThrow(() -> new AccessDeniedException("User is not a member of this group"));
+
+        if (!member.getRole().canApproveMembers()) {
+            throw new AccessDeniedException("No permission to modify group");
+        }
+    }
+
+
 }

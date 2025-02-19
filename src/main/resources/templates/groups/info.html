@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${group.name + ' - Информация'}">Информация о группе</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <!-- Заголовок -->
+  <div class="mb-8">
+    <div class="flex items-center space-x-4">
+      <img th:if="${group.avatarBase64}"
+           th:src="'data:image/jpeg;base64,' + ${group.avatarBase64}"
+           class="w-16 h-16 rounded-lg object-cover"
+           alt="Group avatar">
+      <div>
+        <h1 class="text-2xl font-bold" th:text="${group.name}">Название группы</h1>
+        <a th:href="@{/groups/{id}(id=${group.id})}" class="text-blue-500 hover:text-blue-700">
+          <i class="fas fa-arrow-left mr-2"></i>Вернуться к группе
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основная информация -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Левая колонка -->
+    <div class="space-y-6">
+      <!-- Общая информация -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Общая информация</h2>
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Описание</h3>
+            <p class="mt-1" th:text="${group.description}">Описание группы</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Тип группы</h3>
+            <p class="mt-1" th:text="${group.isPrivate ? 'Закрытая группа' : 'Открытая группа'}">
+              Тип группы
+            </p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Категория</h3>
+            <p class="mt-1" th:text="${group.category.displayName}">Категория</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Дата создания</h3>
+            <p class="mt-1" th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">
+              Дата создания
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Статистика -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Статистика</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600" th:text="${group.membersCount}">0</div>
+            <div class="text-sm text-gray-500">Участников</div>
+          </div>
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600" th:text="${group.postsCount}">0</div>
+            <div class="text-sm text-gray-500">Публикаций</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="space-y-6">
+      <!-- Администрация -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Администрация группы</h2>
+        <div class="flex items-center space-x-4">
+          <img th:if="${group.owner.userAvatarBase64}"
+               th:src="'data:image/jpeg;base64,' + ${group.owner.userAvatarBase64}"
+               class="w-12 h-12 rounded-full object-cover"
+               alt="Owner avatar">
+          <div>
+            <div class="font-semibold" th:text="${group.owner.username}">Имя владельца</div>
+            <div class="text-sm text-gray-600">Владелец группы</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Правила -->
+      <div class="bg-white rounded-lg shadow-lg p-6" th:if="${group.rules}">
+        <h2 class="text-xl font-semibold mb-4">Правила группы</h2>
+        <div class="prose" th:text="${group.rules}">
+          Правила группы
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
