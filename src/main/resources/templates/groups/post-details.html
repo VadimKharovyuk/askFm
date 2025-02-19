@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Пост в группе</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <!-- Навигация -->
+  <div class="mb-6">
+    <a th:href="@{/groups/{id}(id=${group.id})}"
+       class="text-blue-500 hover:text-blue-700">
+      <i class="fas fa-arrow-left mr-2"></i>
+      Вернуться к группе
+    </a>
+  </div>
+
+  <!-- Пост -->
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Автор поста -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center">
+        <div th:if="${!post.isAnonymous}">
+          <img th:if="${post.author.avatarBase64}"
+               th:src="'data:image/jpeg;base64,' + ${post.author.avatarBase64}"
+               class="w-10 h-10 rounded-full object-cover"
+               alt="Author avatar">
+          <span class="ml-3 font-medium" th:text="${post.author.username}">Автор</span>
+        </div>
+        <div th:if="${post.isAnonymous}" class="flex items-center text-gray-600">
+          <i class="fas fa-user-secret mr-2"></i>
+          <span>Анонимный пользователь</span>
+        </div>
+      </div>
+      <span class="text-sm text-gray-500"
+            th:text="${#temporals.format(post.publishedAt, 'dd.MM.yyyy HH:mm')}">
+                Дата публикации
+            </span>
+    </div>
+
+    <!-- Контент поста -->
+    <p class="text-gray-800 whitespace-pre-line" th:text="${post.content}">
+      Текст поста
+    </p>
+
+    <!-- Медиа контент -->
+    <img th:if="${post.mediaBase64}"
+         th:src="'data:image/jpeg;base64,' + ${post.mediaBase64}"
+         class="mt-4 rounded-lg max-h-96 w-full object-contain"
+         alt="Post media">
+
+    <!-- Статистика и действия -->
+    <div class="mt-4 flex items-center justify-between">
+      <div class="flex items-center space-x-6 text-gray-500">
+        <!-- Форма для лайка -->
+        <form th:action="@{/groups/{groupId}/posts/{postId}/like(groupId=${group.id}, postId=${post.id})}"
+              method="post"
+              class="inline">
+          <button type="submit"
+                  class="flex items-center space-x-1 hover:text-blue-500 transition-colors"
+                  th:classappend="${post.likedByCurrentUser ? 'text-blue-500' : ''}">
+            <i class="far fa-heart" th:classappend="${post.likedByCurrentUser ? 'fas' : 'far'}"></i>
+            <span th:text="${post.likesCount}">0</span>
+          </button>
+        </form>
+        <div class="flex items-center space-x-1">
+          <i class="far fa-comment"></i>
+          <span th:text="${post.commentsCount}">0</span>
+        </div>
+      </div>
+
+      <!-- Кнопка удаления для автора -->
+      <div th:if="${post.author != null && post.author.username == #authentication.principal.username}">
+        <form th:action="@{/groups/{groupId}/posts/{postId}/delete(groupId=${group.id},postId=${post.id})}"
+              method="post"
+              class="inline"
+              onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?');">
+          <button type="submit"
+                  class="text-red-500 hover:text-red-700 transition-colors">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Секция комментариев -->
+  <div class="mt-8">
+    <!-- Форма добавления комментария -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold mb-4">Добавить комментарий</h3>
+      <form th:action="@{/groups/{groupId}/posts/{postId}/comments(groupId=${group.id},postId=${post.id})}"
+            th:object="${newComment}"
+            method="post">
+           <textarea th:field="*{content}"
+                     class="w-full p-4 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500"
+                     rows="3"
+                     placeholder="Напишите комментарий..."
+                     required></textarea>
+        <div class="mt-4 flex justify-end">
+          <button type="submit"
+                  class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            Отправить
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Список комментариев -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold">
+        Комментарии
+        <span class="text-gray-500" th:text="'(' + ${#lists.size(comments)} + ')'">
+               (0)
+           </span>
+      </h3>
+
+      <!-- Если есть комментарии -->
+      <div th:each="comment : ${comments}"
+           class="bg-white rounded-lg shadow-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center space-x-3">
+            <img th:if="${comment.author.avatarBase64}"
+                 th:src="'data:image/jpeg;base64,' + ${comment.author.avatarBase64}"
+                 class="w-8 h-8 rounded-full object-cover"
+                 alt="Commenter avatar">
+            <div>
+                       <span class="font-medium" th:text="${comment.author.username}">
+                           Автор комментария
+                       </span>
+              <span class="text-sm text-gray-500 ml-2"
+                    th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">
+                           Дата
+                       </span>
+            </div>
+          </div>
+
+          <!-- Кнопка удаления комментария -->
+          <div th:if="${comment.author.username == #authentication.principal.username}">
+            <form th:action="@{/groups/{groupId}/posts/{postId}/comments/{commentId}/delete(groupId=${group.id},postId=${post.id},commentId=${comment.id})}"
+                  method="post"
+                  class="inline"
+                  onsubmit="return confirm('Удалить комментарий?');">
+              <button type="submit"
+                      class="text-red-500 hover:text-red-700 transition-colors">
+                <i class="fas fa-times"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <p class="text-gray-800" th:text="${comment.content}">
+          Текст комментария
+        </p>
+      </div>
+
+      <!-- Если комментариев нет -->
+      <div th:if="${#lists.isEmpty(comments)}"
+           class="bg-white rounded-lg shadow-lg p-6 text-center text-gray-500">
+        Пока нет комментариев
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</body>
+</html>

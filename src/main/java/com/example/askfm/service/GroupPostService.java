@@ -2,9 +2,12 @@ package com.example.askfm.service;
 
 
 import com.example.askfm.dto.CreateGroupPostDTO;
+import com.example.askfm.dto.GroupPostCommentDTO;
 import com.example.askfm.dto.GroupPostDTO;
 
 import com.example.askfm.exception.GroupNotFoundException;
+import com.example.askfm.exception.PostNotFoundException;
+import com.example.askfm.exception.UserNotFoundException;
 import com.example.askfm.maper.GroupPostMapper;
 import com.example.askfm.model.Group;
 import com.example.askfm.model.GroupMember;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Optional;
 @Slf4j
 @Service
@@ -33,6 +37,7 @@ public class GroupPostService {
     private final UserRepository userRepository;
     private final GroupPostMapper groupPostMapper;
     private final GroupMemberRepository groupMemberRepository;
+    private final GroupPostCommentService groupPostCommentService;
 
     @Transactional
     public GroupPostDTO createPost(Long groupId, String username, CreateGroupPostDTO dto) throws IOException {
@@ -86,14 +91,13 @@ public class GroupPostService {
     }
 
 
-
     @Transactional
-    public void likePost(Long postId, Long userId) {
+    public void likePost(Long postId, String username) {
         GroupPost post = groupPostRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Пост не найден"));
+                .orElseThrow(() -> new PostNotFoundException(postId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (post.getLikedBy().contains(user)) {
             post.getLikedBy().remove(user);
@@ -126,8 +130,24 @@ public class GroupPostService {
         group.setPostsCount(group.getPostsCount() - 1);
         groupRepository.save(group);
 
-        // Удаляем пост
         groupPostRepository.delete(post);
 
     }
+
+    public GroupPostDTO getPostById(Long postId, String username) {
+        log.info("Getting post {} for user {}", postId, username);
+
+        GroupPost post = groupPostRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
+
+        User currentUser = null;
+        if (username != null) {
+            currentUser = userRepository.findByUsername(username)
+                    .orElse(null);
+        }
+
+        return groupPostMapper.toDto(post, currentUser);
+    }
+
+
 }

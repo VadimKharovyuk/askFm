@@ -280,6 +280,7 @@ public class GroupController {
         return "groups/list";
     }
 
+
     @PostMapping("/{groupId}/posts/{postId}/delete")
     public String deletePost(
             @PathVariable Long groupId,

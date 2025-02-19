@@ -24,7 +24,7 @@ public class GroupJoinRequest {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private Group group;  // Эта связь должна соответствовать mappedBy в Group
+    private Group group;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
