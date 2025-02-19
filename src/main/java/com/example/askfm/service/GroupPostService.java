@@ -104,4 +104,30 @@ public class GroupPostService {
         groupPostRepository.save(post);
     }
 
+
+    @Transactional
+    public void deletePostById(Long groupId, String username, Long postId) throws AccessDeniedException {
+        // Находим пост
+        GroupPost post = groupPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        // Проверяем, что пост принадлежит указанной группе
+        if (!post.getGroup().getId().equals(groupId)) {
+            throw new IllegalArgumentException("Post doesn't belong to the specified group");
+        }
+
+        // Проверяем, что пользователь является автором поста
+        if (!post.getAuthor().getUsername().equals(username)) {
+            throw new AccessDeniedException("User is not the author of this post");
+        }
+
+        // Уменьшаем счетчик постов в группе
+        Group group = post.getGroup();
+        group.setPostsCount(group.getPostsCount() - 1);
+        groupRepository.save(group);
+
+        // Удаляем пост
+        groupPostRepository.delete(post);
+
+    }
 }

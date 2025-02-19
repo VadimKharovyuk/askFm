@@ -279,4 +279,22 @@ public class GroupController {
 
         return "groups/list";
     }
+
+    @PostMapping("/{groupId}/posts/{postId}/delete")
+    public String deletePost(
+            @PathVariable Long groupId,
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            groupPostService.deletePostById(groupId, userDetails.getUsername(), postId);
+            redirectAttributes.addFlashAttribute("successMessage", "Пост успешно удален");
+        } catch (AccessDeniedException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "У вас нет прав на удаление этого поста");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении поста");
+        }
+        return "redirect:/groups/" + groupId;
+    }
 }
