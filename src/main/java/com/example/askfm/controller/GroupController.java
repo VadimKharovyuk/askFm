@@ -1,16 +1,17 @@
 package com.example.askfm.controller;
 
-import com.example.askfm.dto.CreateGroupDTO;
-import com.example.askfm.dto.GroupListDTO;
-import com.example.askfm.dto.GroupMembershipDTO;
-import com.example.askfm.dto.GroupViewDTO;
+import com.example.askfm.dto.*;
+import com.example.askfm.enums.MembershipStatus;
+import com.example.askfm.exception.GroupNotFoundException;
 import com.example.askfm.model.Group;
 import com.example.askfm.model.GroupJoinRequest;
 import com.example.askfm.model.User;
+import com.example.askfm.service.GroupPostService;
 import com.example.askfm.service.GroupService;
 import com.example.askfm.enums.GroupCategory;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,14 +27,90 @@ import jakarta.validation.Valid;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
-
+@Slf4j
 @Controller
 @RequestMapping("/groups")
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
     private static final int PAGE_SIZE = 25;
+    private final GroupPostService groupPostService;
+
+    @GetMapping("/{id}")
+    public String viewGroup(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model
+    ) {
+        try {
+            String username = userDetails != null ? userDetails.getUsername() : null;
+
+            // Получаем информацию о группе
+            GroupViewDTO group = groupService.getGroupById(id, username);
+            model.addAttribute("group", group);
+
+            // Если группа закрытая и пользователь не участник, не загружаем посты
+            if (!group.isPrivate() || group.getMembershipStatus() == MembershipStatus.MEMBER) {
+                PageRequest pageRequest = PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(Sort.Direction.DESC, "publishedAt")
+                );
+
+                Page<GroupPostDTO> posts = groupPostService.getGroupPosts(id, username, pageRequest);
+                model.addAttribute("posts", posts);
+                model.addAttribute("currentPage", page);
+            }
+
+            model.addAttribute("groupId", id);
+
+            // Добавляем DTO для создания поста, если пользователь может создавать посты
+            if (group.getMembershipStatus() == MembershipStatus.MEMBER) {
+                model.addAttribute("createPostDTO", new CreateGroupPostDTO());
+            }
+
+            return "groups/view";
+
+        } catch (GroupNotFoundException e) {
+            return "redirect:/groups?error=Group not found";
+        } catch (AccessDeniedException e) {
+            return "redirect:/groups?error=Access denied";
+        } catch (Exception e) {
+            return "redirect:/groups?error=Something went wrong";
+        }
+    }
+    @PostMapping("/{groupId}/posts")
+    public String createPost(
+            @PathVariable Long groupId,
+            @Valid @ModelAttribute CreateGroupPostDTO createGroupPostDTO,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes
+    ) {
+        log.info("Attempting to create post in group {} by user {}", groupId, userDetails.getUsername());
+
+        if (bindingResult.hasErrors()) {
+            log.warn("Validation errors when creating post: {}", bindingResult.getAllErrors());
+            return "redirect:/groups/" + groupId;
+        }
+
+        try {
+            groupPostService.createPost(groupId, userDetails.getUsername(), createGroupPostDTO);
+            log.info("Successfully created post in group {}", groupId);
+            redirectAttributes.addFlashAttribute("successMessage", "Пост успешно создан");
+        } catch (Exception e) {
+            log.error("Error creating post in group {}: {}", groupId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при создании поста: " + e.getMessage());
+        }
+
+        return "redirect:/groups/" + groupId;
+    }
+
+
     @GetMapping
     public String listGroups(
             @RequestParam(defaultValue = "0") int page,
@@ -92,17 +169,6 @@ public class GroupController {
     }
 
 
-    @GetMapping("/{id}")
-    public String viewGroup(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails,
-            Model model
-    ) {
-        String username = userDetails != null ? userDetails.getUsername() : null;
-        GroupViewDTO group = groupService.getGroupById(id, username);
-        model.addAttribute("group", group);
-        return "groups/view";
-    }
 
     @PostMapping("/{id}/join")
     public String joinGroup(

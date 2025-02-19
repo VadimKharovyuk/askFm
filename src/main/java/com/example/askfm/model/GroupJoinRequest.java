@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // Создаем сущность для хранения заявок
 @Entity
@@ -22,12 +24,13 @@ public class GroupJoinRequest {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private Group group;
+    private Group group;  // Эта связь должна соответствовать mappedBy в Group
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String message;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -35,5 +38,4 @@ public class GroupJoinRequest {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private JoinRequestStatus status;
-
 }
