@@ -38,59 +38,85 @@
         </nav>
     </div>
 
-    <!-- Список групп -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div th:each="group : ${groups.content}"
-             class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="relative">
-                <img th:if="${group.avatarBase64}"
-                     th:src="'data:image/jpeg;base64,' + ${group.avatarBase64}"
-                     class="w-full h-48 object-cover"
-                     alt="Group avatar">
-                <div class="absolute top-2 right-2 flex space-x-2">
-                    <span th:if="${group.isPrivate}"
-                          class="bg-gray-800 text-white px-2 py-1 rounded text-sm">
-                        <i class="fas fa-lock mr-1"></i>
-                        Закрытая
-                    </span>
-                    <span th:if="${group.isMember}"
-                          class="bg-green-500 text-white px-2 py-1 rounded text-sm">
-    <i class="fas fa-check mr-1"></i>
-    Участник
-</span>
-                </div>
-            </div>
-            <div class="p-4">
-                <a th:href="@{/groups/{id}(id=${group.id})}" class="group">
-                    <h2 class="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors"
-                        th:text="${group.name}">Название группы</h2>
-                </a>
-                <p class="text-gray-600 mb-4" th:text="${group.description}">Описание группы</p>
-                <div class="flex justify-between text-sm text-gray-500">
-                    <span>
-                        <i class="fas fa-users mr-1"></i>
-                        <span th:text="${group.membersCount + ' участников'}">0 участников</span>
-                    </span>
-                    <span>
-                        <i class="fas fa-newspaper mr-1"></i>
-                        <span th:text="${group.postsCount + ' постов'}">0 постов</span>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="flex gap-6">
+        <!-- Боковая панель с категориями -->
+        <aside class="w-64 flex-shrink-0">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-lg font-semibold mb-4">Категории</h2>
+                <div class="flex flex-col gap-2">
+                    <a href="/groups"
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex justify-between items-center"
+                       th:classappend="${categoryStats[0].selected == false} ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
+                        <span>Все</span>
+                        <span class="text-xs" th:text="${categoryStats[0].totalCount}"></span>
+                    </a>
 
-    <!-- Пагинация -->
-    <div class="mt-8 flex justify-center" th:if="${totalPages > 1}">
-        <nav class="inline-flex rounded-md shadow">
-            <a th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
-               th:href="@{${#httpServletRequest.requestURI}(page=${pageNumber})}"
-               th:text="${pageNumber + 1}"
-               th:class="${pageNumber == currentPage ?
-                             'bg-blue-500 text-white px-4 py-2 border' :
-                             'bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 border'}">
-            </a>
-        </nav>
+                    <a th:each="stat : ${categoryStats}"
+                       th:href="@{/groups(category=${stat.category})}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex justify-between items-center"
+                       th:classappend="${stat.selected} ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
+                        <span th:text="${stat.displayName}">Категория</span>
+                        <span class="text-xs" th:text="${stat.count}"></span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="flex-1">
+            <!-- Список групп -->
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div th:each="group : ${groups.content}"
+                     class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="relative">
+                        <img th:if="${group.avatarBase64}"
+                             th:src="'data:image/jpeg;base64,' + ${group.avatarBase64}"
+                             class="w-full h-32 object-cover"
+                             alt="Group avatar">
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                <span th:if="${group.isPrivate}"
+                      class="bg-gray-800 bg-opacity-75 text-white px-1.5 py-0.5 rounded text-xs">
+                    <i class="fas fa-lock"></i>
+                </span>
+                            <span th:if="${group.isMember}"
+                                  class="bg-green-500 bg-opacity-75 text-white px-1.5 py-0.5 rounded text-xs">
+                    <i class="fas fa-check"></i>
+                </span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <a th:href="@{/groups/{id}(id=${group.id})}" class="group">
+                            <h2 class="text-base font-semibold mb-1 group-hover:text-blue-600 transition-colors line-clamp-1"
+                                th:text="${group.name}">Название группы</h2>
+                        </a>
+                        <p class="text-gray-600 text-sm mb-2 line-clamp-2" th:text="${group.description}">Описание группы</p>
+                        <div class="flex justify-between text-xs text-gray-500">
+                <span class="flex items-center">
+                    <i class="fas fa-users mr-1"></i>
+                    <span th:text="${group.membersCount}">0</span>
+                </span>
+                            <span class="flex items-center">
+                    <i class="fas fa-newspaper mr-1"></i>
+                    <span th:text="${group.postsCount}">0</span>
+                </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Пагинация -->
+            <div class="mt-8 flex justify-center" th:if="${totalPages > 1}">
+                <nav class="inline-flex rounded-md shadow">
+                    <a th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
+                       th:href="@{${#httpServletRequest.requestURI}(page=${pageNumber})}"
+                       th:text="${pageNumber + 1}"
+                       th:class="${pageNumber == currentPage ?
+                                     'bg-blue-500 text-white px-4 py-2 border' :
+                                     'bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 border'}">
+                    </a>
+                </nav>
+            </div>
+        </main>
     </div>
 </div>
 </body>

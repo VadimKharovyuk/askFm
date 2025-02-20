@@ -1,6 +1,7 @@
 package com.example.askfm.service;
 
 import com.example.askfm.dto.*;
+import com.example.askfm.enums.GroupCategory;
 import com.example.askfm.enums.GroupRole;
 import com.example.askfm.enums.JoinRequestStatus;
 import com.example.askfm.enums.MembershipStatus;
@@ -15,7 +16,6 @@ import com.example.askfm.model.User;
 import com.example.askfm.repository.GroupJoinRequestRepository;
 import com.example.askfm.repository.GroupMemberRepository;
 import com.example.askfm.repository.GroupRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +67,41 @@ public class GroupService {
             return dto;
         });
     }
+
+    public Page<GroupListDTO> getGroupsByCategory(GroupCategory category, Pageable pageable, String username) {
+        Page<Group> groups = groupRepository.findByCategory(category, pageable);
+        return groups.map(group -> {
+            GroupListDTO dto = groupMapper.toListDto(group);
+            if (username != null) {
+                boolean isMember = groupMemberRepository
+                        .findByGroupAndUser_Username(group, username)
+                        .isPresent();
+                dto.setMember(isMember);
+            }
+            return dto;
+        });
+    }
+
+    public List<CategoryStatsDTO> getCategoryStatistics(GroupCategory selectedCategory) {
+        Map<GroupCategory, Long> categoryCounts = Arrays.stream(GroupCategory.values())
+                .collect(Collectors.toMap(
+                        category -> category,
+                        groupRepository::countByCategory
+                ));
+
+        long totalCount = categoryCounts.values().stream().mapToLong(count -> count).sum();
+
+        return Arrays.stream(GroupCategory.values())
+                .map(category -> new CategoryStatsDTO(
+                        category,
+                        category.getDisplayName(),
+                        categoryCounts.get(category),
+                        category.equals(selectedCategory),
+                        totalCount
+                ))
+                .collect(Collectors.toList());
+    }
+
     public Group getGroupBasicInfo(Long groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException("Group not found with id: " + groupId));

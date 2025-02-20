@@ -26,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminDashboardController {
     private final UserService userService;
-    private final AdService adService;
-//    private final NewsService newsService;
+
+
 
 
     @GetMapping("/dashboard")

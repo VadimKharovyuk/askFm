@@ -29,4 +29,5 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     );
 
 
+    long countByCategory(GroupCategory category);
 }

@@ -5,11 +5,9 @@ import com.example.askfm.enums.MembershipStatus;
 import com.example.askfm.exception.GroupNotFoundException;
 import com.example.askfm.model.Group;
 import com.example.askfm.model.GroupJoinRequest;
-import com.example.askfm.model.User;
 import com.example.askfm.service.GroupPostService;
 import com.example.askfm.service.GroupService;
 import com.example.askfm.enums.GroupCategory;
-import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -113,6 +111,7 @@ public class GroupController {
 
     @GetMapping
     public String listGroups(
+            @RequestParam(required = false) GroupCategory category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "createdAt") String sort,
             @RequestParam(defaultValue = "desc") String direction,
@@ -123,12 +122,17 @@ public class GroupController {
         PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by(dir, sort));
 
         String username = userDetails != null ? userDetails.getUsername() : null;
-        Page<GroupListDTO> groups = groupService.getAllGroups(pageRequest, username);
+        Page<GroupListDTO> groups = category != null ?
+                groupService.getGroupsByCategory(category, pageRequest, username) :
+                groupService.getAllGroups(pageRequest, username);
+
+        List<CategoryStatsDTO> categoryStats = groupService.getCategoryStatistics(category);
 
         model.addAttribute("groups", groups);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", groups.getTotalPages());
         model.addAttribute("activeTab", "all");
+        model.addAttribute("categoryStats", categoryStats);
 
         return "groups/list";
     }
