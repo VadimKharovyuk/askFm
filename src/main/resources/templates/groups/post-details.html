@@ -52,6 +52,7 @@
          alt="Post media">
 
     <!-- Статистика и действия -->
+    <!-- Статистика и действия -->
     <div class="mt-4 flex items-center justify-between">
       <div class="flex items-center space-x-6 text-gray-500">
         <!-- Форма для лайка -->
@@ -71,19 +72,21 @@
         </div>
       </div>
 
-      <!-- Кнопка удаления для автора -->
+      <!-- Кнопка удаления для автора поста -->
       <div th:if="${post.author != null && post.author.username == #authentication.principal.username}">
-        <form th:action="@{/groups/{groupId}/posts/{postId}/comments/{commentId}/delete(groupId=${group.id},postId=${post.id},commentId=${comment.id})}"
+        <form th:action="@{/groups/{groupId}/posts/{postId}/delete(groupId=${group.id},postId=${post.id})}"
               method="post"
               class="inline"
-              onsubmit="return confirm('Удалить комментарий?');">
+              onsubmit="return confirm('Удалить пост?');">
           <button type="submit"
                   class="text-red-500 hover:text-red-700 transition-colors duration-200">
-            <i class="fas fa-times"></i>
+            <i class="fas fa-trash-alt"></i>
           </button>
         </form>
       </div>
     </div>
+
+
   </div>
 
   <!-- Секция комментариев -->

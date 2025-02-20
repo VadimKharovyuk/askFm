@@ -133,6 +133,7 @@ public class GroupController {
         model.addAttribute("totalPages", groups.getTotalPages());
         model.addAttribute("activeTab", "all");
         model.addAttribute("categoryStats", categoryStats);
+        model.addAttribute("currentUser", userDetails);
 
         return "groups/list";
     }
@@ -253,16 +254,20 @@ public class GroupController {
     @GetMapping("/my")
     public String getMyGroups(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) GroupCategory category,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
         PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupListDTO> groups = groupService.getMyGroups(userDetails.getUsername(), pageRequest);
 
+
+        List<CategoryStatsDTO> categoryStats = groupService.getCategoryStatistics(category);
         model.addAttribute("groups", groups);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", groups.getTotalPages());
         model.addAttribute("activeTab", "my");
+        model.addAttribute("categoryStats", categoryStats);
 
         return "groups/list";
     }
@@ -270,12 +275,16 @@ public class GroupController {
     @GetMapping("/managed")
     public String getManagedGroups(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) GroupCategory category,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
         PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupListDTO> groups = groupService.getManagedGroups(userDetails.getUsername(), pageRequest);
 
+
+        List<CategoryStatsDTO> categoryStats = groupService.getCategoryStatistics(category);
+        model.addAttribute("categoryStats", categoryStats);
         model.addAttribute("groups", groups);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", groups.getTotalPages());
