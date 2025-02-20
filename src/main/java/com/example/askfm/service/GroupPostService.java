@@ -37,12 +37,9 @@ public class GroupPostService {
     private final UserRepository userRepository;
     private final GroupPostMapper groupPostMapper;
     private final GroupMemberRepository groupMemberRepository;
-    private final GroupPostCommentService groupPostCommentService;
 
     @Transactional
     public GroupPostDTO createPost(Long groupId, String username, CreateGroupPostDTO dto) throws IOException {
-        log.info("Creating post in group {} for user {}", groupId, username);
-        log.debug("Creating post with anonymous flag: {}", dto.isAnonymous());
         try {
             Group group = groupRepository.findById(groupId)
                     .orElseThrow(() -> new IllegalArgumentException("Группа не найдена"));
@@ -57,7 +54,6 @@ public class GroupPostService {
             group.setPostsCount(group.getPostsCount() + 1);
             groupRepository.save(group);
 
-            log.info("Successfully created post {} in group {}", post.getId(), groupId);
             return groupPostMapper.toDto(post, author);
 
         } catch (Exception e) {
@@ -111,7 +107,6 @@ public class GroupPostService {
 
     @Transactional
     public void deletePostById(Long groupId, String username, Long postId) throws AccessDeniedException {
-        // Находим пост
         GroupPost post = groupPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
@@ -135,8 +130,6 @@ public class GroupPostService {
     }
 
     public GroupPostDTO getPostById(Long postId, String username) {
-        log.info("Getting post {} for user {}", postId, username);
-
         GroupPost post = groupPostRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
 

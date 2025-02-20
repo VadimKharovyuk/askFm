@@ -8,7 +8,7 @@ public enum JoinRequestStatus {
     PENDING("На рассмотрении"),
     APPROVED("Одобрено"),
     REJECTED("Отклонено"),
-    CANCELLED("Отменено"); // если пользователь сам отменил заявку
+    CANCELLED("Отменено");
 
     private final String displayName;
 

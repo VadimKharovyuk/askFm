@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Создаем сущность для хранения заявок
+// сущность для хранения заявок
 @Entity
 @Table(name = "group_join_requests")
 @Getter

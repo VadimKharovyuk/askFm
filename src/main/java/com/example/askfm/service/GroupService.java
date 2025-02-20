@@ -53,6 +53,7 @@ public class GroupService {
         return groupRepository.save(group);
     }
 
+
     public Page<GroupListDTO> getAllGroups(Pageable pageable, String username) {
         Page<Group> groups = groupRepository.findAll(pageable);
         return groups.map(group -> {
@@ -266,10 +267,12 @@ public class GroupService {
         Page<Group> groups = groupRepository.findByMembersUserUsername(username, pageable);
         return groups.map(group -> {
             GroupListDTO dto = groupMapper.toListDto(group);
-            dto.setMember(true); // Это точно группы пользователя
+            dto.setMember(true);
             return dto;
         });
     }
+
+
     public Page<GroupListDTO> getManagedGroups(String username, Pageable pageable) {
         User user = userService.findByUsername(username);
         if (user == null) {

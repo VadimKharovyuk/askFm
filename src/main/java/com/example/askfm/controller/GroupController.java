@@ -65,11 +65,11 @@ public class GroupController {
             }
 
             model.addAttribute("groupId", id);
-
-            // Добавляем DTO для создания поста, если пользователь может создавать посты
             if (group.getMembershipStatus() == MembershipStatus.MEMBER) {
                 model.addAttribute("createPostDTO", new CreateGroupPostDTO());
             }
+            model.addAttribute("currentUser", userDetails);
+
 
             return "groups/view";
 

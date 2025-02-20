@@ -14,6 +14,8 @@ import com.example.askfm.repository.GroupPostRepository;
 import com.example.askfm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,36 +32,30 @@ public class GroupPostCommentService {
     private final UserRepository userRepository;
     private final GroupPostCommentMapper commentMapper;
 
+
+    public static final int COMMENTS_PER_PAGE = 20;
+
+    public Page<GroupPostCommentDTO> getPostComments(Long postId, Pageable pageable) {
+        return commentRepository
+                .findByPostIdOrderByCreatedAtDesc(postId, pageable)
+                .map(commentMapper::toDto);
+    }
+
     @Transactional
     public GroupPostCommentDTO createComment(Long postId, String username, CreateCommentDTO dto) {
-        log.info("Creating comment for post {} by user {}", postId, username);
-
         GroupPost post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
-
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         GroupPostComment comment = commentMapper.toEntity(dto, post, author);
         comment = commentRepository.save(comment);
 
-        log.info("Created comment {} for post {}", comment.getId(), postId);
         return commentMapper.toDto(comment);
-    }
-
-    public List<GroupPostCommentDTO> getPostComments(Long postId) {
-        log.info("Getting comments for post {}", postId);
-
-        return commentRepository.findByPostIdOrderByCreatedAtDesc(postId)
-                .stream()
-                .map(commentMapper::toDto)
-                .collect(Collectors.toList());
     }
 
     @Transactional
     public void deleteComment(Long commentId, String username) {
-        log.info("Deleting comment {} by user {}", commentId, username);
-
         GroupPostComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
@@ -67,8 +63,7 @@ public class GroupPostCommentService {
         if (!comment.getAuthor().getUsername().equals(username)) {
             throw new AccessDeniedException("User is not the author of this comment");
         }
-
         commentRepository.delete(comment);
-        log.info("Deleted comment {}", commentId);
+
     }
 }

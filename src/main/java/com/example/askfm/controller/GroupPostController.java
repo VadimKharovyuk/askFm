@@ -11,6 +11,8 @@ import com.example.askfm.service.GroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +40,7 @@ public class GroupPostController {
     public String viewPost(
             @PathVariable Long groupId,
             @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
@@ -56,12 +59,17 @@ public class GroupPostController {
                 throw new IllegalArgumentException("Post doesn't belong to this group");
             }
 
-            // Получаем комментарии к посту
-            List<GroupPostCommentDTO> comments = commentService.getPostComments(postId);
+            // Получаем комментарии к посту с пагинацией
+            Page<GroupPostCommentDTO> comments = commentService.getPostComments(
+                    postId,
+                    PageRequest.of(page, GroupPostCommentService.COMMENTS_PER_PAGE)
+            );
 
             model.addAttribute("post", post);
             model.addAttribute("comments", comments);
-            model.addAttribute("newComment", new CreateCommentDTO()); // для формы создания
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", comments.getTotalPages());
+            model.addAttribute("newComment", new CreateCommentDTO());
 
             return "groups/post-details";
 

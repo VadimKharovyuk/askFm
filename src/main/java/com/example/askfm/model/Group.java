@@ -10,7 +10,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 @Entity
-@Table(name = "groups")
+@Table(name = "groups", indexes = {
+        @Index(name = "idx_groups_category", columnList = "category"),
+        @Index(name = "idx_groups_pagination", columnList = "created_at DESC, category"),
+        @Index(name = "idx_groups_name", columnList = "name"),
+        @Index(name = "idx_groups_name_category", columnList = "name, category"),
+        @Index(name = "idx_groups_private", columnList = "is_private")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,7 +60,6 @@ public class Group {
     @Column(name = "rules", columnDefinition = "TEXT")
     private String rules;
 
-    // Связь с участниками группы и их ролями
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<GroupMember> members = new ArrayList<>();
 

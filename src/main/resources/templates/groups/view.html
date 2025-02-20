@@ -30,13 +30,18 @@
         <aside class="w-64 flex-shrink-0">
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4">
                 <nav class="space-y-2">
-                    <a href="#" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <a href="/groups" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                         <i class="fas fa-info-circle text-blue-500"></i>
-                        <span>Информация</span>
+                        <span>Все группы</span>
                     </a>
-                    <a th:href="@{/groups/{id}/members(id=${group.id})}" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-users text-blue-500"></i>
-                        <span th:text="${group.membersCount + ' участников'}">0 участников</span>
+                    <a href="/home" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-home text-blue-500"></i>
+                        <span>Главная</span>
+                    </a>
+                    <a th:href="@{'/users/' + ${currentUser.getUsername()}}"
+                       class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-user text-blue-500"></i>
+                        <span>Профиль</span>
                     </a>
                 </nav>
             </div>
@@ -87,18 +92,25 @@
                         <!-- Автор поста -->
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <div th:if="${!post.isAnonymous}">
-                                    <img th:if="${post.author.avatarBase64}" th:src="'data:image/jpeg;base64,' + ${post.author.avatarBase64}" class="w-10 h-10 rounded-full object-cover" alt="Author avatar">
-                                    <span class="ml-3 font-medium" th:text="${post.author.username}">Автор</span>
+                                <div th:if="${!post.isAnonymous}" class="flex items-center">
+                                    <a th:href="@{'/users/' + ${post.author.username}}" class="flex items-center group">
+                                        <img th:if="${post.author.avatarBase64}"
+                                             th:src="'data:image/jpeg;base64,' + ${post.author.avatarBase64}"
+                                             class="w-10 h-10 rounded-full object-cover"
+                                             alt="Author avatar">
+                                        <span class="ml-3 font-medium group-hover:text-blue-500 transition-colors"
+                                              th:text="${post.author.username}">Автор</span>
+                                    </a>
                                 </div>
                                 <div th:if="${post.isAnonymous}" class="flex items-center text-gray-600">
                                     <i class="fas fa-user-secret mr-2"></i>
                                     <span>Анонимный пользователь</span>
                                 </div>
                             </div>
-                            <span class="text-sm text-gray-500" th:text="${#temporals.format(post.publishedAt, 'dd.MM.yyyy HH:mm')}">
-                                Дата публикации
-                            </span>
+                            <span class="text-sm text-gray-500"
+                                  th:text="${#temporals.format(post.publishedAt, 'dd.MM.yyyy HH:mm')}">
+        Дата публикации
+    </span>
                         </div>
 
                         <!-- Контент поста с ссылкой на детали -->
