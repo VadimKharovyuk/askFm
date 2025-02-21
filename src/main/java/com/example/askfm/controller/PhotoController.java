@@ -151,6 +151,7 @@ public class PhotoController {
         }
     }
 
+
     @GetMapping("/user/{username}/photos")
     public String showUserPhotoGrid(
             @PathVariable String username,

@@ -1,0 +1,57 @@
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 24px;
+    text-decoration: none;
+    color: var(--text-white);
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.side-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    text-decoration: none;
+    color: var(--text-white);
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+    font-size: 1.2rem;
+}
+
+.side-link:hover {
+    background-color: rgba(239, 243, 244, 0.1);
+    color: var(--text-white);
+}
+
+.side-link i {
+    width: 24px;
+    text-align: center;
+}
+
+
+
+
+.d-flex {
+    display: flex;
+    min-height: 100vh;
+}
+
+.left-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 275px; /* Фиксированная ширина */
+    padding: 20px;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    flex-shrink: 0; /* Предотвращает сжатие сайдбара */
+}

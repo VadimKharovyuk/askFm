@@ -20,6 +20,7 @@ public class AllTrendingPostsController {
 
     private final TopLikedPostsService topLikedPostsService;
 
+
     @GetMapping
     public String showAllTrendingPosts(@AuthenticationPrincipal UserDetails userDetails,
                                        @PageableDefault(size = 20) Pageable pageable,

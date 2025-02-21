@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<!-- Определяем фрагмент с именем sidebar -->
+<aside th:fragment="sidebar" class="left-sidebar">
+  <a href="/" class="logo-link">
+    <i class="fas fa-comment-dots"></i>
+    <span>AskFM</span>
+  </a>
+
+  <nav class="side-nav">
+    <a href="/home" class="side-link">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="/events" class="side-link">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Ивенты</span>
+    </a>
+
+    <a href="/notifications" class="side-link">
+      <i class="fas fa-bell"></i>
+      <span>Уведомления</span>
+      <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
+    </a>
+
+    <a href="/messages" class="side-link">
+      <i class="fas fa-envelope"></i>
+      <span>Сообщения</span>
+      <span th:if="${unreadMessagesCount > 0}"
+            class="notification-badge"
+            th:text="${unreadMessagesCount}">
+    </span>
+    </a>
+    <a href="/saved" class="side-link">
+      <i class="fas fa-bookmark"></i>
+      <span>Закладки</span>
+    </a>
+
+    <a href="/photos/my-list" class="side-link">
+      <i class="fas fa-camera"></i>
+      <span>Фото</span>
+    </a>
+
+    <a href="/groups" class="side-link">
+      <i class="fas fa-users"></i>
+      <span>Группы</span>
+    </a>
+    <!-- Или вариант с иконкой глаза, что символизирует просмотры -->
+    <a href="/visits/my" class="side-link">
+      <i class="fas fa-eye"></i>
+      <span>Истории</span>
+    </a>
+
+    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+    <a href="/ads" class="side-link">
+      <i class="fas fa-ad"></i>
+      <span>Мои рекламы</span>
+    </a>
+    <a href="/settings" class="side-link">
+      <i class="fas fa-cog"></i>
+      <span>Налаштування</span>
+    </a>
+
+    <a href="/balance" class="side-link">
+      <i class="fas fa-coins"></i>
+      <span>Balance</span>
+    </a>
+  </nav>
+</aside>
+</body>
+</html>

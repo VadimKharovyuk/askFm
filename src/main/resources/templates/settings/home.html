@@ -1,328 +1,215 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Настройки</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <style>
-    :root {
-      --background-dark: #050505;
-      --secondary-bg: #16181c;
-      --text-white: #dce3e7;
-      --text-gray: #e7eaee;
-      --border-color: #2f3336;
-      --blue-accent: #1d9bf0;
-      --blue-hover: #1a8cd8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/sidebar.css}" rel="stylesheet">
+    <title>Настройки</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --background-dark: #050505;
+            --secondary-bg: #16181c;
+            --text-white: #dce3e7;
+            --text-gray: #e7eaee;
+            --border-color: #2f3336;
+            --blue-accent: #1d9bf0;
+            --blue-hover: #1a8cd8;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--background-dark);
-      color: var(--text-white);
-      display: flex;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-white);
+        }
 
-    /* Боковая панель */
-    .left-sidebar {
-      width: 250px;
-      height: 100vh;
-      background-color: var(--secondary-bg);
-      padding: 20px;
-      position: fixed;
-      border-right: 1px solid var(--border-color);
-    }
+        .d-flex {
+            display: flex;
+            min-height: 100vh;
+        }
 
-    .logo-link {
-      display: flex;
-      align-items: center;
-      font-size: 24px;
-      color: var(--blue-accent);
-      text-decoration: none;
-      margin-bottom: 30px;
-    }
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            min-width: 0; /* Важно для предотвращения переполнения */
+        }
 
-    .logo-link span {
-      margin-left: 10px;
-    }
+        .settings-header {
+            margin-bottom: 30px;
+        }
 
-    .side-nav {
-      display: flex;
-      flex-direction: column;
-    }
+        .settings-header h1 {
+            font-size: 24px;
+            color: var(--text-white);
+        }
 
-    .side-link {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      color: var(--text-white);
-      text-decoration: none;
-      border-radius: 25px;
-      margin-bottom: 5px;
-      transition: background-color 0.2s;
-    }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
 
-    .side-link:hover {
-      background-color: var(--border-color);
-      color: var(--blue-accent);
-    }
+        .settings-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .side-link i {
-      width: 24px;
-      margin-right: 15px;
-    }
+        .settings-card:hover {
+            transform: translateY(-5px);
+            background-color: var(--border-color);
+        }
 
-    /* Основной контент */
-    .main-content {
-      margin-left: 250px;
-      padding: 30px;
-      width: calc(100% - 250px);
-    }
+        .settings-card h2 {
+            color: var(--text-white);
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .settings-header {
-      margin-bottom: 30px;
-    }
+        .settings-card h2 i {
+            color: var(--blue-accent);
+            flex-shrink: 0;
+        }
 
-    .settings-header h1 {
-      font-size: 24px;
-      color: var(--text-white);
-    }
+        .settings-card p {
+            color: var(--text-gray);
+            font-size: 14px;
+            line-height: 1.5;
+        }
 
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
-    }
+        .blocked-count {
+            background: #e0245e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            margin-left: auto;
+        }
 
-    .settings-card {
-      background: var(--secondary-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 15px;
-      padding: 25px;
-      transition: transform 0.2s, background-color 0.2s;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-    }
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
 
-    .settings-card:hover {
-      transform: translateY(-5px);
-      background-color: var(--border-color);
-    }
+            .main-content {
+                padding: 20px;
+            }
+        }
 
-    .settings-card h2 {
-      color: var(--text-white);
-      margin-bottom: 15px;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-    }
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .settings-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-    .settings-card h2 i {
-      margin-right: 10px;
-      color: var(--blue-accent);
-    }
-
-    .settings-card p {
-      color: var(--text-gray);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    /* Additional icons and hover effects */
-    .settings-card:hover i {
-      transform: scale(1.1);
-      transition: transform 0.2s;
-    }
-
-    .side-link i,
-    .settings-card h2 i {
-      transition: transform 0.2s;
-    }
-
-    .side-link:hover i {
-      transform: scale(1.1);
-    }
-
-    .settings-card {
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      border-radius: 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: var(--text-primary);
-    }
-
-    .settings-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px var(--shadow-color);
-      border-color: var(--accent-color);
-    }
-
-    .settings-card h2 {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .settings-card i {
-      color: var(--accent-color);
-      font-size: 1.5rem;
-    }
-
-    .settings-card p {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      margin: 0;
-    }
-
-    .blocked-count {
-      background: var(--danger-color);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      margin-left: auto;
-    }
-  </style>
+        @media (min-width: 1201px) {
+            .settings-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
-<!-- Боковая панель -->
-<aside class="left-sidebar">
-  <a href="/" class="logo-link">
-    <i class="fas fa-comment-dots"></i>
-    <span>AskFM</span>
-  </a>
 
-  <nav class="side-nav">
-    <a href="/home" class="side-link">
-      <i class="fas fa-home"></i>
-      <span>Главная</span>
-    </a>
-    <a href="/explore" class="side-link">
-      <i class="fas fa-compass"></i>
-      <span>Поиск</span>
-    </a>
-    <a href="/notifications" class="side-link">
-      <i class="fas fa-bell"></i>
-      <span>Уведомления</span>
-    </a>
-    <a href="/messages" class="side-link">
-      <i class="fas fa-envelope"></i>
-      <span>Сообщения</span>
-    </a>
-    <a href="/saved" class="side-link">
-      <i class="fas fa-bookmark"></i>
-      <span>Закладки</span>
-    </a>
-    <a href="/visits/my" class="side-link">
-      <i class="fas fa-history"></i>
-      <span>Истории</span>
-    </a>
-    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
-      <i class="fas fa-user"></i>
-      <span>Профиль</span>
-    </a>
-    <a href="/settings" class="side-link">
-      <i class="fas fa-cog"></i>
-      <span>Налаштування</span>
-    </a>
+<div class="d-flex">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-    <form th:action="@{/logout}" method="post" class="m-0">
-      <button type="submit" class="side-link border-0 w-100 text-start" style="background: none; border: none; cursor: pointer;">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Вийти</span>
-      </button>
-    </form>
-  </nav>
-</aside>
 
-<!-- Основной контент -->
-<main class="main-content">
-  <div class="settings-header">
-    <h1>Настройки профиля</h1>
-    <p th:text="${username}" style="color: var(--text-gray); margin-top: 5px;"></p>
-  </div>
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="settings-header">
+            <h1>Настройки профиля</h1>
+            <p th:text="${username}" style="color: var(--text-gray); margin-top: 5px;"></p>
+        </div>
 
-  <div class="settings-grid">
-    <a href="/settings/password" class="settings-card">
-      <h2>
-        <i class="fas fa-key"></i>
-        Изменить пароль
-      </h2>
-      <p>Обновите свой пароль для обеспечения безопасности аккаунта</p>
-    </a>
+        <div class="settings-grid">
+            <a href="/settings/password" class="settings-card">
+                <h2>
+                    <i class="fas fa-key"></i>
+                    Изменить пароль
+                </h2>
+                <p>Обновите свой пароль для обеспечения безопасности аккаунта</p>
+            </a>
 
-    <a href="/settings/avatar" class="settings-card">
-      <h2>
-        <i class="fas fa-user-circle"></i>
-        Изменить аватар
-      </h2>
-      <p>Загрузите новую фотографию профиля</p>
-    </a>
+            <a href="/settings/avatar" class="settings-card">
+                <h2>
+                    <i class="fas fa-user-circle"></i>
+                    Изменить аватар
+                </h2>
+                <p>Загрузите новую фотографию профиля</p>
+            </a>
 
-    <a href="/settings/privacy" class="settings-card">
-      <h2>
-        <i class="fas fa-shield-alt"></i>
-        Приватность
-      </h2>
-      <p>Управляйте настройками конфиденциальности вашего аккаунта</p>
-    </a>
+            <a href="/settings/privacy" class="settings-card">
+                <h2>
+                    <i class="fas fa-shield-alt"></i>
+                    Приватность
+                </h2>
+                <p>Управляйте настройками конфиденциальности вашего аккаунта</p>
+            </a>
 
-    <a href="/profile/edit" class="settings-card">
-      <h2>
-        <i class="fas fa-user-edit"></i>
-        Редактировать профиль
-      </h2>
-      <p>Измените информацию в вашем профиле</p>
-    </a>
+            <a href="/profile/edit" class="settings-card">
+                <h2>
+                    <i class="fas fa-user-edit"></i>
+                    Редактировать профиль
+                </h2>
+                <p>Измените информацию в вашем профиле</p>
+            </a>
 
-    <a href="/blocks" class="settings-card">
-      <h2>
-        <i class="fas fa-user-lock"></i>
-        Заблокированные пользователи
-        <span class="blocked-count" th:if="${blockedCount > 0}"
-              th:text="${blockedCount}">0</span>
-      </h2>
-      <p>Управление черным списком и доступом к вашему аккаунту</p>
-    </a>
+            <a href="/blocks" class="settings-card">
+                <h2>
+                    <i class="fas fa-user-lock"></i>
+                    Заблокированные пользователи
+                    <span class="blocked-count" th:if="${blockedCount > 0}"
+                          th:text="${blockedCount}">0</span>
+                </h2>
+                <p>Управление черным списком и доступом к вашему аккаунту</p>
+            </a>
 
-    <a href="/settings/notifications" class="settings-card">
-      <h2>
-        <i class="fas fa-bell"></i>
-        Уведомления
-      </h2>
-      <p>Настройте параметры уведомлений</p>
-    </a>
+            <a href="/settings/notifications" class="settings-card">
+                <h2>
+                    <i class="fas fa-bell"></i>
+                    Уведомления
+                </h2>
+                <p>Настройте параметры уведомлений</p>
+            </a>
 
-    <a href="/settings/security" class="settings-card">
-      <h2>
-        <i class="fas fa-lock"></i>
-        Безопасность
-      </h2>
-      <p>Управляйте параметрами безопасности вашего аккаунта</p>
-    </a>
+            <a href="/settings/security" class="settings-card">
+                <h2>
+                    <i class="fas fa-lock"></i>
+                    Безопасность
+                </h2>
+                <p>Управляйте параметрами безопасности вашего аккаунта</p>
+            </a>
 
-    <a href="/settings/updateUsername" class="settings-card">
-      <h2>
-        <i class="fas fa-lock"></i>
-        изменения имени
-      </h2>
-      <p>Управляйте  именем для вашего аккаунта</p>
-    </a>
-  </div>
-</main>
+            <a href="/settings/updateUsername" class="settings-card">
+                <h2>
+                    <i class="fas fa-lock"></i>
+                    изменения имени
+                </h2>
+                <p>Управляйте именем для вашего аккаунта</p>
+            </a>
+        </div>
+
+    </main>
+</div>
 </body>
 </html>

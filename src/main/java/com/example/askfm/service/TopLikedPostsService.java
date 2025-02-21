@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TopLikedPostsService {
 
-    private static final int PREVIEW_SIZE = 3;
+    private static final int PREVIEW_SIZE = 2;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final CacheManager cacheManager;
@@ -81,6 +81,7 @@ public class TopLikedPostsService {
                 }
             }
         }
+
 
         log.info("🔴 Предпросмотр не найден в кеше. Ключ: {}. Загрузка из базы данных...", cacheKey);
         LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
