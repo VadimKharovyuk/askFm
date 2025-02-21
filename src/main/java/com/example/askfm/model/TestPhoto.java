@@ -22,7 +22,7 @@ public class TestPhoto {
     private String title;
     private String description;
 
-    // URL изображения с Imgur
+
     private String imageUrl;
 
     // Хеш для удаления (можно использовать для управления изображениями)

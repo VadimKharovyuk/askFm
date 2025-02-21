@@ -1,5 +1,6 @@
 package com.example.askfm.service;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,11 @@ public class ImgurStorageService {
 
     private final RestTemplate restTemplate;
 
-    // Модифицируем метод для возврата всех данных об изображении
-    public ImgurData uploadImage(byte[] imageData) {
+
+    /**
+     * Загружает изображение и возвращает URL и deleteHash
+     */
+    public ImgurUploadResult saveImage(byte[] imageData) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
@@ -50,20 +54,19 @@ public class ImgurStorageService {
             );
 
             if (response.getBody() != null && response.getBody().getData() != null) {
-                log.info("Image uploaded successfully to Imgur");
-                return response.getBody().getData();
+                ImgurData data = response.getBody().getData();
+                return ImgurUploadResult.builder()
+                        .imageUrl(data.getLink())
+                        .deleteHash(data.getDeleteHash())
+                        .build();
             }
-            throw new RuntimeException("Failed to upload image to Imgur");
+            throw new RuntimeException("Failed to save image to Imgur");
         } catch (Exception e) {
-            log.error("Error uploading image to Imgur: ", e);
-            throw new RuntimeException("Error uploading image to Imgur: " + e.getMessage(), e);
+            log.error("Error saving image to Imgur: ", e);
+            throw new RuntimeException("Error saving image to Imgur: " + e.getMessage(), e);
         }
     }
 
-    // Метод для получения только URL
-    public String uploadImageAndGetUrl(byte[] imageData) {
-        return uploadImage(imageData).getLink();
-    }
 
     public void deleteImage(String deleteHash) {
         try {
@@ -73,22 +76,26 @@ public class ImgurStorageService {
 
             HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-            restTemplate.exchange(
-                    "https://api.imgur.com/3/image/" + deleteHash,
+            // Используем deleteHash для удаления изображения
+            String deleteUrl = "https://api.imgur.com/3/image/" + deleteHash;
+
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    deleteUrl,
                     HttpMethod.DELETE,
                     requestEntity,
                     Void.class
             );
-            log.info("Image successfully deleted from Imgur");
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                log.info("Successfully deleted image with deleteHash: {}", deleteHash);
+            } else {
+                log.error("Failed to delete image. Status code: {}", response.getStatusCode());
+                throw new RuntimeException("Failed to delete image from Imgur");
+            }
         } catch (Exception e) {
             log.error("Error deleting image from Imgur: ", e);
             throw new RuntimeException("Error deleting image from Imgur: " + e.getMessage(), e);
         }
-    }
-
-    // Проверка валидности URL
-    public boolean isImgurUrl(String url) {
-        return url != null && url.startsWith("https://i.imgur.com/");
     }
 
     @Data
@@ -105,5 +112,14 @@ public class ImgurStorageService {
         private String description;
         private String link;        // URL изображения
         private String deleteHash;  // Хеш для удаления
+    }
+    /**
+     * Класс для хранения результата загрузки изображения
+     */
+    @Data
+    @Builder
+    public static class ImgurUploadResult {
+        private String imageUrl;
+        private String deleteHash;
     }
 }

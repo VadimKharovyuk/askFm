@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View Photo</title>
+    <style>
+        .photo-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .photo-info {
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="photo-container">
+    <div th:if="${photo}">
+        <h1 th:text="${photo.title}"></h1>
+        <div class="photo-info">
+            <p th:text="${photo.description}"></p>
+            <p>Uploaded: <span th:text="${#temporals.format(photo.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+        </div>
+        <img th:src="${photo.imageUrl}" th:alt="${photo.title}">
+    </div>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <a href="/upload-photo">Back to Upload</a>
+</div>
+</body>
+</html>

@@ -20,26 +20,40 @@ public class TestPhotoService {
 
     public TestPhotoDTO savePhoto(String title, String description, MultipartFile file) {
         try {
-            // Загружаем фото в Imgur
-            String imageUrl = imgurStorageService.uploadImageAndGetUrl(file.getBytes());
+            // Загружаем фото в Imgur и получаем результат
+            ImgurStorageService.ImgurUploadResult uploadResult =
+                    imgurStorageService.saveImage(file.getBytes());
 
             // Создаем запись в базе данных
             TestPhoto photo = TestPhoto.builder()
                     .title(title)
                     .description(description)
-                    .imageUrl(imageUrl)
+                    .imageUrl(uploadResult.getImageUrl())
+                    .deleteHash(uploadResult.getDeleteHash()) // Сохраняем deleteHash
                     .createdAt(LocalDateTime.now())
                     .build();
 
             TestPhoto savedPhoto = testPhotoRepository.save(photo);
 
-            log.info("Saved test photo with ID: {} and Imgur URL: {}", savedPhoto.getId(), imageUrl);
+            log.info("Saved test photo with ID: {} and Imgur URL: {}",
+                    savedPhoto.getId(), uploadResult.getImageUrl());
 
             return convertToDTO(savedPhoto);
         } catch (IOException e) {
             log.error("Error saving test photo: ", e);
             throw new RuntimeException("Failed to save photo: " + e.getMessage());
         }
+    }
+    // Добавим метод удаления фото
+    public void deletePhoto(Long id) {
+        TestPhoto photo = testPhotoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+
+        // Удаляем с Imgur используя deleteHash
+        imgurStorageService.deleteImage(photo.getDeleteHash());
+
+        // Удаляем из базы данных
+        testPhotoRepository.delete(photo);
     }
 
     public TestPhotoDTO getPhoto(Long id) {
