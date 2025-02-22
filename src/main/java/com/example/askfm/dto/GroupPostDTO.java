@@ -15,8 +15,9 @@ public class GroupPostDTO {
     private Long id;
     private Long groupId;
     private String content;
-    private String mediaBase64;
+    private String mediaUrl;
     private LocalDateTime publishedAt;
+    private String mediaDeleteHash;
     private boolean isAnonymous;
     private GroupPostUserDTO author;
     private int likesCount;

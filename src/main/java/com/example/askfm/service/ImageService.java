@@ -45,9 +45,6 @@ public class ImageService {
     }
 
 
-
-
-
     public byte[] addWatermark(byte[] imageData, String watermarkText) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

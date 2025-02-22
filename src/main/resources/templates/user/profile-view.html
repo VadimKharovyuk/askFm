@@ -706,9 +706,10 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${activeTab == 'likes' ? 'active' : ''}"
-                   th:href="@{'/users/' + ${profileUser.username} + '/likes'}">
-                    Лайки
+                <a class="nav-link"
+                   th:classappend="${activeTab == 'stories' ? 'active' : ''}"
+                   th:href="@{/stories/user/{username}(username=${profileUser.username})}">
+                    Истории
                 </a>
             </li>
             <li class="nav-item">

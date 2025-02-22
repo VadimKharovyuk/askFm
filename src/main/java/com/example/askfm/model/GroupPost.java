@@ -34,8 +34,15 @@ public class GroupPost {
     @Column(name = "is_anonymous")
     private boolean isAnonymous;
 
-    @Column(name = "media", columnDefinition = "bytea")
-    private byte[] media;
+//    @Column(name = "media", columnDefinition = "bytea")
+//    private byte[] media;
+
+    @Column(name = "media_url")
+    private String mediaUrl;
+
+    // Добавляем поле для deleteHash
+    @Column(name = "media_delete_hash")
+    private String mediaDeleteHash;
 
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
@@ -56,10 +63,6 @@ public class GroupPost {
     private Set<User> mentionedUsers = new HashSet<>();
 
 
-    @Transient
-    public boolean canShowAuthor() {
-        return !isAnonymous;
-    }
 
 
 }

@@ -46,12 +46,12 @@
     </p>
 
     <!-- Медиа контент -->
-    <img th:if="${post.mediaBase64}"
-         th:src="'data:image/jpeg;base64,' + ${post.mediaBase64}"
+    <img th:if="${post.mediaUrl}"
+         th:src="${post.mediaUrl}"
          class="mt-4 rounded-lg max-h-96 w-full object-contain shadow-sm"
          alt="Post media">
 
-    <!-- Статистика и действия -->
+
     <!-- Статистика и действия -->
     <div class="mt-4 flex items-center justify-between">
       <div class="flex items-center space-x-6 text-gray-500">

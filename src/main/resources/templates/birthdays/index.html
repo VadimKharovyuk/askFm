@@ -1,210 +1,255 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Дни рождения</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Добавляем FontAwesome для иконок -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <style>
-    /* Переменные для темного дизайна */
-    :root {
-      --background-dark: #050505;
-      --secondary-bg: #16181c;
-      --text-white: #dce3e7;
-      --text-gray: #e7eaee;
-      --border-color: #2f3336;
-      --blue-accent: #1d9bf0;
-      --blue-hover: #1a8cd8;
-    }
+    <title>Дни рождения</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Добавляем FontAwesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Переменные для темного дизайна */
+        :root {
+            --background-dark: #050505;
+            --secondary-bg: #16181c;
+            --text-white: #dce3e7;
+            --text-gray: #e7eaee;
+            --border-color: #2f3336;
+            --blue-accent: #1d9bf0;
+            --blue-hover: #1a8cd8;
+        }
 
-    /* Основные стили для темного дизайна */
-    body {
-      background-color: var(--background-dark);
-      color: var(--text-white);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+        /* Основные стили для темного дизайна */
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-white);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    /* Стили для боковой панели */
-    .left-sidebar {
-      width: 250px;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: var(--secondary-bg);
-      border-right: 1px solid var(--border-color);
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .logo-link {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      color: var(--blue-accent);
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .logo-link i {
-      margin-right: 10px;
-    }
-    .side-nav {
-      display: flex;
-      flex-direction: column;
-    }
-    .side-link {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      color: var(--text-white);
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 5px;
-      transition: background-color 0.3s;
-    }
-    .side-link:hover {
-      background-color: var(--background-dark);
-    }
-    .side-link i {
-      margin-right: 10px;
-    }
+        /* Стили для боковой панели */
+        .left-sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--secondary-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-    /* Стили для основного контента */
-    .container {
-      margin-left: 270px; /* Отступ для основного контента */
-    }
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            text-decoration: none;
+            color: var(--text-white);
+            padding: 12px;
+            margin-bottom: 20px;
+        }
 
-    /* Стили для карточек */
-    .card {
-      background-color: var(--secondary-bg);
-      border: 1px solid var(--border-color);
-    }
-    .card-header {
-      background-color: var(--secondary-bg);
-      border-bottom: 1px solid var(--border-color);
-    }
-    .card-body {
-      background-color: var(--secondary-bg);
-    }
-    .text-muted {
-      color: var(--text-gray) !important;
-    }
-    .btn-primary {
-      background-color: var(--blue-accent);
-      border-color: var(--blue-accent);
-    }
-    .btn-primary:hover {
-      background-color: var(--blue-hover);
-      border-color: var(--blue-hover);
-    }
-    a {
-      color: var(--blue-accent);
-    }
-    a:hover {
-      color: var(--blue-hover);
-    }
-  </style>
+        .logo-link i {
+            margin-right: 10px;
+        }
+
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-white);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .side-link:hover {
+            background-color: var(--background-dark);
+        }
+
+        .side-link i {
+            margin-right: 10px;
+        }
+
+        /* Стили для основного контента */
+        .container {
+            margin-left: 270px; /* Отступ для основного контента */
+        }
+
+        /* Стили для карточек */
+        .card {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            background-color: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-body {
+            background-color: var(--secondary-bg);
+        }
+
+        .text-muted {
+            color: var(--text-gray) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--blue-accent);
+            border-color: var(--blue-accent);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--blue-hover);
+            border-color: var(--blue-hover);
+        }
+
+        a {
+            color: var(--blue-accent);
+        }
+
+        a:hover {
+            color: var(--blue-hover);
+        }
+    </style>
 </head>
 <body>
 <!-- Боковая панель -->
 <aside class="left-sidebar">
-  <a href="/" class="logo-link">
-    <i class="fas fa-comment-dots"></i>
-    <span>AskFM</span>
-  </a>
-  <nav class="side-nav">
-    <a href="/home" class="side-link">
-      <i class="fas fa-home"></i>
-      <span>Главная</span>
+    <a href="/" class="logo-link">
+        <i class="fas fa-comment-dots"></i>
+        <span>AskFM</span>
     </a>
-    <a href="/explore" class="side-link">
-      <i class="fas fa-hashtag"></i>
-      <span>Поиск</span>
-    </a>
-    <a href="/notifications" class="side-link">
-      <i class="fas fa-bell"></i>
-      <span>Уведомления</span>
-    </a>
-    <a href="/messages" class="side-link">
-      <i class="fas fa-envelope"></i>
-      <span>Сообщения</span>
-    </a>
-    <a href="/saved" class="side-link">
-      <i class="fas fa-bookmark"></i>
-      <span>Закладки</span>
-    </a>
-    <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
-      <i class="fas fa-user"></i>
-      <span>Профиль</span>
-    </a>
-  </nav>
+    <nav class="side-nav">
+        <a href="/home" class="side-link">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </a>
+        <a href="/events" class="side-link">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Ивенты</span>
+        </a>
+
+        <a href="/notifications" class="side-link">
+            <i class="fas fa-bell"></i>
+            <span>Уведомления</span>
+            <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
+        </a>
+
+        <a href="/messages" class="side-link">
+            <i class="fas fa-envelope"></i>
+            <span>Сообщения</span>
+            <span th:if="${unreadMessagesCount > 0}"
+                  class="notification-badge"
+                  th:text="${unreadMessagesCount}">
+    </span>
+        </a>
+        <a href="/saved" class="side-link">
+            <i class="fas fa-bookmark"></i>
+            <span>Закладки</span>
+        </a>
+
+        <a href="/photos/my-list" class="side-link">
+            <i class="fas fa-camera"></i>
+            <span>Фото</span>
+        </a>
+
+        <a href="/groups" class="side-link">
+            <i class="fas fa-users"></i>
+            <span>Группы</span>
+        </a>
+        <!-- Или вариант с иконкой глаза, что символизирует просмотры -->
+        <a href="/visits/my" class="side-link">
+            <i class="fas fa-eye"></i>
+            <span>Истории</span>
+        </a>
+
+        <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+        <a href="/ads" class="side-link">
+            <i class="fas fa-ad"></i>
+            <span>Мои рекламы</span>
+        </a>
+        <a href="/settings" class="side-link">
+            <i class="fas fa-cog"></i>
+            <span>Налаштування</span>
+        </a>
+
+        <a href="/balance" class="side-link">
+            <i class="fas fa-coins"></i>
+            <span>Balance</span>
+        </a>
+    </nav>
 </aside>
 
 <!-- Основной контент -->
 <div class="container py-4">
-  <!-- Блок с сегодняшними днями рождения -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">Сегодня день рождения</h5>
-    </div>
-    <div class="card-body">
-      <div th:if="${#lists.isEmpty(todaysBirthdays)}" class="text-muted">
-        Сегодня нет дней рождения
-      </div>
-      <div th:each="birthday : ${todaysBirthdays}" class="d-flex align-items-center mb-3">
-        <img th:if="${birthday.avatarUrl}" th:src="${birthday.avatarUrl}"
-             class="rounded-circle me-3" style="width: 50px; height: 50px;"
-             alt="Profile picture">
-        <img th:unless="${birthday.avatarUrl}" src="/images/default-avatar.png"
-             class="rounded-circle me-3" style="width: 50px; height: 50px;"
-             alt="Default profile picture">
-        <div>
-          <a th:href="${birthday.userProfileUrl}" class="text-decoration-none">
-            <h6 class="mb-0" th:text="${birthday.username}">Username</h6>
-          </a>
-          <span class="text-muted" th:text="'Исполняется ' + ${birthday.upcomingAge} + ' лет'">
-              Возраст
-            </span>
+    <!-- Блок с сегодняшними днями рождения -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Сегодня день рождения</h5>
         </div>
-      </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(todaysBirthdays)}" class="text-muted">
+                Сегодня нет дней рождения
+            </div>
+            <div th:each="birthday : ${todaysBirthdays}" class="d-flex align-items-center mb-3">
+                <img th:src="${birthday.avatarUrl != null ? 'data:image/jpeg;base64,' + birthday.avatarUrl : '/api/placeholder/48/48'}"
+                     class="rounded-circle me-3"
+                     style="width: 48px; height: 48px; object-fit: cover;"
+                     alt="Profile picture">
+                <div>
+                    <a th:href="${birthday.userProfileUrl}" class="text-decoration-none">
+                        <h6 class="mb-0" th:text="${birthday.username}">Username</h6>
+                    </a>
+                    <span class="text-muted" th:text="'Исполняется ' + ${birthday.upcomingAge} + ' лет'">
+                        Возраст
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Блок с предстоящими днями рождения -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Предстоящие дни рождения</h5>
-      <a th:href="@{/birthdays/upcoming}" class="btn btn-primary btn-sm">
-        Показать все
-      </a>
-    </div>
-    <div class="card-body">
-      <div th:if="${#lists.isEmpty(upcomingBirthdays)}" class="text-muted">
-        Нет предстоящих дней рождения
-      </div>
-      <div th:each="birthday : ${upcomingBirthdays}" class="d-flex align-items-center mb-3">
-        <img th:if="${birthday.avatarUrl}" th:src="${birthday.avatarUrl}"
-             class="rounded-circle me-3" style="width: 50px; height: 50px;"
-             alt="Profile picture">
-        <img th:unless="${birthday.avatarUrl}" src="/images/default-avatar.png"
-             class="rounded-circle me-3" style="width: 50px; height: 50px;"
-             alt="Default profile picture">
-        <div>
-          <a th:href="${birthday.userProfileUrl}" class="text-decoration-none">
-            <h6 class="mb-0" th:text="${birthday.username}">Username</h6>
-          </a>
-          <span class="text-muted">
-              <span th:text="${birthday.formattedDate}">Дата</span>
-              <span th:text="'(' + ${birthday.daysUntilBirthday} + ' дн.)'">
-                Дней осталось
-              </span>
-            </span>
+    <!-- Блок с предстоящими днями рождения -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Предстоящие дни рождения</h5>
+            <a th:href="@{/birthdays/upcoming}" class="btn btn-primary btn-sm">
+                Показать все
+            </a>
         </div>
-      </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(upcomingBirthdays)}" class="text-muted">
+                Нет предстоящих дней рождения
+            </div>
+            <div th:each="birthday : ${upcomingBirthdays}" class="d-flex align-items-center mb-3">
+                <img th:src="${birthday.avatarUrl != null ? 'data:image/jpeg;base64,' + birthday.avatarUrl : '/api/placeholder/48/48'}"
+                     class="rounded-circle me-3"
+                     style="width: 48px; height: 48px; object-fit: cover;"
+                     alt="Profile picture">
+                <div>
+                    <a th:href="${birthday.userProfileUrl}" class="text-decoration-none">
+                        <h6 class="mb-0" th:text="${birthday.username}">Username</h6>
+                    </a>
+                    <span class="text-muted">
+                        <span th:text="${birthday.formattedDate}">Дата</span>
+                        <span th:text="'(' + ${birthday.daysUntilBirthday} + ' дн.)'">
+                            Дней осталось
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -40,6 +40,8 @@ public class UserProfileController {
     private final NotificationService notificationService;
     private final MessageService messageService;
     private final TopLikedPostsService topLikedPostsService;
+    private final StoryService storyService;
+
 
 
 
@@ -159,7 +161,10 @@ public class UserProfileController {
         // Добавляем рекомендуемых пользователей
         model.addAttribute("suggestedUsers", suggestedUsers);
 
+        // Получаем активные истории пользователя
+        List<StoryResponseDto> userStories = storyService.getUserActiveStories(username);
 
+        model.addAttribute("stories", userStories);
 
         return "user/profile-view";
     }

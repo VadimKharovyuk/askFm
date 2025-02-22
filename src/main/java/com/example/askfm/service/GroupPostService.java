@@ -37,6 +37,7 @@ public class GroupPostService {
     private final UserRepository userRepository;
     private final GroupPostMapper groupPostMapper;
     private final GroupMemberRepository groupMemberRepository;
+    private final ImgurStorageService   imgurStorageService;
 
     @Transactional
     public GroupPostDTO createPost(Long groupId, String username, CreateGroupPostDTO dto) throws IOException {
@@ -120,13 +121,22 @@ public class GroupPostService {
             throw new AccessDeniedException("User is not the author of this post");
         }
 
-        // Уменьшаем счетчик постов в группе
-        Group group = post.getGroup();
-        group.setPostsCount(group.getPostsCount() - 1);
-        groupRepository.save(group);
+        try {
+            // Удаляем изображение из Imgur, если оно есть
+            if (post.getMediaDeleteHash() != null) {
+                imgurStorageService.deleteImage(post.getMediaDeleteHash());
+            }
 
-        groupPostRepository.delete(post);
+            // Уменьшаем счетчик постов в группе
+            Group group = post.getGroup();
+            group.setPostsCount(group.getPostsCount() - 1);
+            groupRepository.save(group);
 
+            groupPostRepository.delete(post);
+        } catch (Exception e) {
+            log.error("Error while deleting post {} and its media: {}", postId, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete post and associated media", e);
+        }
     }
 
     public GroupPostDTO getPostById(Long postId, String username) {

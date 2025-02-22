@@ -8,29 +8,43 @@ import com.example.askfm.model.Group;
 import com.example.askfm.model.GroupPost;
 import com.example.askfm.model.User;
 import com.example.askfm.service.ImageService;
+import com.example.askfm.service.ImgurStorageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GroupPostMapper {
     private final ImageService imageService;
+    private final ImgurStorageService imgurStorageService;
 
     public GroupPost toEntity(CreateGroupPostDTO dto, Group group, User author) throws IOException {
-        byte[] processedMedia = null;
+        // Загружаем медиа в Imgur если оно есть
+        ImgurStorageService.ImgurUploadResult uploadResult = null;
         if (dto.getMedia() != null && !dto.getMedia().isEmpty()) {
-            processedMedia = imageService.resizeImage(dto.getMedia().getBytes(), 1024);
+            try {
+                uploadResult = imgurStorageService.saveImage(dto.getMedia().getBytes());
+                log.info("Successfully uploaded media to Imgur: {}", uploadResult.getImageUrl());
+                log.info("Mapping media - URL: {}, DeleteHash: {}",
+                        uploadResult.getImageUrl(),
+                        uploadResult.getDeleteHash());
+            } catch (Exception e) {
+                log.error("Failed to upload media to Imgur", e);
+                throw new IOException("Failed to process media", e);
+            }
         }
 
         return GroupPost.builder()
                 .group(group)
                 .author(author)
                 .content(dto.getContent())
-                .media(processedMedia)
+                .mediaUrl(uploadResult != null ? uploadResult.getImageUrl() : null)
+                .mediaDeleteHash(uploadResult != null ? uploadResult.getDeleteHash() : null)
                 .isAnonymous(dto.isAnonymous())
                 .publishedAt(LocalDateTime.now())
                 .likedBy(new HashSet<>())
@@ -44,9 +58,9 @@ public class GroupPostMapper {
                 .id(post.getId())
                 .groupId(post.getGroup().getId())
                 .content(post.getContent())
-                .mediaBase64(post.getMedia() != null ?
-                        imageService.getBase64Avatar(post.getMedia()) : null)
+                .mediaUrl(post.getMediaUrl()) // Теперь передаем URL напрямую
                 .publishedAt(post.getPublishedAt())
+                .mediaDeleteHash(post.getMediaDeleteHash())
                 .isAnonymous(post.isAnonymous())
                 .author(post.isAnonymous() ? null : mapUser(post.getAuthor()))
                 .likesCount(post.getLikedBy().size())

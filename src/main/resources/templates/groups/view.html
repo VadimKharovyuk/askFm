@@ -124,8 +124,8 @@
                                     Текст поста
                                 </p>
                                 <!-- Медиа контент -->
-                                <img th:if="${post.mediaBase64}"
-                                     th:src="'data:image/jpeg;base64,' + ${post.mediaBase64}"
+                                <img th:if="${post.mediaUrl}"
+                                     th:src="${post.mediaUrl}"
                                      class="mt-4 rounded-lg max-h-96 w-full object-contain"
                                      alt="Post media">
                             </div>

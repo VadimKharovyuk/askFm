@@ -25,9 +25,7 @@ public class ImgurStorageService {
     private final RestTemplate restTemplate;
 
 
-    /**
-     * Загружает изображение и возвращает URL и deleteHash
-     */
+
     public ImgurUploadResult saveImage(byte[] imageData) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -53,17 +51,26 @@ public class ImgurStorageService {
                     ImgurResponse.class
             );
 
+            // Добавляем отладочную информацию
+            log.info("Imgur API Response: {}", response.getBody());
+
             if (response.getBody() != null && response.getBody().getData() != null) {
                 ImgurData data = response.getBody().getData();
+
+                log.info("Imgur Response Data - Link: {}, DeleteHash: {}, ID: {}",
+                        data.getLink(),
+                        data.getDeletehash(),
+                        data.getId());
+
                 return ImgurUploadResult.builder()
                         .imageUrl(data.getLink())
-                        .deleteHash(data.getDeleteHash())
+                        .deleteHash(data.getDeletehash())
                         .build();
             }
-            throw new RuntimeException("Failed to save image to Imgur");
+            throw new RuntimeException("Failed to upload image to Imgur");
         } catch (Exception e) {
-            log.error("Error saving image to Imgur: ", e);
-            throw new RuntimeException("Error saving image to Imgur: " + e.getMessage(), e);
+            log.error("Error uploading image to Imgur: ", e);
+            throw new RuntimeException("Error uploading image: " + e.getMessage(), e);
         }
     }
 
@@ -110,8 +117,8 @@ public class ImgurStorageService {
         private String id;
         private String title;
         private String description;
-        private String link;        // URL изображения
-        private String deleteHash;  // Хеш для удаления
+        private String link;
+        private String deletehash;  // Изменено с deleteHash на deletehash
     }
     /**
      * Класс для хранения результата загрузки изображения
