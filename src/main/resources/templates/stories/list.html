@@ -165,34 +165,149 @@
             color: white;
             border: none;
         }
+        .nav-section {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(145deg, #6366f1, #a855f7);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(145deg, #6366f1, #a855f7);
+            color: white;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+        .btn-group {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .btn-group .btn {
+            padding: 8px 16px;
+            border: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn:hover {
+            background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+            color: white;
+        }
+
+        .btn-group .btn.active {
+            background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+            color: white;
+        }
+
+        .btn-group .btn:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background-color: var(--border-color);
+        }
+        .pagination {
+            gap: 5px;
+        }
+
+        .page-link {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gradient-1);
+            border-color: var(--gradient-1);
+        }
+
+        .page-item.active .page-link {
+            background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+            border-color: transparent;
+        }
+
+        .page-link:hover {
+            background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+            color: white;
+            border-color: transparent;
+        }
     </style>
 </head>
 <body class="bg-light">
+
+<div th:replace="~{/fragments/nav :: nav}"></div>
+
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-0">Stories</h2>
-            <div class="btn-group mt-2">
-                <a href="/stories" class="btn btn-outline-primary btn-sm">All Stories</a>
-                <a href="/stories/my" class="btn btn-outline-primary btn-sm">My Stories</a>
-                <a href="/stories/my/active" class="btn btn-outline-primary btn-sm">My Active Stories</a>
-            </div>
+    <!-- Центрированный заголовок и навигация -->
+    <div class="d-flex flex-column align-items-center text-center mb-4">
+        <h2 class="mb-3">Stories</h2>
+        <div class="btn-group">
+            <a href="/stories/all"
+               class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-globe me-1"></i>
+                All Stories
+            </a>
+            <a href="/stories"
+               class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-users me-1"></i>
+                Following Stories
+            </a>
+            <a href="/stories/my"
+               class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-user me-1"></i>
+                My Stories
+            </a>
         </div>
-        <span th:text="${currentUsername}" class="text-muted"></span>
     </div>
+
+</div>
 
     <div class="stories-container">
         <div th:each="story : ${stories}" class="story-card">
             <div class="story-header">
-                <div class="user-avatar">
-                    <img th:if="${story.userAvatar}"
-                         th:src="'data:image/jpeg;base64,' + ${story.userAvatar}"
-                         class="rounded-circle"
-                         style="width: 40px; height: 40px; object-fit: cover;"
-                         th:alt="|${story.username}'s avatar|">
-                    <i th:unless="${story.userAvatar}"
-                       class="fas fa-user text-secondary"></i>
-                </div>
+                <a th:href="@{'/users/' + ${story.username}}" class="text-decoration-none">
+                    <div class="user-avatar">
+                        <img th:if="${story.userAvatar}"
+                             th:src="'data:image/jpeg;base64,' + ${story.userAvatar}"
+                             class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover;"
+                             th:alt="|${story.username}'s avatar|">
+                        <i th:unless="${story.userAvatar}"
+                           class="fas fa-user text-secondary"></i>
+                    </div>
+                </a>
                 <div>
                     <h6 class="mb-0" th:text="${story.username}">Username</h6>
                     <small class="text-muted"
@@ -219,19 +334,75 @@
             </div>
 
             <div class="p-3 d-flex justify-content-between align-items-center">
-                <button class="btn btn-link text-muted p-0 text-decoration-none view-btn"
-                        th:data-story-id="${story.id}">
-                    <i class="fas fa-eye me-1"></i>
-                    <span th:text="${story.viewsCount}">0</span> views
-                </button>
-                <button class="btn btn-link text-muted p-0 text-decoration-none reaction-details-btn"
-                        th:data-story-id="${story.id}">
-                    <i class="far fa-smile me-1"></i>
-                    Reactions
-                </button>
+                <!-- Показываем кнопки только автору истории -->
+                <th:block th:if="${currentUsername == story.username}">
+                    <button class="btn btn-link text-muted p-0 text-decoration-none view-btn"
+                            th:data-story-id="${story.id}">
+                        <i class="fas fa-eye me-1"></i>
+                        <span th:text="${story.viewsCount}">0</span> views
+                    </button>
+                    <button class="btn btn-link text-muted p-0 text-decoration-none reaction-details-btn"
+                            th:data-story-id="${story.id}">
+                        <i class="far fa-smile me-1"></i>
+                        Reactions
+                    </button>
+                </th:block>
+
+                <!-- Для остальных пользователей показываем только счетчик без возможности клика -->
+                <th:block th:unless="${currentUsername == story.username}">
+                    <div class="text-muted">
+                        <i class="fas fa-eye me-1"></i>
+                        <span th:text="${story.viewsCount}">0</span> views
+                    </div>
+                    <div class="text-muted">
+                        <i class="far fa-smile me-1"></i>
+                        <span th:text="${#lists.size(story.reactionCounts)}">0</span> reactions
+                    </div>
+                </th:block>
             </div>
         </div>
+
     </div>
+<div th:if="${#lists.isEmpty(stories)}" class="text-center w-100 p-4">
+    <i class="fas fa-camera mb-3" style="font-size: 3rem; color: #dee2e6;"></i>
+    <h4 class="text-muted">Нет доступных историй</h4>
+    <p class="text-muted">Подпишитесь на других пользователей, чтобы видеть их истории</p>
+</div>
+
+<!-- После контейнера с историями -->
+<div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+    <nav aria-label="Stories pagination">
+        <ul class="pagination">
+            <!-- Кнопка "Предыдущая" -->
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${requestUrl}(page=${currentPage - 1})}"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Номера страниц -->
+            <li class="page-item"
+                th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${pageNum == currentPage ? 'active' : ''}">
+                <a class="page-link"
+                   th:href="@{${requestUrl}(page=${pageNum})}"
+                   th:text="${pageNum + 1}">1</a>
+            </li>
+
+            <!-- Кнопка "Следующая" -->
+            <li class="page-item"
+                th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${requestUrl}(page=${currentPage + 1})}"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 
     <a href="/stories/create" class="create-story-btn text-decoration-none">
         <i class="fas fa-plus"></i>

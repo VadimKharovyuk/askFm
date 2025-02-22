@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .nav-section {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .nav-link {
+      color: #6b7280;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link:hover {
+      background: linear-gradient(145deg, #6366f1, #a855f7);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(145deg, #6366f1, #a855f7);
+      color: white;
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div th:fragment="nav">
+  <nav class="nav-section">
+    <div class="nav-links">
+      <a href="/feed" class="nav-link">
+        <i class="fas fa-home"></i>
+        Feed
+      </a>
+      <a href="/explore" class="nav-link">
+        <i class="fas fa-compass"></i>
+        Explore
+      </a>
+      <a href="/stories" class="nav-link">
+        <i class="fas fa-photo-video"></i>
+        Stories
+      </a>
+      <a href="/favorites" class="nav-link">
+        <i class="fas fa-heart"></i>
+        Favorites
+      </a>
+      <a href="/notifications" class="nav-link">
+        <i class="fas fa-bell"></i>
+        Notifications
+      </a>
+      <a th:href="@{'/users/' + ${currentUser}}" class="nav-link">
+        <i class="fas fa-user"></i>
+        <span>Профиль</span>
+      </a>
+    </div>
+  </nav>
+</div>
+</body>
+</html>

@@ -9,6 +9,7 @@ import com.example.askfm.service.StoryService;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,13 +29,65 @@ public class StoryController {
     private final StoryService storyService;
     private final UserService userService;
 
-    @GetMapping("/stories")
-    public String showStories(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        List<StoryResponseDto> activeStories = storyService.getActiveStories();
-        model.addAttribute("stories", activeStories);
-        model.addAttribute("currentUsername", userDetails.getUsername());
+    @GetMapping("/stories/all")
+    public String showAllStories(
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        Page<StoryResponseDto> storiesPage = storyService.getActiveStories(page);
+
+        model.addAttribute("stories", storiesPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storiesPage.getTotalPages());
+        model.addAttribute("currentUsername",
+                userDetails != null ? userDetails.getUsername() : null);
+        model.addAttribute("requestUrl", "/stories/all");
         return "stories/list";
     }
+
+    @GetMapping("/stories")
+    public String showFollowingStories(
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        if (userDetails == null) {
+            return "redirect:/stories/all";
+        }
+
+        Page<StoryResponseDto> storiesPage =
+                storyService.getSubscribedUserStories(userDetails.getUsername(), page);
+
+        model.addAttribute("stories", storiesPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storiesPage.getTotalPages());
+        model.addAttribute("currentUsername", userDetails.getUsername());
+        model.addAttribute("requestUrl", "/stories");
+        return "stories/list";
+    }
+
+    @GetMapping("/stories/my")
+    public String showMyStories(
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        if (userDetails == null) {
+            return "redirect:/stories/all";
+        }
+
+        Page<StoryResponseDto> storiesPage =
+                storyService.getUserActiveStories(userDetails.getUsername(), page);
+
+        model.addAttribute("stories", storiesPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storiesPage.getTotalPages());
+        model.addAttribute("currentUsername", userDetails.getUsername());
+        model.addAttribute("requestUrl", "/stories/my");
+        return "stories/list";
+    }
+
 
     @GetMapping("/stories/create")
     public String showCreateStoryForm() {
@@ -112,27 +165,9 @@ public class StoryController {
         return "stories/reactions";
     }
 
-    /**
-     * Показать все истории текущего пользователя
-     */
-    @GetMapping("/stories/my")
-    public String showMyStories(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        List<StoryResponseDto> userStories = storyService.getUserStories(userDetails.getUsername());
-        model.addAttribute("stories", userStories);
-        model.addAttribute("currentUsername", userDetails.getUsername());
-        return "stories/list";
-    }
 
-    /**
-     * Показать активные истории текущего пользователя
-     */
-    @GetMapping("/stories/my/active")
-    public String showMyActiveStories(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        List<StoryResponseDto> activeStories = storyService.getUserActiveStories(userDetails.getUsername());
-        model.addAttribute("stories", activeStories);
-        model.addAttribute("currentUsername", userDetails.getUsername());
-        return "stories/list";
-    }
+
+
 
     /**
      * Показать истории конкретного пользователя
