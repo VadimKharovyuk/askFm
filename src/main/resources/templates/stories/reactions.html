@@ -1,59 +1,236 @@
-<!-- templates/stories/reactions.html -->
+<!--&lt;!&ndash; templates/stories/reactions.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Story Reactions</title>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    .reaction-item {-->
+<!--      transition: background-color 0.2s ease;-->
+<!--    }-->
+<!--    .reaction-item:hover {-->
+<!--      background-color: #f8f9fa;-->
+<!--    }-->
+<!--    .reaction-time {-->
+<!--      font-size: 0.875rem;-->
+<!--      color: #6c757d;-->
+<!--    }-->
+<!--    .reaction-emoji {-->
+<!--      font-size: 1.5rem;-->
+<!--      margin-right: 0.5rem;-->
+<!--    }-->
+<!--    .empty-message {-->
+<!--      text-align: center;-->
+<!--      padding: 2rem;-->
+<!--      color: #6c757d;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body class="bg-light">-->
+<!--<div class="container py-4">-->
+<!--  <div class="card shadow-sm">-->
+<!--    <div class="card-header bg-white">-->
+<!--      <h5 class="mb-0">Story Reactions</h5>-->
+<!--    </div>-->
+<!--    <div class="card-body p-0">-->
+<!--      <div th:if="${#lists.isEmpty(reactions)}" class="empty-message">-->
+<!--        <i class="far fa-smile mb-2" style="font-size: 2rem;"></i>-->
+<!--        <p class="mb-0">No reactions yet</p>-->
+<!--      </div>-->
+<!--      <div th:unless="${#lists.isEmpty(reactions)}" class="list-group list-group-flush">-->
+<!--        <div th:each="reaction : ${reactions}" class="list-group-item reaction-item">-->
+<!--          <div class="d-flex align-items-center">-->
+<!--            <div class="flex-shrink-0">-->
+<!--              <span class="reaction-emoji" th:text="${reaction.emoji}">👍</span>-->
+<!--            </div>-->
+<!--            <div class="flex-grow-1">-->
+<!--              <div class="d-flex align-items-center">-->
+<!--                <h6 class="mb-0" th:text="${reaction.username}">Username</h6>-->
+<!--                <span class="reaction-time ms-2"-->
+<!--                      th:text="${#temporals.format(reaction.reactedAt, 'dd MMM, HH:mm')}">-->
+<!--                                        Time-->
+<!--                                    </span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Story Reactions</title>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #405de6;
+      --secondary-color: #5851db;
+      --gradient-1: #833ab4;
+      --gradient-2: #c13584;
+      --gradient-3: #e1306c;
+      --gradient-4: #fd1d1d;
+      --background-light: #fafafa;
+      --border-color: #dbdbdb;
+      --text-dark: #262626;
+      --text-light: #8e8e8e;
+    }
+
+    body {
+      background-color: var(--background-light);
+      color: var(--text-dark);
+    }
+
+    .card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      border-radius: 16px 16px 0 0 !important;
+      padding: 1rem;
+    }
+
+    .card-header h5 {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
     .reaction-item {
-      transition: background-color 0.2s ease;
+      transition: all 0.3s ease;
+      border: none;
+      padding: 1rem;
+      margin: 0.25rem 0;
     }
+
     .reaction-item:hover {
-      background-color: #f8f9fa;
+      background: linear-gradient(to right, rgba(131, 58, 180, 0.05), rgba(253, 29, 29, 0.05));
+      transform: translateX(5px);
     }
+
+    .reaction-emoji {
+      font-size: 2rem;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+      border-radius: 50%;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .reaction-item:hover .reaction-emoji {
+      transform: scale(1.1) rotate(10deg);
+    }
+
     .reaction-time {
       font-size: 0.875rem;
-      color: #6c757d;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .reaction-emoji {
-      font-size: 1.5rem;
-      margin-right: 0.5rem;
+
+    .reaction-time i {
+      font-size: 0.75rem;
     }
+
     .empty-message {
       text-align: center;
-      padding: 2rem;
-      color: #6c757d;
+      padding: 3rem;
+      color: var(--text-light);
+    }
+
+    .empty-message i {
+      font-size: 3rem;
+      background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .username-link {
+      color: var(--text-dark);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .username-link:hover {
+      color: var(--primary-color);
+    }
+
+    .reaction-type {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4));
+      color: white;
+      margin-left: 1rem;
     }
   </style>
 </head>
-<body class="bg-light">
-<div class="container py-4">
-  <div class="card shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="mb-0">Story Reactions</h5>
+<body>
+<div class="container py-4" style="max-width: 600px;">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="fas fa-eye me-2"></i>
+        Story Views
+      </h5>
+      <a href="/stories" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>
+        Back to Stories
+      </a>
+    </div>
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <h5 class="mb-0">
+        <i class="far fa-smile me-2" style="color: var(--gradient-3);"></i>
+        Story Reactions
+      </h5>
+      <span class="badge bg-primary"
+            th:text="${#lists.size(reactions)} + ' reactions'"
+            style="background: linear-gradient(45deg, var(--gradient-1), var(--gradient-4)) !important;">
+            </span>
     </div>
     <div class="card-body p-0">
       <div th:if="${#lists.isEmpty(reactions)}" class="empty-message">
-        <i class="far fa-smile mb-2" style="font-size: 2rem;"></i>
-        <p class="mb-0">No reactions yet</p>
+        <i class="far fa-smile"></i>
+        <h6 class="mb-2">No reactions yet</h6>
+        <p class="mb-0 text-muted">Be the first one to react to this story!</p>
       </div>
       <div th:unless="${#lists.isEmpty(reactions)}" class="list-group list-group-flush">
         <div th:each="reaction : ${reactions}" class="list-group-item reaction-item">
           <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <span class="reaction-emoji" th:text="${reaction.emoji}">👍</span>
-            </div>
-            <div class="flex-grow-1">
+            <div class="reaction-emoji" th:text="${reaction.emoji}">👍</div>
+            <div class="flex-grow-1 ms-3">
               <div class="d-flex align-items-center">
-                <h6 class="mb-0" th:text="${reaction.username}">Username</h6>
-                <span class="reaction-time ms-2"
-                      th:text="${#temporals.format(reaction.reactedAt, 'dd MMM, HH:mm')}">
-                                        Time
-                                    </span>
+                <a th:href="@{'/users/' + ${reaction.username}}"
+                   class="username-link">
+                  <h6 class="mb-0" th:text="${reaction.username}">Username</h6>
+                </a>
+                <span class="reaction-type"
+                      th:text="${reaction.reactionType}">LIKE</span>
               </div>
+              <span class="reaction-time">
+                                <i class="far fa-clock"></i>
+                                <span th:text="${#temporals.format(reaction.reactedAt, 'dd MMM, HH:mm')}">Time</span>
+                            </span>
             </div>
           </div>
         </div>

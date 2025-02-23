@@ -7,6 +7,7 @@ import com.example.askfm.exception.UserNotFoundException;
 import com.example.askfm.model.User;
 import com.example.askfm.service.StoryService;
 import com.example.askfm.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -151,8 +152,12 @@ public class StoryController {
     }
 
 
+
     @GetMapping("/stories/{storyId}/views")
     public String getStoryViews(@PathVariable Long storyId, Model model) {
+        if (storyId == null) {
+            return "redirect:/stories";  // или другой подходящий редирект
+        }
         List<StoryViewDto> views = storyService.getStoryViews(storyId);
         model.addAttribute("views", views);
         return "stories/views";
@@ -160,10 +165,27 @@ public class StoryController {
 
     @GetMapping("/stories/{storyId}/reactions")
     public String getStoryReactions(@PathVariable Long storyId, Model model) {
+        if (storyId == null) {
+            return "redirect:/stories";  // или другой подходящий редирект
+        }
         List<StoryReactionDto> reactions = storyService.getStoryReactions(storyId);
         model.addAttribute("reactions", reactions);
         return "stories/reactions";
     }
+
+//    @GetMapping("/stories/{storyId}/views")
+//    public String getStoryViews(@PathVariable Long storyId, Model model) {
+//        List<StoryViewDto> views = storyService.getStoryViews(storyId);
+//        model.addAttribute("views", views);
+//        return "stories/views";
+//    }
+//
+//    @GetMapping("/stories/{storyId}/reactions")
+//    public String getStoryReactions(@PathVariable Long storyId, Model model) {
+//        List<StoryReactionDto> reactions = storyService.getStoryReactions(storyId);
+//        model.addAttribute("reactions", reactions);
+//        return "stories/reactions";
+//    }
 
 
 
