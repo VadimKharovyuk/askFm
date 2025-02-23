@@ -586,11 +586,6 @@
     </div>
 </nav>
 <aside class="left-sidebar">
-    <a href="/" class="logo-link">
-        <i class="fas fa-comment-dots"></i>
-        <span>AskFM</span>
-    </a>
-
     <nav class="side-nav">
         <a href="/home" class="side-link">
             <i class="fas fa-home"></i>
@@ -630,6 +625,10 @@
         <a href="/visits/my" class="side-link">
             <i class="fas fa-eye"></i>
             <span>Истории</span>
+        </a>
+        <a href="/stories" class="side-link">
+            <i class="fas fa-camera-retro"></i>
+            <span>Stories</span>
         </a>
         <a th:href="@{'/users/' + ${currentUser}}" class="side-link">
             <i class="fas fa-user"></i>

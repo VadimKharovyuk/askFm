@@ -269,7 +269,6 @@
     </style>
 </head>
 <body class="bg-light">
-
 <div th:replace="~{/fragments/nav :: nav}"></div>
 
 <div class="container-fluid py-4">
@@ -277,127 +276,124 @@
     <div class="d-flex flex-column align-items-center text-center mb-4">
         <h2 class="mb-3">Stories</h2>
         <div class="btn-group">
-            <a href="/stories/all"
-               class="btn btn-outline-primary btn-sm">
+            <a href="/stories/all" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-globe me-1"></i>
                 All Stories
             </a>
-            <a href="/stories"
-               class="btn btn-outline-primary btn-sm">
+            <a href="/stories" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-users me-1"></i>
                 Following Stories
             </a>
-            <a href="/stories/my"
-               class="btn btn-outline-primary btn-sm">
+            <a href="/stories/my" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-user me-1"></i>
                 My Stories
             </a>
         </div>
     </div>
 
-</div>
+    <!-- Сообщение если нет историй -->
+    <div th:if="${#lists.isEmpty(stories)}" class="text-center w-100 p-4">
+        <i class="fas fa-camera mb-3" style="font-size: 3rem; color: #dee2e6;"></i>
+        <h4 class="text-muted">Нет доступных историй</h4>
+        <p class="text-muted">Подпишитесь на других пользователей, чтобы видеть их истории</p>
+    </div>
 
-<div class="stories-container">
-    <div th:each="story : ${stories}" class="story-card">
-        <div class="story-header">
-            <a th:href="@{'/users/' + ${story.username}}" class="text-decoration-none">
-                <div class="user-avatar">
-                    <img th:if="${story.userAvatar}"
-                         th:src="'data:image/jpeg;base64,' + ${story.userAvatar}"
-                         class="rounded-circle"
-                         style="width: 40px; height: 40px; object-fit: cover;"
-                         th:alt="|${story.username}'s avatar|">
-                    <i th:unless="${story.userAvatar}"
-                       class="fas fa-user text-secondary"></i>
+    <!-- Контейнер для историй -->
+    <div class="stories-container" th:unless="${#lists.isEmpty(stories)}">
+        <div th:each="story : ${stories}" class="story-card">
+            <div class="story-header">
+                <a th:href="@{'/users/' + ${story.username}}" class="text-decoration-none">
+                    <div class="user-avatar">
+                        <img th:if="${story.userAvatar}"
+                             th:src="'data:image/jpeg;base64,' + ${story.userAvatar}"
+                             class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover;"
+                             th:alt="|${story.username}'s avatar|">
+                        <i th:unless="${story.userAvatar}"
+                           class="fas fa-user text-secondary"></i>
+                    </div>
+                </a>
+                <div>
+                    <h6 class="mb-0" th:text="${story.username}">Username</h6>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(story.createdAt, 'dd MMM HH:mm')}">Date</small>
                 </div>
-            </a>
-            <div>
-                <h6 class="mb-0" th:text="${story.username}">Username</h6>
-                <small class="text-muted"
-                       th:text="${#temporals.format(story.createdAt, 'dd MMM HH:mm')}">Date</small>
+                <button th:if="${currentUsername == story.username}"
+                        class="btn btn-link text-danger ms-auto delete-story"
+                        th:data-story-id="${story.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-            <button th:if="${currentUsername == story.username}"
-                    class="btn btn-link text-danger ms-auto delete-story"
-                    th:data-story-id="${story.id}">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
 
-        <img th:src="${story.imageUrl}" class="story-image" th:alt="|Story by ${story.username}|">
+            <img th:src="${story.imageUrl}" class="story-image" th:alt="|Story by ${story.username}|">
 
-        <div class="p-3 d-flex justify-content-between align-items-center">
-            <!-- Показываем кнопки только автору истории -->
-            <th:block th:if="${currentUsername == story.username}">
-                <a th:href="@{'/stories/' + ${story.id} + '/views'}"
-                   th:if="${story.id != null}"
-                   class="btn btn-link text-muted p-0 text-decoration-none">
-                    <i class="fas fa-eye me-1"></i>
-                    <span th:text="${story.viewsCount}">0</span> views
-                </a>
-                <a th:href="@{'/stories/' + ${story.id} + '/reactions'}"
-                   th:if="${story.id != null}"
-                   class="btn btn-link text-muted p-0 text-decoration-none">
-                    <i class="far fa-smile me-1"></i>
-                    Reactions
-                </a>
-            </th:block>
+            <div class="p-3 d-flex justify-content-between align-items-center">
+                <!-- Показываем кнопки только автору истории -->
+                <th:block th:if="${currentUsername == story.username}">
+                    <a th:href="@{'/stories/' + ${story.id} + '/views'}"
+                       th:if="${story.id != null}"
+                       class="btn btn-link text-muted p-0 text-decoration-none">
+                        <i class="fas fa-eye me-1"></i>
+                        <span th:text="${story.viewsCount}">0</span> views
+                    </a>
+                    <a th:href="@{'/stories/' + ${story.id} + '/reactions'}"
+                       th:if="${story.id != null}"
+                       class="btn btn-link text-muted p-0 text-decoration-none">
+                        <i class="far fa-smile me-1"></i>
+                        Reactions
+                    </a>
+                </th:block>
 
-            <!-- Для остальных пользователей показываем только счетчики без ссылок -->
-            <th:block th:unless="${currentUsername == story.username}">
-                <div class="text-muted">
-                    <i class="fas fa-eye me-1"></i>
-                    <span th:text="${story.viewsCount}">0</span> views
-                </div>
-                <div class="text-muted">
-                    <i class="far fa-smile me-1"></i>
-                    <span th:text="${#lists.size(story.reactionCounts)}">0</span> reactions
-                </div>
-            </th:block>
-        </div>
-
-        <!-- Сообщение если нет историй -->
-        <div th:if="${#lists.isEmpty(stories)}" class="text-center w-100 p-4">
-            <i class="fas fa-camera mb-3" style="font-size: 3rem; color: #dee2e6;"></i>
-            <h4 class="text-muted">Нет доступных историй</h4>
-            <p class="text-muted">Подпишитесь на других пользователей, чтобы видеть их истории</p>
-        </div>
-
-        <!-- Пагинация -->
-        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
-            <nav aria-label="Stories pagination">
-                <ul class="pagination">
-                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-                        <a class="page-link"
-                           th:href="@{${requestUrl}(page=${currentPage - 1})}"
-                           aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item"
-                        th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${pageNum == currentPage ? 'active' : ''}">
-                        <a class="page-link"
-                           th:href="@{${requestUrl}(page=${pageNum})}"
-                           th:text="${pageNum + 1}">1</a>
-                    </li>
-                    <li class="page-item"
-                        th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
-                        <a class="page-link"
-                           th:href="@{${requestUrl}(page=${currentPage + 1})}"
-                           aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+                <!-- Для остальных пользователей показываем только счетчики -->
+                <th:block th:unless="${currentUsername == story.username}">
+                    <div class="text-muted">
+                        <i class="fas fa-eye me-1"></i>
+                        <span th:text="${story.viewsCount}">0</span> views
+                    </div>
+                    <div class="text-muted">
+                        <i class="far fa-smile me-1"></i>
+                        <span th:text="${#lists.size(story.reactionCounts)}">0</span> reactions
+                    </div>
+                </th:block>
+            </div>
         </div>
     </div>
-</div>
-<!-- Кнопка создания истории -->
-<a href="/stories/create" class="create-story-btn text-decoration-none">
-    <i class="fas fa-plus"></i>
-</a>
 
+    <!-- Пагинация -->
+    <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+        <nav aria-label="Stories pagination">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="@{${requestUrl}(page=${currentPage - 1})}"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item"
+                    th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${pageNum == currentPage ? 'active' : ''}">
+                    <a class="page-link"
+                       th:href="@{${requestUrl}(page=${pageNum})}"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
+                <li class="page-item"
+                    th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="@{${requestUrl}(page=${currentPage + 1})}"
+                       aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Кнопка создания истории -->
+    <a href="/stories/create" class="create-story-btn text-decoration-none">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
 <!-- Скрипты -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
