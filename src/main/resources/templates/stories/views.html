@@ -199,18 +199,29 @@
       <div th:unless="${#lists.isEmpty(views)}" class="list-group list-group-flush">
         <div th:each="view : ${views}" class="list-group-item view-item">
           <div class="d-flex align-items-center">
-            <div class="user-avatar">
-              <i class="fas fa-user"></i>
-            </div>
+            <!-- Аватар в ссылке -->
+            <a th:href="@{'/users/' + ${view.username}}" class="text-decoration-none">
+              <div class="user-avatar">
+                <img th:if="${view.userAvatar}"
+                     th:src="'data:image/jpeg;base64,' + ${view.userAvatar}"
+                     class="rounded-circle"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     th:alt="|${view.username}'s avatar|">
+                <i th:unless="${view.userAvatar}"
+                   class="fas fa-user text-secondary"></i>
+              </div>
+            </a>
             <div class="flex-grow-1 ms-3">
-              <a th:href="@{'/users/' + ${view.username}}"
-                 class="username-link">
-                <h6 class="mb-0" th:text="${view.username}">Username</h6>
-              </a>
-              <span class="view-time">
-                                <i class="far fa-clock"></i>
-                                <span th:text="${#temporals.format(view.viewedAt, 'dd MMM, HH:mm')}">Time</span>
-                            </span>
+              <!-- Имя пользователя в ссылке -->
+              <h6 class="mb-0">
+                <a th:href="@{'/users/' + ${view.username}}"
+                   class="text-decoration-none"
+                   th:text="${view.username}">Username</a>
+              </h6>
+              <span class="view-time"
+                    th:text="${#temporals.format(view.viewedAt, 'dd MMM, HH:mm')}">
+               Time
+           </span>
             </div>
           </div>
         </div>

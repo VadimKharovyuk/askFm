@@ -173,20 +173,6 @@ public class StoryController {
         return "stories/reactions";
     }
 
-//    @GetMapping("/stories/{storyId}/views")
-//    public String getStoryViews(@PathVariable Long storyId, Model model) {
-//        List<StoryViewDto> views = storyService.getStoryViews(storyId);
-//        model.addAttribute("views", views);
-//        return "stories/views";
-//    }
-//
-//    @GetMapping("/stories/{storyId}/reactions")
-//    public String getStoryReactions(@PathVariable Long storyId, Model model) {
-//        List<StoryReactionDto> reactions = storyService.getStoryReactions(storyId);
-//        model.addAttribute("reactions", reactions);
-//        return "stories/reactions";
-//    }
-
 
 
 

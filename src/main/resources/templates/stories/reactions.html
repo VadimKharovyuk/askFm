@@ -217,7 +217,21 @@
       <div th:unless="${#lists.isEmpty(reactions)}" class="list-group list-group-flush">
         <div th:each="reaction : ${reactions}" class="list-group-item reaction-item">
           <div class="d-flex align-items-center">
+            <!-- Добавляем аватар со ссылкой -->
+            <a th:href="@{'/users/' + ${reaction.username}}" class="text-decoration-none me-2">
+              <div class="user-avatar">
+                <img th:if="${reaction.userAvatar}"
+                     th:src="'data:image/jpeg;base64,' + ${reaction.userAvatar}"
+                     class="rounded-circle"
+                     style="width: 40px; height: 40px; object-fit: cover;"
+                     th:alt="|${reaction.username}'s avatar|">
+                <i th:unless="${reaction.userAvatar}"
+                   class="fas fa-user text-secondary"></i>
+              </div>
+            </a>
+
             <div class="reaction-emoji" th:text="${reaction.emoji}">👍</div>
+
             <div class="flex-grow-1 ms-3">
               <div class="d-flex align-items-center">
                 <a th:href="@{'/users/' + ${reaction.username}}"
@@ -228,9 +242,9 @@
                       th:text="${reaction.reactionType}">LIKE</span>
               </div>
               <span class="reaction-time">
-                                <i class="far fa-clock"></i>
-                                <span th:text="${#temporals.format(reaction.reactedAt, 'dd MMM, HH:mm')}">Time</span>
-                            </span>
+                <i class="far fa-clock"></i>
+                <span th:text="${#temporals.format(reaction.reactedAt, 'dd MMM, HH:mm')}">Time</span>
+            </span>
             </div>
           </div>
         </div>

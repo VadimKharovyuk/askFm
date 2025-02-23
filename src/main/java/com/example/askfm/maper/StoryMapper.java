@@ -56,6 +56,9 @@ public class StoryMapper {
             return StoryViewDto.builder()
                     .username(view.getUser().getUsername())
                     .viewedAt(view.getViewedAt())
+                    .userAvatar(view.getUser().getAvatar() != null ?
+                            imageService.getBase64Avatar(view.getUser().getAvatar()) :
+                            null)
                     .build();
         }
 
@@ -69,6 +72,9 @@ public class StoryMapper {
                     .reactionType(reaction.getReactionType())
                     .emoji(reaction.getReactionType().getEmoji())
                     .reactedAt(reaction.getReactedAt())
+                    .userAvatar(reaction.getUser().getAvatar() != null ?
+                            imageService.getBase64Avatar(reaction.getUser().getAvatar()) :
+                            null)
                     .build();
         }
 

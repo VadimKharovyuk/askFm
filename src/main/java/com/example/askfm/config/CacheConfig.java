@@ -143,6 +143,36 @@ public class CacheConfig {
         cacheManager.registerCustomCache("photoUnlocksStats", photoUnlocksStatsCache.build());
 
 
+        // Кэш для активных историй
+        Caffeine<Object, Object> storiesBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(1, TimeUnit.HOURS)      // Обновление каждый час
+                .expireAfterAccess(2, TimeUnit.HOURS)     // Удаление если не обращались 2 часа
+                .initialCapacity(100)                     // Начальный размер
+                .maximumSize(500)                         // Максимальный размер
+                .recordStats();                           // Запись статистики
+        cacheManager.registerCustomCache("activeStories", storiesBuilder.build());
+
+        // Кэш для историй подписок
+        Caffeine<Object, Object> followingStoriesBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES)   // Обновление каждые 30 минут
+                .expireAfterAccess(1, TimeUnit.HOURS)     // Удаление если не обращались 1 час
+                .initialCapacity(50)                      // Начальный размер
+                .maximumSize(200)                         // Максимальный размер
+                .recordStats();
+        cacheManager.registerCustomCache("followingStories", followingStoriesBuilder.build());
+
+        // Кэш для просмотров и реакций
+        Caffeine<Object, Object> storyStatsBuilder = Caffeine.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)    // Обновление каждые 5 минут
+                .expireAfterAccess(15, TimeUnit.MINUTES)  // Удаление если не обращались 15 минут
+                .initialCapacity(200)                     // Начальный размер
+                .maximumSize(1000)                        // Максимальный размер
+                .recordStats();
+        cacheManager.registerCustomCache("storyStats", storyStatsBuilder.build());
+
+
+
+
         // Устанавливаем специальную конфигурацию
         cacheManager.registerCustomCache("followers", followersCacheBuilder.build());
         cacheManager.registerCustomCache("userSearch", userSearchCacheBuilder.build());

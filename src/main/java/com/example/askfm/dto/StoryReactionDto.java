@@ -13,4 +13,5 @@ public class StoryReactionDto {
     private ReactionType reactionType;
     private String emoji;
     private LocalDateTime reactedAt;
+    private String userAvatar;
 }
