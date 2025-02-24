@@ -126,13 +126,31 @@ public class PostController {
 
     @PostMapping("/{id}/delete")
     public String deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
+        log.info("Получен запрос на удаление поста с ID: {}", id);
+
         Post post = postService.getPost(id);
+        log.info("Найден пост с ID: {}, автор: {}", id, post.getAuthor().getUsername());
+
         if (!post.getAuthor().getUsername().equals(userDetails.getUsername())) {
+            log.warn("Отказано в доступе для пользователя: {}", userDetails.getUsername());
             throw new AccessDeniedException("Not authorized");
         }
+
         postService.deletePost(id);
+        log.info("Пост успешно удален");
+
         return "redirect:/users/" + userDetails.getUsername();
     }
+
+//    @PostMapping("/{id}/delete")
+//    public String deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
+//        Post post = postService.getPost(id);
+//        if (!post.getAuthor().getUsername().equals(userDetails.getUsername())) {
+//            throw new AccessDeniedException("Not authorized");
+//        }
+//        postService.deletePost(id);
+//        return "redirect:/users/" + userDetails.getUsername();
+//    }
 
 
     @PostMapping("/{postId}/like")
@@ -176,7 +194,6 @@ public class PostController {
         postService.createPost(userDetails.getUsername(), postForm);
         return "redirect:/home";
     }
-
 
     @GetMapping("/{username}/posts")
     public String getUserPosts(@PathVariable String username,

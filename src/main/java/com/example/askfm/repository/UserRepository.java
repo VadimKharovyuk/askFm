@@ -81,7 +81,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByAvatarIsNotNullOrCoverIsNotNull();
 
-    }
+    @Query("SELECT u.username FROM User u")
+    List<String> findAllUsernames();
+}
 
 
 

@@ -1,6 +1,5 @@
 
 package com.example.askfm.service;
-
 import com.example.askfm.dto.PostCreateDTO;
 import com.example.askfm.dto.PostDTO;
 import com.example.askfm.exception.PostNotFoundException;
