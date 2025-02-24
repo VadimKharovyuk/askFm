@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,6 +37,11 @@ public class User {
     @Column(nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO; // Баланс монет
+
+    @Column
+    private LocalDate lastRewardDate;//награда рандом
+
+    private LocalDate lastPageVisitDate; //награда за переход
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

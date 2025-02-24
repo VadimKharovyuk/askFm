@@ -35,10 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -460,6 +464,64 @@ public Page<BlockedUserDTO> getBlockedUsers(String username) {
         return blockInfoRepository.countByBlocker(user);
     }
 
+    private final SecureRandom random = new SecureRandom();
+    private static final int MIN_REWARD = 1;
+    private static final int MAX_REWARD = 5;
+
+    public Optional<BigDecimal> claimDailyReward(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    if (user.getLastRewardDate() != null && user.getLastRewardDate().isEqual(LocalDate.now())) {
+                        return Optional.<BigDecimal>empty(); // Уже получал награду
+                    }
+
+                    // Генерируем случайную награду
+                    int reward = random.nextInt(MAX_REWARD - MIN_REWARD + 1) + MIN_REWARD;
+                    BigDecimal rewardAmount = BigDecimal.valueOf(reward);
+
+                    // Обновляем баланс и дату последней награды
+                    user.setBalance(user.getBalance().add(rewardAmount));
+                    user.setLastRewardDate(LocalDate.now());
+                    userRepository.save(user);
+
+                    return Optional.of(rewardAmount);
+                })
+                .orElse(Optional.empty()); // Если пользователя нет, просто ничего не возвращаем
+    }
 
 
+    public boolean canClaimDailyReward(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getLastRewardDate() == null || !user.getLastRewardDate().isEqual(LocalDate.now()))
+                .orElse(false);
+    }
+
+    public Optional<BigDecimal> claimPageVisitReward(String username) {
+        final BigDecimal PAGE_VISIT_REWARD = BigDecimal.ONE; // 1 бонус за посещение
+
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    // Проверяем, получал ли пользователь награду сегодня
+                    if (user.getLastPageVisitDate() != null &&
+                            user.getLastPageVisitDate().isEqual(LocalDate.now())) {
+                        return Optional.<BigDecimal>empty(); // Уже получал награду сегодня
+                    }
+
+                    // Обновляем баланс и дату последнего посещения
+                    user.setBalance(user.getBalance().add(PAGE_VISIT_REWARD));
+                    user.setLastPageVisitDate(LocalDate.now());
+                    userRepository.save(user);
+
+                    return Optional.of(PAGE_VISIT_REWARD);
+                })
+                .orElse(Optional.empty());
+    }
+
+    // Метод для проверки возможности получения награды
+    public boolean canClaimPageVisitReward(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getLastPageVisitDate() == null ||
+                        !user.getLastPageVisitDate().isEqual(LocalDate.now()))
+                .orElse(false);
+    }
 }
