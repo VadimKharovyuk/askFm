@@ -4,6 +4,7 @@ import com.example.askfm.dto.*;
 import com.example.askfm.enums.ReactionType;
 import com.example.askfm.exception.StoryNotFoundException;
 import com.example.askfm.exception.UserNotFoundException;
+import com.example.askfm.model.Story;
 import com.example.askfm.model.User;
 import com.example.askfm.service.StoryService;
 import com.example.askfm.service.UserService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 @Controller
 @RequiredArgsConstructor
@@ -29,6 +31,32 @@ import java.util.List;
 public class StoryController {
     private final StoryService storyService;
     private final UserService userService;
+
+
+
+    @GetMapping("/stories/create")
+    public String showCreateStoryForm() {
+        return "stories/create";
+    }
+
+    @PostMapping("/stories")
+    public String createStory(@RequestParam("image") MultipartFile image,
+                              @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            CreateStoryDto dto = CreateStoryDto.builder()
+                    .username(userDetails.getUsername())
+                    .imageData(image.getBytes())
+                    .build();
+
+            storyService.createStory(dto);
+            return "redirect:/stories";
+        } catch (IOException e) {
+            log.error("Error processing image upload", e);
+            return "redirect:/stories/create?error";
+        }
+    }
+
+
 
     @GetMapping("/stories/all")
     public String showAllStories(
@@ -90,27 +118,6 @@ public class StoryController {
     }
 
 
-    @GetMapping("/stories/create")
-    public String showCreateStoryForm() {
-        return "stories/create";
-    }
-
-    @PostMapping("/stories")
-    public String createStory(@RequestParam("image") MultipartFile image,
-                              @AuthenticationPrincipal UserDetails userDetails) {
-        try {
-            CreateStoryDto dto = CreateStoryDto.builder()
-                    .username(userDetails.getUsername())
-                    .imageData(image.getBytes())
-                    .build();
-
-            storyService.createStory(dto);
-            return "redirect:/stories";
-        } catch (IOException e) {
-            log.error("Error processing image upload", e);
-            return "redirect:/stories/create?error";
-        }
-    }
 
     @PostMapping("/stories/{storyId}/view")
     @ResponseBody

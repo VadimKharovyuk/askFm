@@ -3,6 +3,8 @@ package com.example.askfm.controller;
 import com.example.askfm.dto.CreateRepostRequest;
 import com.example.askfm.dto.RepostDTO;
 import com.example.askfm.model.User;
+import com.example.askfm.repository.NotificationRepository;
+import com.example.askfm.service.NotificationService;
 import com.example.askfm.service.RepostService;
 import com.example.askfm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class RepostController {
     private final RepostService repostService;
     private final UserService userService;
+    private  final NotificationRepository notificationRepository;
 
     @PostMapping("/delete")
     public String deleteRepost(@RequestParam("postId") Long postId,

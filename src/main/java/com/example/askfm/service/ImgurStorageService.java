@@ -112,6 +112,7 @@ public class ImgurStorageService {
         private int status;
     }
 
+
     @Data
     public static class ImgurData {
         private String id;

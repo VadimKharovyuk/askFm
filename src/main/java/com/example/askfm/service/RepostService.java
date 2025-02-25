@@ -8,6 +8,7 @@ import com.example.askfm.maper.RepostMapper;
 import com.example.askfm.model.Post;
 import com.example.askfm.model.Repost;
 import com.example.askfm.model.User;
+import com.example.askfm.repository.NotificationRepository;
 import com.example.askfm.repository.PostRepository;
 import com.example.askfm.repository.RepostRepository;
 import com.example.askfm.repository.UserRepository;
@@ -31,6 +32,7 @@ public class RepostService {
     private final RepostMapper repostMapper;
     private final CacheManager cacheManager;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public RepostDTO createRepost(Long userId, CreateRepostRequest request) {
@@ -81,6 +83,9 @@ public class RepostService {
 
         validateRepostDeletion(repost, userId);
 
+        // Delete associated notifications first
+        deleteRepostNotifications(repost.getId());
+
         String username = repost.getUser().getUsername();
         repostRepository.delete(repost);
         log.debug("✨ Репост удален из БД");
@@ -94,6 +99,46 @@ public class RepostService {
 
         log.info("✅ Репост успешно удален пользователем: {}", username);
     }
+
+    /**
+     * Delete all notifications associated with a repost
+     */
+    private void deleteRepostNotifications(Long repostId) {
+        log.debug("🔔 Удаление уведомлений, связанных с репостом ID: {}", repostId);
+        try {
+            // Assuming you have a notificationRepository
+            notificationRepository.deleteByRepostId(repostId);
+            log.debug("✅ Уведомления, связанные с репостом, успешно удалены");
+        } catch (Exception e) {
+            log.error("❌ Ошибка при удалении уведомлений, связанных с репостом: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+//    @Transactional
+//    public void deleteRepost(Long userId, Long postId) {
+//        log.debug("📝 Начало удаления репоста для пользователя: {}, пост: {}", userId, postId);
+//
+//        Repost repost = repostRepository.findByUserIdAndOriginalPostId(userId, postId)
+//                .orElseThrow(() -> {
+//                    log.error("❌ Репост не найден для пользователя: {}, пост: {}", userId, postId);
+//                    return new RepostNotFoundException("Repost not found");
+//                });
+//
+//        validateRepostDeletion(repost, userId);
+//
+//        String username = repost.getUser().getUsername();
+//        repostRepository.delete(repost);
+//        log.debug("✨ Репост удален из БД");
+//
+//        // Очищаем кеш
+//        Cache cache = cacheManager.getCache("posts");
+//        if (cache != null) {
+//            cache.clear();
+//            log.debug("🧹 Кеш постов полностью очищен после удаления репоста");
+//        }
+//
+//        log.info("✅ Репост успешно удален пользователем: {}", username);
+//    }
     private void validateRepostCreation(User user, Post originalPost) {
         if (repostRepository.existsByUserAndOriginalPost(user, originalPost)) {
             log.error("❌ Репост уже существует для пользователя: {}, пост: {}",

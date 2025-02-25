@@ -142,15 +142,6 @@ public class PostController {
         return "redirect:/users/" + userDetails.getUsername();
     }
 
-//    @PostMapping("/{id}/delete")
-//    public String deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
-//        Post post = postService.getPost(id);
-//        if (!post.getAuthor().getUsername().equals(userDetails.getUsername())) {
-//            throw new AccessDeniedException("Not authorized");
-//        }
-//        postService.deletePost(id);
-//        return "redirect:/users/" + userDetails.getUsername();
-//    }
 
 
     @PostMapping("/{postId}/like")
