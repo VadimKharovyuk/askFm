@@ -33,6 +33,6 @@ build/
 .vscode/
 
 ### Configuration secrets ###
-application-prod.properties
+application.properties
 secrets.properties
 .env
